@@ -29,11 +29,6 @@ Lucidity is a modern productivity tracking application designed to help individu
 > "Simple, elegant, and powerful. Lucidity is the productivity app I didn’t know I needed."  
 > — Jordan T., Startup Founder
 
-## 📦 Getting Started
-
-1. Visit [lucidityapp.com](#) and click **Sign Up**
-2. Choose your plan (Free, Pro, or Enterprise)
-3. Connect your favorite tools and start tracking!
 
 ## 📚 FAQs
 
@@ -41,8 +36,8 @@ Find answers to common questions on our [FAQ page](#).
 
 ## 📬 Contact & Support
 
-- 📧 Email: support@lucidityapp.com  
-- 🌐 Website: [lucidityapp.com](#)  
+- 📧 Email:  
+- 🌐 Website: 
 - 📱 Follow us on [Twitter](#), [LinkedIn](#), [Instagram](#)
 
 ## 📄 License
