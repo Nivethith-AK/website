@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, CheckCircle, AlertCircle, Send, Clock, Globe } from "lucide-react";
+import { Mail, Clock, MapPin } from "lucide-react";
 import { post } from "@/lib/api";
-import { Card } from "@/components/Card";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -101,22 +100,26 @@ export default function Contact() {
                 title: "Correspondence",
                 value: "concierge@aura.com",
                 desc: "Priority response within 12 hours",
+                icon: Mail,
               },
               {
                 title: "Operating Hours",
                 value: "09:00 — 18:00 EST",
                 desc: "Monday through Friday",
+                icon: Clock,
               },
               {
                 title: "Headquarters",
                 value: "Fifth Avenue, NYC",
                 desc: "Global Operations",
+                icon: MapPin,
               },
             ].map((contact, idx) => (
               <div
                 key={idx}
                 className="lux-glass lux-glow-hover p-8 text-center group rounded-2xl"
               >
+                <contact.icon className="mx-auto mb-3 h-4 w-4 text-accent/80" />
                 <h3 className="text-[10px] font-bold mb-6 text-muted-foreground uppercase tracking-[0.3em] group-hover:text-accent-purple transition-colors duration-1000">{contact.title}</h3>
                 <p className="text-xl font-bold mb-2 text-foreground uppercase tracking-tight group-hover:text-accent transition-colors duration-1000">{contact.value}</p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest group-hover:text-foreground transition-colors duration-1000">{contact.desc}</p>
