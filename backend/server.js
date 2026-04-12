@@ -11,6 +11,8 @@ import authRoutes from './routes/auth.js';
 import designerRoutes from './routes/designer.js';
 import adminRoutes from './routes/admin.js';
 import clientRoutes from './routes/client.js';
+import messageRoutes from './routes/messages.js';
+import profileRoutes from './routes/profile.js';
 
 dotenv.config();
 
@@ -39,6 +41,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/designers', designerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/clients', clientRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/profile', profileRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

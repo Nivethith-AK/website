@@ -23,6 +23,7 @@ export const ensureAdminUser = async () => {
         password: DEFAULT_ADMIN_PASSWORD,
         role: 'admin',
         isApproved: true,
+        isVerified: true,
       });
       console.log('Default admin created: admin@gmail.com');
       return;
@@ -49,6 +50,7 @@ export const ensureAdminUser = async () => {
         password: DEFAULT_TEST_PASSWORD,
         role: 'company',
         isApproved: true,
+        isVerified: true,
       });
       console.log('Default test user created: test@gmail.com');
       return;
