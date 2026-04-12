@@ -9,7 +9,6 @@ import {
 } from '../controllers/designerController.js';
 import { protect, authorize } from '../middleware/auth.js';
 import multer from 'multer';
-import path from 'path';
 
 const router = express.Router();
 
