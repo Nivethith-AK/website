@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-export const protect = (req, res, next) => {
+export const authMiddleware = (req, res, next) => {
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -26,7 +26,9 @@ export const protect = (req, res, next) => {
   }
 };
 
-export const authorize = (...roles) => {
+export const protect = authMiddleware;
+
+export const roleMiddleware = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
@@ -37,3 +39,5 @@ export const authorize = (...roles) => {
     next();
   };
 };
+
+export const authorize = roleMiddleware;

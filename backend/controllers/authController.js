@@ -5,7 +5,7 @@ import Company from '../models/Company.js';
 
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE,
+    expiresIn: '7d',
   });
 };
 
@@ -22,10 +22,95 @@ const sendTokenResponse = (user, statusCode, res) => {
     token,
     user: {
       id: user._id,
+      name: user.name,
       email: user.email,
       role: user.role,
+      isApproved: user.isApproved,
+      createdAt: user.createdAt,
     },
   });
+};
+
+export const registerUser = async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({
+        success: false,
+        message: 'name, email, password and role are required',
+      });
+    }
+
+    if (!['admin', 'designer', 'company'].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid role. Allowed: admin, designer, company',
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters',
+      });
+    }
+
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email already exists',
+      });
+    }
+
+    let user;
+
+    if (role === 'designer') {
+      const tokens = name.trim().split(/\s+/);
+      const firstName = tokens[0] || name;
+      const lastName = tokens.slice(1).join(' ') || firstName;
+
+      user = await Designer.create({
+        name,
+        email,
+        password,
+        role: 'designer',
+        isApproved: false,
+        firstName,
+        lastName,
+        experienceLevel: req.body.experienceLevel || 'Student',
+      });
+    } else if (role === 'company') {
+      user = await Company.create({
+        name,
+        email,
+        password,
+        role: 'company',
+        isApproved: true,
+        companyName: req.body.companyName || name,
+        industry: req.body.industry || 'Fashion',
+        contactPerson: req.body.contactPerson || name,
+        phone: req.body.phone || 'N/A',
+        address: req.body.address || 'N/A',
+      });
+    } else {
+      user = await User.create({
+        name,
+        email,
+        password,
+        role: 'admin',
+        isApproved: true,
+      });
+    }
+
+    return sendTokenResponse(user, 201, res);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };
 
 export const registerDesigner = async (req, res) => {
@@ -96,7 +181,7 @@ export const registerCompany = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {
+export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -128,14 +213,16 @@ export const login = async (req, res) => {
       });
     }
 
-    sendTokenResponse(user, 200, res);
+    return sendTokenResponse(user, 200, res);
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
+
+export const login = loginUser;
 
 export const getMe = async (req, res) => {
   try {
