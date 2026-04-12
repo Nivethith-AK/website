@@ -43,6 +43,7 @@ export const registerDesigner = async (req, res) => {
 
     // Create designer
     const designer = await Designer.create({
+      name: `${firstName} ${lastName}`.trim(),
       email,
       password,
       firstName,
@@ -75,6 +76,7 @@ export const registerCompany = async (req, res) => {
 
     // Create company
     const company = await Company.create({
+      name: companyName,
       email,
       password,
       companyName,

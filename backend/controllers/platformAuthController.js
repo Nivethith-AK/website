@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import Designer from '../models/Designer.js';
+import Company from '../models/Company.js';
 import DesignerProfile from '../models/DesignerProfile.js';
 
 const signToken = (user) =>
@@ -33,13 +35,43 @@ export const register = async (req, res) => {
       });
     }
 
-    const user = await User.create({
-      name,
-      email,
-      password,
-      role,
-      isApproved: role === 'designer' ? false : true,
-    });
+    let user;
+    if (role === 'designer') {
+      const nameParts = name.trim().split(/\s+/);
+      const firstName = nameParts[0] || name;
+      const lastName = nameParts.slice(1).join(' ') || firstName;
+      user = await Designer.create({
+        name,
+        firstName,
+        lastName,
+        email,
+        password,
+        role,
+        isApproved: false,
+        experienceLevel,
+      });
+    } else if (role === 'company') {
+      user = await Company.create({
+        name,
+        email,
+        password,
+        role,
+        isApproved: true,
+        companyName: name,
+        industry: 'Fashion',
+        contactPerson: name,
+        phone: 'N/A',
+        address: 'N/A',
+      });
+    } else {
+      user = await User.create({
+        name,
+        email,
+        password,
+        role,
+        isApproved: true,
+      });
+    }
 
     if (role === 'designer') {
       await DesignerProfile.create({
