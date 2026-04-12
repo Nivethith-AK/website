@@ -11,7 +11,6 @@ import authRoutes from './routes/auth.js';
 import designerRoutes from './routes/designer.js';
 import adminRoutes from './routes/admin.js';
 import clientRoutes from './routes/client.js';
-import platformAuthRoutes from './routes/platformAuth.js';
 import platformDesignersRoutes from './routes/platformDesigners.js';
 import platformRequestRoutes from './routes/platformRequest.js';
 import platformAdminRoutes from './routes/platformAdmin.js';
@@ -44,8 +43,7 @@ app.use('/api/designers', designerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/clients', clientRoutes);
 
-// Canonical platform routes requested for clean architecture
-app.use('/api/auth', platformAuthRoutes);
+// Additional platform routes
 app.use('/api/designers', platformDesignersRoutes);
 app.use('/api/request', platformRequestRoutes);
 app.use('/api/admin', platformAdminRoutes);
