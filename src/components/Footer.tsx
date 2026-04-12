@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Sparkles, Mail, Globe } from "lucide-react";
 
 export default function Footer() {
