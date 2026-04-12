@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 import Designer from '../models/Designer.js';
 import Company from '../models/Company.js';
@@ -80,6 +81,13 @@ export const registerUser = async (req, res) => {
       });
     }
 
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database unavailable. Cannot register right now.',
+      });
+    }
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({
@@ -141,6 +149,13 @@ export const registerDesigner = async (req, res) => {
   try {
     const { email, password, firstName, lastName, experienceLevel } = req.body;
 
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database unavailable. Cannot register right now.',
+      });
+    }
+
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -173,6 +188,13 @@ export const registerDesigner = async (req, res) => {
 export const registerCompany = async (req, res) => {
   try {
     const { email, password, companyName, industry, contactPerson, phone, address } = req.body;
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database unavailable. Cannot register right now.',
+      });
+    }
 
     // Check if user already exists
     const userExists = await User.findOne({ email });
@@ -219,6 +241,13 @@ export const loginUser = async (req, res) => {
 
     if (maybeHandleDevTestLogin(email, password, res)) {
       return;
+    }
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database unavailable. Try test@gmail.com in local development.',
+      });
     }
 
     // Check for user
