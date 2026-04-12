@@ -2,7 +2,6 @@ import Designer from '../models/Designer.js';
 import Company from '../models/Company.js';
 import ClientRequest from '../models/ClientRequest.js';
 import Project from '../models/Project.js';
-import User from '../models/User.js';
 
 export const getDashboardStats = async (req, res) => {
   try {
