@@ -9,7 +9,6 @@ router.post('/login', loginUser);
 
 router.post('/register/designer', registerDesigner);
 router.post('/register/company', registerCompany);
-router.post('/login', login);
 router.get('/me', authMiddleware, getMe);
 router.post('/logout', logout);
 
