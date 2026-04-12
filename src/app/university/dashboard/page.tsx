@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { LogOut, GraduationCap, Users, BookOpen, Search, Filter, ArrowUpRight, Plus, ExternalLink } from "lucide-react";
+import { GraduationCap, Search, Filter, ArrowUpRight, Plus, ExternalLink } from "lucide-react";
 import { get } from "@/lib/api";
 import { useRouter } from "next/navigation";
-import { Card } from "@/components/Card";
 
 interface UniversityProfile {
   _id: string;
@@ -61,6 +60,7 @@ export default function UniversityDashboard() {
 
   useEffect(() => {
     fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   const handleLogout = () => {
