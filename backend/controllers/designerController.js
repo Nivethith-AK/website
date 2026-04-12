@@ -1,5 +1,4 @@
 import Designer from '../models/Designer.js';
-import User from '../models/User.js';
 
 export const getDesignerProfile = async (req, res) => {
   try {
