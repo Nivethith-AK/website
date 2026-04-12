@@ -3,6 +3,11 @@ import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema(
   {
+    name: {
+      type: String,
+      required: [true, 'Name is required'],
+      trim: true,
+    },
     email: {
       type: String,
       required: [true, 'Email is required'],
@@ -24,6 +29,12 @@ const userSchema = new mongoose.Schema(
       enum: ['admin', 'designer', 'company'],
       required: true,
     },
+    isApproved: {
+      type: Boolean,
+      default: function () {
+        return this.role === 'designer' ? false : true;
+      },
+    },
     isActive: {
       type: Boolean,
       default: true,
@@ -39,7 +50,7 @@ const userSchema = new mongoose.Schema(
 // Hash password before saving
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
-    next();
+    return next();
   }
 
   const salt = await bcrypt.genSalt(10);
