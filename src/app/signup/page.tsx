@@ -19,7 +19,7 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
-const expertiseLevels = ["Student", "AOD Graduate", "Intern", "Professional"] as const;
+const expertiseLevels = ["Student", "Graduate", "Intern", "Professional"] as const;
 const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function SignUp() {
