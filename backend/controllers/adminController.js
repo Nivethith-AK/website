@@ -2,6 +2,7 @@ import Designer from '../models/Designer.js';
 import Company from '../models/Company.js';
 import ClientRequest from '../models/ClientRequest.js';
 import Project from '../models/Project.js';
+import User from '../models/User.js';
 
 export const getDashboardStats = async (req, res) => {
   try {
@@ -356,6 +357,109 @@ export const getAllCompanies = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const { page = 1, limit = 20, role } = req.query;
+    const parsedPage = Number(page) || 1;
+    const parsedLimit = Number(limit) || 20;
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    const filter = {};
+    if (role) filter.role = role;
+
+    const users = await User.find(filter)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .limit(parsedLimit)
+      .skip(skip);
+
+    const total = await User.countDocuments(filter);
+
+    return res.status(200).json({
+      success: true,
+      data: users,
+      total,
+      pages: Math.ceil(total / parsedLimit),
+      currentPage: parsedPage,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const approveUser = async (req, res) => {
+  try {
+    const { userId, isApproved = true } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId is required',
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { isApproved: Boolean(isApproved) },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'User approval updated',
+      data: user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId is required',
+      });
+    }
+
+    const user = await User.findByIdAndDelete(userId).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'User deleted successfully',
+      data: user,
+    });
+  } catch (error) {
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
