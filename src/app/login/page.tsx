@@ -108,6 +108,7 @@ export default function LoginPage() {
                   placeholder="name@agency.com"
                   disabled={isLoading}
                   required
+                  className="normal-case tracking-normal"
                 />
               </Field>
 
@@ -121,6 +122,7 @@ export default function LoginPage() {
                   placeholder="********"
                   disabled={isLoading}
                   required
+                  className="normal-case tracking-normal"
                 />
                 <FieldDescription>Minimum 5 characters</FieldDescription>
               </Field>
