@@ -15,9 +15,11 @@ export const ensureAdminUser = async () => {
 
     if (!existing) {
       await User.create({
+        name: 'Admin',
         email: DEFAULT_ADMIN_EMAIL,
         password: DEFAULT_ADMIN_PASSWORD,
         role: 'admin',
+        isApproved: true,
       });
       console.log('Default admin created: admin@gmail.com');
       return;
