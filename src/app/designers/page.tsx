@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { get } from "@/lib/api";
-import { Search, Sparkles, Filter, CircleCheck } from "lucide-react";
+import { Search, Sparkles, CircleCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/Card";
 
@@ -138,6 +138,7 @@ export default function DesignersPage() {
                     <div className="flex items-center gap-3">
                       <div className="h-12 w-12 overflow-hidden rounded-xl border border-white/15 bg-white/5">
                         {designer.profileImage ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img src={designer.profileImage} alt={designer.firstName} className="h-full w-full object-cover" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-sm font-black uppercase text-white/55">

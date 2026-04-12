@@ -323,6 +323,7 @@ export default function DesignerDashboardPage() {
                   {profile.portfolio.map((item, idx) => (
                     <motion.div key={idx} whileHover={{ y: -4 }} className="rounded-xl border border-white/12 bg-white/[0.03] p-3">
                       <div className="mb-3 h-40 overflow-hidden rounded-lg border border-white/10 bg-white/5">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={item.image.startsWith("http") ? item.image : `http://localhost:5000${item.image}`}
                           alt={item.title}
