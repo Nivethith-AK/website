@@ -1,8 +1,10 @@
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
+import crypto from 'crypto';
 import User from '../models/User.js';
 import Designer from '../models/Designer.js';
 import Company from '../models/Company.js';
+import { sendVerificationEmail } from '../utils/email.js';
 
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
@@ -27,9 +29,17 @@ const sendTokenResponse = (user, statusCode, res) => {
       email: user.email,
       role: user.role,
       isApproved: user.isApproved,
+      isVerified: user.isVerified,
       createdAt: user.createdAt,
     },
   });
+};
+
+const createVerificationToken = () => crypto.randomBytes(32).toString('hex');
+
+const notifyVerification = async (email, token) => {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return;
+  await sendVerificationEmail({ to: email, token });
 };
 
 const maybeHandleDevTestLogin = (email, password, res) => {
@@ -109,6 +119,8 @@ export const registerUser = async (req, res) => {
         password,
         role: 'designer',
         isApproved: false,
+        isVerified: false,
+        verificationToken: createVerificationToken(),
         firstName,
         lastName,
         experienceLevel: req.body.experienceLevel || 'Student',
@@ -120,6 +132,8 @@ export const registerUser = async (req, res) => {
         password,
         role: 'company',
         isApproved: true,
+        isVerified: false,
+        verificationToken: createVerificationToken(),
         companyName: req.body.companyName || name,
         industry: req.body.industry || 'Fashion',
         contactPerson: req.body.contactPerson || name,
@@ -133,7 +147,12 @@ export const registerUser = async (req, res) => {
         password,
         role: 'admin',
         isApproved: true,
+        isVerified: true,
       });
+    }
+
+    if (user.role !== 'admin' && user.verificationToken) {
+      await notifyVerification(user.email, user.verificationToken);
     }
 
     return sendTokenResponse(user, 201, res);
@@ -174,7 +193,12 @@ export const registerDesigner = async (req, res) => {
       lastName,
       experienceLevel,
       role: 'designer',
+      isApproved: false,
+      isVerified: false,
+      verificationToken: createVerificationToken(),
     });
+
+    await notifyVerification(designer.email, designer.verificationToken);
 
     sendTokenResponse(designer, 201, res);
   } catch (error) {
@@ -216,7 +240,12 @@ export const registerCompany = async (req, res) => {
       phone,
       address,
       role: 'company',
+      isApproved: true,
+      isVerified: false,
+      verificationToken: createVerificationToken(),
     });
+
+    await notifyVerification(company.email, company.verificationToken);
 
     sendTokenResponse(company, 201, res);
   } catch (error) {
@@ -270,6 +299,13 @@ export const loginUser = async (req, res) => {
       });
     }
 
+    if (!user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: 'Please verify your email before logging in',
+      });
+    }
+
     return sendTokenResponse(user, 200, res);
   } catch (error) {
     return res.status(500).json({
@@ -280,6 +316,42 @@ export const loginUser = async (req, res) => {
 };
 
 export const login = loginUser;
+
+export const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification token is required',
+      });
+    }
+
+    const user = await User.findOne({ verificationToken: token });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token',
+      });
+    }
+
+    user.isVerified = true;
+    user.verificationToken = null;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Email verified successfully',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export const getMe = async (req, res) => {
   try {
