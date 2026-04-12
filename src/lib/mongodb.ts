@@ -9,6 +9,8 @@ if (!cached) {
 }
 
 async function connectToDatabase() {
+  mongoose.set("bufferCommands", false);
+
   if (cached.conn) {
     return cached.conn;
   }
@@ -16,6 +18,8 @@ async function connectToDatabase() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 10000,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
