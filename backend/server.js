@@ -11,9 +11,6 @@ import authRoutes from './routes/auth.js';
 import designerRoutes from './routes/designer.js';
 import adminRoutes from './routes/admin.js';
 import clientRoutes from './routes/client.js';
-import platformDesignersRoutes from './routes/platformDesigners.js';
-import platformRequestRoutes from './routes/platformRequest.js';
-import platformAdminRoutes from './routes/platformAdmin.js';
 
 dotenv.config();
 
@@ -42,11 +39,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/designers', designerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/clients', clientRoutes);
-
-// Additional platform routes
-app.use('/api/designers', platformDesignersRoutes);
-app.use('/api/request', platformRequestRoutes);
-app.use('/api/admin', platformAdminRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
