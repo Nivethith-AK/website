@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Shield, Globe, Sparkles, Layers, WandSparkles } from "lucide-react";
@@ -8,6 +9,16 @@ import { Button } from "@/components/ui/button";
 const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function Home() {
+  useEffect(() => {
+    const previous = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
+    return () => {
+      window.history.scrollRestoration = previous;
+    };
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-background pb-28 text-foreground">
       <div className="noise-bg" />
