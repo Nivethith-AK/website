@@ -31,13 +31,37 @@ const userSchema = new mongoose.Schema(
     },
     isApproved: {
       type: Boolean,
-      default: function () {
-        return this.role === 'designer' ? false : true;
-      },
+      default: false,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+      default: null,
     },
     isActive: {
       type: Boolean,
       default: true,
+    },
+    about: {
+      type: String,
+      default: '',
+      maxlength: 1000,
+    },
+    experience: {
+      type: String,
+      default: '',
+      maxlength: 1000,
+    },
+    skills: {
+      type: [String],
+      default: [],
+    },
+    portfolio: {
+      type: [String],
+      default: [],
     },
     createdAt: {
       type: Date,
