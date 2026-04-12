@@ -11,6 +11,9 @@ import {
   updateProjectStatus,
   getAllProjects,
   getAllCompanies,
+  getAllUsers,
+  approveUser,
+  deleteUser,
 } from '../controllers/adminController.js';
 import { protect, authorize } from '../middleware/auth.js';
 
@@ -39,5 +42,10 @@ router.put('/projects/:id/status', updateProjectStatus);
 
 // Company management
 router.get('/companies', getAllCompanies);
+
+// User management
+router.get('/users', getAllUsers);
+router.patch('/approve-user', approveUser);
+router.delete('/delete-user', deleteUser);
 
 export default router;
