@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/Card";
 import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+
+const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -55,31 +58,42 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12 pt-28 text-foreground">
-      <div className="absolute inset-0 -z-10 pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[55vw] h-[55vw] bg-accent-purple/20 rounded-full blur-[140px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-[45vw] h-[45vw] bg-accent/10 rounded-full blur-[120px]" />
+    <div className="min-h-screen bg-background px-4 pb-12 pt-32 text-foreground">
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <motion.div
+          animate={{ x: [0, 28, -15, 0], y: [0, -25, 18, 0] }}
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute left-[-10%] top-[2%] h-[34rem] w-[34rem] rounded-full bg-accent-purple/24 blur-[130px]"
+        />
+        <motion.div
+          animate={{ x: [0, -20, 16, 0], y: [0, 24, -16, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-[-12%] right-[-8%] h-[30rem] w-[30rem] rounded-full bg-accent/10 blur-[120px]"
+        />
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 28 }}
+        initial={{ opacity: 0, y: 22 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full max-w-xl"
+        transition={{ duration: 0.6, ease }}
+        className="mx-auto w-full max-w-xl"
       >
-        <Card
-          variant="premium"
-          className="p-7 sm:p-10 md:p-14 border-white/5 bg-[#161626] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] rounded-none relative overflow-hidden"
-        >
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-accent" />
+        <Card className="lux-glass rounded-3xl p-7 sm:p-10 md:p-12">
+          <div className="mb-8 flex items-center justify-between">
+            <Badge variant="accent">Member Access</Badge>
+            <Link href="/" className="text-xs font-black uppercase tracking-[0.28em] text-white/60 hover:text-white">
+              Home
+            </Link>
+          </div>
 
-          <div className="text-center mb-10 sm:mb-12">
-            <Link href="/" className="inline-block mb-8">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-black tracking-[0.35em] text-foreground uppercase">
+          <div className="mb-10 text-center">
+            <Link href="/" className="mb-6 inline-block">
+              <div className="text-2xl sm:text-3xl font-black tracking-[0.35em] uppercase">
                 AURA<span className="text-accent">X</span>
               </div>
             </Link>
-            <h1 className="text-[10px] uppercase tracking-[0.55em] text-muted-foreground">Sign In</h1>
+            <h1 className="text-3xl font-black uppercase tracking-tight sm:text-4xl">Sign In</h1>
+            <p className="mt-2 text-[10px] uppercase tracking-[0.32em] text-white/55">Secure identity validation</p>
           </div>
 
           <form onSubmit={handleSubmit}>
@@ -112,23 +126,32 @@ export default function LoginPage() {
               </Field>
 
               {error && (
-                <div className="border border-red-500/30 bg-red-500/10 px-4 py-3 text-[10px] uppercase tracking-[0.2em] text-red-300">
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-[10px] uppercase tracking-[0.2em] text-red-300"
+                >
                   {error}
-                </div>
+                </motion.div>
               )}
 
-              <Button
-                type="submit"
-                disabled={isLoading}
-                variant="primary"
-                size="lg"
-                className="w-full bg-accent text-black hover:bg-accent-purple hover:text-white border-none rounded-none text-[9px] tracking-[0.45em] font-bold uppercase py-5"
-              >
-                {isLoading ? "Validating..." : "Enter Portal"}
-              </Button>
+              <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.995 }}>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  variant="secondary"
+                  size="lg"
+                  className="gold-glow-hover w-full rounded-full"
+                >
+                  {isLoading ? "Validating..." : "Enter Portal"}
+                </Button>
+              </motion.div>
 
-              <p className="text-center text-[10px] uppercase tracking-[0.35em] text-muted-foreground pt-2">
-                No account? <Link href="/signup" className="text-accent hover:text-white">Register</Link>
+              <p className="pt-1 text-center text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                No account?{" "}
+                <Link href="/signup" className="text-accent hover:text-white">
+                  Register
+                </Link>
               </p>
             </FieldGroup>
           </form>

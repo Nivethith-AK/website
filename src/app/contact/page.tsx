@@ -15,6 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 
 export default function Contact() {
   const [isLoading, setIsLoading] = useState(false);
@@ -63,20 +65,20 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Hero Section */}
-      <section className="pt-48 pb-32 relative border-b border-border/40 bg-background">
+      <section className="pt-40 pb-24 relative border-b border-border/40 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="max-w-3xl"
             >
-              <span className="text-accent-purple font-black tracking-[0.5em] uppercase text-[10px] mb-8 block">Concierge</span>
-              <h1 className="text-7xl md:text-[100px] font-black mb-8 tracking-tighter text-foreground uppercase leading-[0.9]">
+              <Badge variant="accent" className="mb-6 w-fit">Concierge</Badge>
+              <h1 className="text-6xl md:text-[88px] font-black mb-6 tracking-tighter text-foreground uppercase leading-[0.9]">
                 Connect <br/>With <span className="text-accent-purple">AURAX</span>
               </h1>
-              <p className="text-xl md:text-2xl text-muted-foreground font-black uppercase leading-relaxed">
+              <p className="text-base md:text-xl text-muted-foreground font-black uppercase leading-relaxed">
                 Elite support for Designers, Universities, and Luxury Partners.
               </p>
             </motion.div>
@@ -86,7 +88,7 @@ export default function Contact() {
       {/* Contact Section */}
       <section className="py-32 relative bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border/20 border border-border/40 mb-48 shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16">
             {[
               {
                 title: "Correspondence",
@@ -106,7 +108,7 @@ export default function Contact() {
             ].map((contact, idx) => (
               <div
                 key={idx}
-                className="bg-white p-12 text-center group hover:bg-background transition-colors duration-1000"
+                className="lux-glass lux-glow-hover p-8 text-center group rounded-2xl"
               >
                 <h3 className="text-[10px] font-bold mb-6 text-muted-foreground uppercase tracking-[0.3em] group-hover:text-accent-purple transition-colors duration-1000">{contact.title}</h3>
                 <p className="text-xl font-bold mb-2 text-foreground uppercase tracking-tight group-hover:text-accent transition-colors duration-1000">{contact.value}</p>
@@ -115,7 +117,7 @@ export default function Contact() {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-32 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-20 items-start">
             {/* Info Column */}
             <div className="lg:col-span-2 space-y-16">
               <div>
@@ -143,13 +145,13 @@ export default function Contact() {
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                className="relative"
+                className="relative lux-glass rounded-2xl p-6 sm:p-8"
               >
                 {success && (
                   <motion.div 
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-12 p-8 border border-accent/20 bg-accent/5"
+                    className="mb-8 p-6 border border-accent/20 bg-accent/5 rounded-xl"
                   >
                     <p className="text-accent font-bold text-xs uppercase tracking-[0.3em]">Transmission Received</p>
                     <p className="text-muted-foreground text-[10px] mt-2 uppercase tracking-widest">Our concierge will contact you shortly.</p>
@@ -157,7 +159,7 @@ export default function Contact() {
                 )}
 
                 {error && (
-                  <div className="mb-12 p-8 border border-red-500/20 bg-red-500/5">
+                  <div className="mb-8 p-6 border border-red-500/20 bg-red-500/5 rounded-xl">
                     <p className="text-red-500 text-xs font-bold uppercase tracking-[0.3em]">{error}</p>
                   </div>
                 )}
@@ -229,7 +231,7 @@ export default function Contact() {
 
                     <Field>
                       <FieldLabel htmlFor="contact-message">Message</FieldLabel>
-                      <textarea
+                      <Textarea
                         id="contact-message"
                         name="message"
                         value={formData.message}
@@ -237,7 +239,7 @@ export default function Contact() {
                         required
                         disabled={isLoading}
                         rows={4}
-                        className="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-accent-purple transition-all duration-1000 text-foreground text-sm uppercase tracking-widest font-black resize-none leading-relaxed placeholder:text-muted-foreground/30"
+                        className="uppercase tracking-[0.12em] font-black"
                         placeholder="MESSAGE..."
                       />
                     </Field>

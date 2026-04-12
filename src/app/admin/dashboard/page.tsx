@@ -1,12 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Users, Briefcase, CheckCircle, Clock, LogOut, Shield, BarChart, ExternalLink, UserCheck, ClipboardList } from "lucide-react";
-import { get } from "@/lib/api";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { BarChart3, Briefcase, CheckCircle2, Clock3, Users } from "lucide-react";
+import { get } from "@/lib/api";
 import { Card } from "@/components/Card";
+import { AdminShell } from "@/components/admin/AdminShell";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface DashboardStats {
   totalDesigners: number;
@@ -16,6 +25,8 @@ interface DashboardStats {
   activeProjects: number;
   completedProjects: number;
 }
+
+const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -30,11 +41,10 @@ export default function AdminDashboard() {
         return;
       }
 
-      const response = await get("/admin/stats");
-      if (response.success) {
+      const response = await get<DashboardStats>("/admin/dashboard/stats");
+      if (response.success && response.data) {
         setStats(response.data);
       } else {
-        alert(response.message || "Failed to load stats");
         router.push("/login");
       }
       setIsLoading(false);
@@ -43,124 +53,130 @@ export default function AdminDashboard() {
     fetchStats();
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    router.push("/");
-  };
-
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center pt-20 gap-8">
-        <div className="w-16 h-[1px] bg-accent-purple animate-pulse" />
-        <p className="text-muted-foreground animate-pulse tracking-[0.5em] text-[10px] uppercase font-black">Synchronizing Console...</p>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="lux-glass animate-pulse rounded-2xl px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-white/65">
+          Loading Mission Console
+        </div>
       </div>
     );
   }
 
-  const statsCards = [
-    { label: "Vetted Collective", value: stats?.totalDesigners || 0, icon: Users },
-    { label: "Curation Queue", value: stats?.pendingDesigners || 0, icon: Clock },
-    { label: "Luxury Partners", value: stats?.totalCompanies || 0, icon: Briefcase },
-    { label: "Active Missions", value: stats?.activeProjects || 0, icon: CheckCircle },
+  const metricCards = [
+    { label: "Designers", value: stats?.totalDesigners || 0, icon: Users, tone: "accent" as const },
+    { label: "Pending Review", value: stats?.pendingDesigners || 0, icon: Clock3, tone: "warning" as const },
+    { label: "Companies", value: stats?.totalCompanies || 0, icon: Briefcase, tone: "purple" as const },
+    { label: "Active Projects", value: stats?.activeProjects || 0, icon: CheckCircle2, tone: "success" as const },
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="fixed top-20 left-0 right-0 bg-background/80 backdrop-blur-2xl border-b border-white/5 z-40 transition-all duration-1000">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex justify-between items-end">
-          <div className="flex flex-col gap-6">
-            <span className="text-accent-purple font-black tracking-[0.5em] uppercase text-[10px] mb-2 block">Administrative Control</span>
-            <h1 className="text-6xl font-black text-foreground uppercase tracking-tighter leading-none">
-              Console
-            </h1>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground hover:text-accent-purple transition-all duration-1000 pb-2 border-b border-transparent hover:border-accent-purple font-black"
+    <AdminShell
+      title="Admin Dashboard"
+      subtitle="Track assignments, requests, and talent operations in real time."
+      rightSlot={<Badge variant="accent">Live Control</Badge>}
+    >
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {metricCards.map((card, idx) => (
+          <motion.div
+            key={card.label}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.06, duration: 0.4, ease }}
           >
-            Sign Out
-          </button>
-        </div>
-      </div>
+            <Card className="lux-glass lux-glow-hover rounded-2xl p-5">
+              <card.icon className="mb-3 h-5 w-5 text-accent" />
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/60">{card.label}</p>
+              <p className="mt-2 text-3xl font-black">{card.value}</p>
+              <div className="mt-3">
+                <Badge variant={card.tone}>{card.label}</Badge>
+              </div>
+            </Card>
+          </motion.div>
+        ))}
+      </section>
 
-      <div className="pt-80 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/5 border border-white/5 mb-32 shadow-sm relative overflow-hidden">
-          <div className="absolute inset-0 bg-accent-purple/[0.03] -z-10" />
-          {statsCards.map((card, idx) => {
-            const Icon = card.icon;
-            return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-                className="bg-card p-12 flex flex-col items-center text-center group hover:bg-background transition-colors duration-1000"
+      <section className="mt-7 grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <Card className="lux-glass rounded-2xl p-6 xl:col-span-2">
+          <div className="mb-6 flex items-center justify-between">
+            <p className="text-[10px] font-black uppercase tracking-[0.26em] text-accent">Performance Snapshot</p>
+            <BarChart3 className="h-5 w-5 text-accent/80" />
+          </div>
+          <div className="space-y-4">
+            {[
+              { label: "Total Requests", value: stats?.totalRequests || 0, ratio: 80 },
+              { label: "Completed Projects", value: stats?.completedProjects || 0, ratio: 62 },
+              { label: "Active Projects", value: stats?.activeProjects || 0, ratio: 46 },
+            ].map((row) => (
+              <div key={row.label}>
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="text-white/70">{row.label}</span>
+                  <span className="font-black text-accent">{row.value}</span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-white/10">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${row.ratio}%` }}
+                    transition={{ duration: 0.65, ease }}
+                    className="h-2 rounded-full bg-gradient-to-r from-accent-purple to-accent"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="lux-glass rounded-2xl p-6">
+          <p className="mb-4 text-[10px] font-black uppercase tracking-[0.26em] text-accent">Action Routing</p>
+          <div className="space-y-3">
+            {[
+              { label: "Review Designers", href: "/admin/designers" },
+              { label: "Handle Requests", href: "/admin/requests" },
+              { label: "Manage Projects", href: "/admin/projects" },
+            ].map((action) => (
+              <button
+                key={action.href}
+                onClick={() => router.push(action.href)}
+                className="w-full rounded-xl border border-white/12 bg-white/[0.03] px-4 py-3 text-left text-[10px] font-black uppercase tracking-[0.2em] text-white/75 hover:border-accent/35 hover:text-accent"
               >
-                <div className="text-accent-purple mb-8 group-hover:scale-110 transition-transform duration-1000">
-                  <Icon size={20} strokeWidth={1.5} />
-                </div>
-                <p className="text-[10px] font-black tracking-[0.3em] uppercase text-muted-foreground mb-4">{card.label}</p>
-                <p className="text-5xl font-black text-foreground tracking-tighter group-hover:text-accent transition-colors duration-1000">{card.value}</p>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Section Title */}
-        <div className="mb-16 border-l-2 border-accent-purple pl-6 ml-2">
-          <h2 className="text-[10px] font-black tracking-[0.5em] uppercase text-foreground">Operational Modules</h2>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
-          {[
-            { title: "Designers", desc: "Curate membership applications", action: "/admin/designers" },
-            { title: "Inquiries", desc: "Orchestrate partner requests", action: "/admin/requests" },
-            { title: "Projects", desc: "Monitor tactical operations", action: "/admin/projects" },
-          ].map((action, idx) => (
-            <div
-              key={idx}
-              className="group cursor-pointer space-y-10 p-2"
-              onClick={() => router.push(action.action)}
-            >
-              <div className="h-[1px] w-16 bg-white/10 group-hover:bg-accent group-hover:w-full transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]" />
-              <div>
-                <h3 className="text-4xl font-black text-foreground uppercase tracking-tight group-hover:text-accent transition-colors duration-1000">{action.title}</h3>
-                <p className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.3em] mt-4 leading-relaxed">{action.desc}</p>
-              </div>
-              <button className="text-[10px] font-black uppercase tracking-[0.4em] text-foreground border-b border-white/10 pb-2 group-hover:border-accent group-hover:text-accent transition-all duration-1000">
-                Access Module
+                {action.label}
               </button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </Card>
+      </section>
 
-        {/* Platform Overview */}
-        <div className="mt-60 pt-24 border-t border-white/5 bg-background relative overflow-hidden">
-           <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-purple/20 to-transparent" />
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-32">
-              <div className="space-y-6">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Cumulative Volume</p>
-                <p className="text-7xl font-black text-foreground tracking-tighter">{stats?.totalRequests || 0}</p>
-              </div>
-              <div className="space-y-6">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Success Quotient</p>
-                <p className="text-7xl font-black text-foreground tracking-tighter">
-                  {stats?.totalRequests ? Math.round(((stats?.completedProjects || 0) / stats.totalRequests) * 100) : 0}<span className="text-3xl text-accent-purple">%</span>
-                </p>
-              </div>
-              <div className="space-y-6">
-                <p className="text-[10px] font-black text-accent-purple uppercase tracking-[0.5em]">Queue Alerts</p>
-                <div className="flex items-end gap-6">
-                  <p className="text-7xl font-black text-foreground tracking-tighter">{stats?.pendingDesigners || 0}</p>
-                  <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-3 pb-2 border-b border-white/10">Review Required</span>
-                </div>
-              </div>
-           </div>
-        </div>
-      </div>
-    </div>
+      <section className="mt-7">
+        <Card className="lux-glass rounded-2xl p-0 overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Metric</TableHead>
+                <TableHead>Value</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-semibold">Pending Designers</TableCell>
+                <TableCell>{stats?.pendingDesigners || 0}</TableCell>
+                <TableCell>
+                  <Badge variant={(stats?.pendingDesigners || 0) > 0 ? "warning" : "success"}>
+                    {(stats?.pendingDesigners || 0) > 0 ? "Needs Review" : "Stable"}
+                  </Badge>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-semibold">Completed Projects</TableCell>
+                <TableCell>{stats?.completedProjects || 0}</TableCell>
+                <TableCell>
+                  <Badge variant="success">Delivered</Badge>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </Card>
+      </section>
+    </AdminShell>
   );
 }
