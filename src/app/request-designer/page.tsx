@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Building2, Briefcase, Calendar, DollarSign, Users, Sparkles } from "lucide-react";
+import { ArrowLeft, Building2, Users, Sparkles } from "lucide-react";
 import { apiCall } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/Card";

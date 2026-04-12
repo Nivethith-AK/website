@@ -90,7 +90,7 @@ export default function Home() {
                 { k: "Luxury Brands", v: "120" },
                 { k: "Avg Match Time", v: "32h" },
                 { k: "Global Cities", v: "18" },
-              ].map((item, idx) => (
+              ].map((item) => (
                 <motion.div
                   key={item.k}
                   whileHover={{ y: -5 }}
