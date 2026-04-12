@@ -49,7 +49,14 @@ export default function Contact() {
     }
 
     try {
-      const response = await post("/contact", formData);
+      const response = await post("/clients/requests", {
+        projectTitle: formData.subject,
+        description: `${formData.message}\n\nContact: ${formData.name} (${formData.email})\nType: ${formData.accountType}`,
+        requiredDesigners: 1,
+        duration: "1 month",
+        budget: undefined,
+      });
+
       if (response.success) {
         setSuccess(true);
         setFormData({ name: "", email: "", accountType: "Designer", subject: "", message: "" });
@@ -121,8 +128,8 @@ export default function Contact() {
             {/* Info Column */}
             <div className="lg:col-span-2 space-y-16">
               <div>
-                <h2 className="text-5xl font-bold text-foreground mb-8 tracking-tighter uppercase leading-[0.9]">Begin the <br /><span className="text-accent-purple font-serif italic">Conversation</span></h2>
-                <p className="text-muted-foreground leading-relaxed font-serif font-light italic">
+                <h2 className="text-5xl font-bold text-foreground mb-8 tracking-tighter uppercase leading-[0.9]">Begin the <br /><span className="text-accent-purple">Conversation</span></h2>
+                <p className="text-muted-foreground leading-relaxed">
                   Whether you are an established brand seeking elite talent or a visionary designer looking to elevate your career, our consultants are here to guide your transition into the collective.
                 </p>
               </div>
@@ -130,11 +137,11 @@ export default function Contact() {
               <div className="space-y-12">
                 <div className="space-y-4">
                   <h4 className="text-foreground font-bold text-[10px] uppercase tracking-[0.3em]">Elite Curation</h4>
-                  <p className="text-xs text-muted-foreground leading-relaxed font-light">Access to pre-vetted, top-tier global fashion designers through a secure administrative bridge.</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">Access to pre-vetted, top-tier global fashion designers through a secure administrative bridge.</p>
                 </div>
                 <div className="space-y-4">
                   <h4 className="text-foreground font-bold text-[10px] uppercase tracking-[0.3em]">Secure Collaboration</h4>
-                  <p className="text-xs text-muted-foreground leading-relaxed font-light">Premium security standards for your projects and intellectual property, managed by Aura.</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">Premium security standards for your projects and intellectual property, managed by Aura.</p>
                 </div>
               </div>
             </div>

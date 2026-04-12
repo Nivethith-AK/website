@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { get, post } from "@/lib/api";
+import { get, put } from "@/lib/api";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,7 @@ export default function AdminProjectsPage() {
   }, [projects, tab]);
 
   const completeProject = async (id: string) => {
-    const response = await post(`/admin/projects/${id}/status`, { status: "Completed" });
+    const response = await put(`/admin/projects/${id}/status`, { status: "Completed" });
     if (response.success) setProjects((prev) => prev.map((p) => (p._id === id ? { ...p, status: "Completed" } : p)));
   };
 

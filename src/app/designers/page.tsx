@@ -31,7 +31,7 @@ export default function DesignersPage() {
   useEffect(() => {
     const fetchDesigners = async () => {
       setIsLoading(true);
-      const response = await get<Designer[]>("/designers/list?limit=24");
+      const response = await get<Designer[]>("/designers?limit=24");
       setDesigners(response.success && response.data ? response.data : []);
       setIsLoading(false);
     };
@@ -126,13 +126,12 @@ export default function DesignersPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredDesigners.map((designer, idx) => (
+            {filteredDesigners.map((designer) => (
               <motion.div
                 key={designer._id}
                 initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ delay: idx * 0.04, duration: 0.45, ease }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.28, ease }}
               >
                 <Card className="lux-glass lux-glow-hover rounded-2xl p-5 h-full">
                   <div className="mb-4 flex items-start justify-between">

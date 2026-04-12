@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { get, post } from "@/lib/api";
+import { get, put } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +41,7 @@ export default function AdminDesignersPage() {
 
   const approve = async (id: string) => {
     setProcessingId(id);
-    const response = await post(`/admin/designers/${id}/approve`, {});
+    const response = await put(`/admin/designers/${id}/approve`, {});
     if (response.success) setDesigners((prev) => prev.filter((d) => d._id !== id));
     setProcessingId(null);
   };
@@ -50,7 +50,7 @@ export default function AdminDesignersPage() {
     const reason = prompt("Rejection reason:");
     if (reason === null) return;
     setProcessingId(id);
-    const response = await post(`/admin/designers/${id}/reject`, { rejectionReason: reason });
+    const response = await put(`/admin/designers/${id}/reject`, { rejectionReason: reason });
     if (response.success) setDesigners((prev) => prev.filter((d) => d._id !== id));
     setProcessingId(null);
   };

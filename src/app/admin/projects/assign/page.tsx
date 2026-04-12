@@ -40,7 +40,7 @@ function AssignContent() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [reqRes, desRes] = await Promise.all([get<any>("/admin/requests"), get<Designer[]>("/designers/list?limit=100")]);
+      const [reqRes, desRes] = await Promise.all([get<any>("/admin/requests"), get<Designer[]>("/designers?limit=100")]);
 
       if (reqRes.success && reqRes.data && requestId) {
         const target = reqRes.data.find((r: any) => r._id === requestId) || null;

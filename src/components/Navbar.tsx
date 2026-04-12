@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Crown, Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -17,15 +17,28 @@ const navLinks = [
 const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function Navbar() {
+  const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
+
+  const token = useSyncExternalStore(
+    (callback) => {
+      if (typeof window === "undefined") return () => {};
+      window.addEventListener("storage", callback);
+      return () => window.removeEventListener("storage", callback);
+    },
+    () => (typeof window === "undefined" ? null : localStorage.getItem("token")),
+    () => null
+  );
 
   useEffect(() => {
-    setMounted(true);
-    setToken(localStorage.getItem("token"));
-  }, []);
+    navLinks.forEach((link) => router.prefetch(link.href));
+    router.prefetch("/login");
+    router.prefetch("/signup");
+    router.prefetch("/designer/dashboard");
+    router.prefetch("/client/dashboard");
+    router.prefetch("/admin/dashboard");
+  }, [router]);
 
   return (
     <motion.nav
@@ -75,7 +88,7 @@ export default function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-4">
-          {mounted && token ? (
+          {token ? (
             <>
               <Link href="/designer/dashboard" className="text-[10px] font-black uppercase tracking-[0.28em] text-white/70 hover:text-white transition-colors">
                 Dashboard
@@ -142,7 +155,7 @@ export default function Navbar() {
               ))}
 
               <div className="space-y-3 border-t border-white/10 pt-4">
-                {mounted && token ? (
+                {token ? (
                   <>
                     <Link href="/designer/dashboard" onClick={() => setIsOpen(false)} className="block text-[10px] font-black uppercase tracking-[0.3em] text-white">
                       Dashboard

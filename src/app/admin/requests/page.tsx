@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { get, post } from "@/lib/api";
+import { get, put } from "@/lib/api";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -60,7 +60,7 @@ export default function AdminRequestsPage() {
 
   const approve = async (id: string) => {
     setProcessingId(id);
-    const response = await post(`/admin/requests/${id}/approve`, {});
+    const response = await put(`/admin/requests/${id}/approve`, {});
     if (response.success) setRequests((prev) => prev.map((r) => (r._id === id ? { ...r, status: "Approved" } : r)));
     setProcessingId(null);
   };
@@ -69,7 +69,7 @@ export default function AdminRequestsPage() {
     const reason = prompt("Rejection reason:");
     if (reason === null) return;
     setProcessingId(id);
-    const response = await post(`/admin/requests/${id}/reject`, { rejectionReason: reason });
+    const response = await put(`/admin/requests/${id}/reject`, { rejectionReason: reason });
     if (response.success) setRequests((prev) => prev.map((r) => (r._id === id ? { ...r, status: "Rejected" } : r)));
     setProcessingId(null);
   };

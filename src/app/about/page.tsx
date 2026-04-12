@@ -1,151 +1,138 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Users, Target, Sparkles, ArrowRight, Award, Globe, Zap } from "lucide-react";
 import Link from "next/link";
+import { ShieldCheck, Orbit, Sparkles, Crown, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/Card";
+import { Badge } from "@/components/ui/badge";
 
-export default function About() {
+const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="pt-48 pb-32 relative border-b border-border/40 overflow-hidden bg-background">
-        {/* Ambient Aura */}
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-accent-purple/5 rounded-full blur-[150px] -ml-64 -mt-64 animate-pulse" />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-            className="max-w-4xl"
-          >
-            <span className="text-accent-purple font-black tracking-[0.5em] uppercase text-[10px] mb-8 block">Our Legacy</span>
-            <h1 className="text-7xl md:text-[110px] font-black mb-12 tracking-tighter uppercase leading-[0.85] text-foreground">
-              The <span className="text-accent-purple">AURAX</span> <br/>Standard
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-12 leading-relaxed font-black max-w-2xl uppercase">
-              A global bridge for the world's most visionary fashion talent.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+    <div className="min-h-screen bg-background pb-16 pt-28 text-foreground">
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <motion.div
+          animate={{ x: [0, 34, -18, 0], y: [0, -28, 20, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute left-[-10%] top-[-8%] h-[38rem] w-[38rem] rounded-full bg-accent-purple/18 blur-[130px]"
+        />
+        <motion.div
+          animate={{ x: [0, -28, 16, 0], y: [0, 24, -14, 0] }}
+          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-[-18%] right-[-8%] h-[34rem] w-[34rem] rounded-full bg-[#2e0854]/28 blur-[140px]"
+        />
+      </div>
 
-      {/* Mission Section */}
-      <section className="py-60 relative bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-start">
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <h2 className="text-5xl font-black mb-16 text-foreground tracking-tighter uppercase leading-tight">Our <span className="text-accent-purple underline decoration-accent/30 underline-offset-8">Mission</span></h2>
-              <p className="text-xl text-muted-foreground mb-8 leading-relaxed font-black uppercase">
-                At AURAX, we believe true artistry transcends boundaries. Our mission is to empower the next generation of fashion icons.
-              </p>
-              <p className="text-lg text-muted-foreground leading-relaxed font-black mb-20 uppercase tracking-[0.3em] text-[10px]">
-                We don't just facilitate hiring; we cultivate careers and build the foundations for the future of luxury.
-              </p>
-              <div className="flex gap-12">
-                <Link href="/designers">
-                  <button className="text-[11px] font-black uppercase tracking-[0.4em] text-foreground border-b border-accent-purple/30 pb-2 hover:text-accent-purple hover:border-accent-purple transition-all duration-1000">Talent Pool</button>
-                </Link>
-                <Link href="/contact">
-                  <button className="text-[11px] font-black uppercase tracking-[0.4em] text-muted-foreground border-b border-white/10 pb-2 hover:text-foreground hover:border-foreground transition-all duration-1000">The Process</button>
-                </Link>
-              </div>
-            </motion.div>
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 pb-14 pt-8 sm:px-6 lg:grid-cols-12 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, ease }}
+          className="lg:col-span-7"
+        >
+          <Badge variant="accent" className="mb-6">AURAX Identity</Badge>
+          <h1 className="mb-6 text-5xl font-black uppercase leading-[0.9] tracking-tight sm:text-6xl lg:text-7xl">
+            Built for
+            <span className="block text-accent">Luxury Execution</span>
+          </h1>
+          <p className="max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
+            AURAX is a high-end talent marketplace connecting fashion designers and luxury companies through a controlled,
+            admin-managed operating model.
+          </p>
+        </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-              className="grid grid-cols-2 gap-px bg-white/5 border border-white/5 shadow-2xl"
-            >
+        <motion.div
+          initial={{ opacity: 0, x: 16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1, duration: 0.6, ease }}
+          className="lg:col-span-5"
+        >
+          <Card className="lux-glass rounded-3xl p-6">
+            <p className="mb-4 text-[10px] font-black uppercase tracking-[0.25em] text-accent">Live Standards</p>
+            <div className="grid grid-cols-2 gap-3">
               {[
-                { label: "800+", desc: "Vetted Talent" },
-                { label: "45+", desc: "Global Hubs" },
-                { label: "300+", desc: "Luxury Brands" },
-                { label: "99%", desc: "Success Rate" },
-              ].map((item, idx) => (
-                <div key={idx} className="bg-card p-16 text-center group hover:bg-background transition-colors duration-1000">
-                  <p className="text-5xl font-black text-foreground mb-2 tracking-tighter group-hover:text-accent-purple transition-colors duration-1000">{item.label}</p>
-                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em] group-hover:text-accent transition-colors duration-1000">{item.desc}</p>
+                { k: "Vetted Talent", v: "High" },
+                { k: "Security", v: "Strict" },
+                { k: "Assignment Speed", v: "Fast" },
+                { k: "Global Reach", v: "Expanding" },
+              ].map((item) => (
+                <div key={item.k} className="rounded-xl border border-white/12 bg-white/[0.03] p-3">
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/55">{item.k}</p>
+                  <p className="mt-1 text-lg font-black uppercase">{item.v}</p>
                 </div>
               ))}
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Values Section */}
-      <section className="py-48 border-t border-white/5 relative bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-32">
-            <h2 className="text-5xl font-black text-foreground tracking-tighter uppercase leading-[0.9]">The <br/><span className="text-accent-purple">Standards</span></h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-24">
-            {[
-              {
-                title: "Excellence",
-                description: "We maintain the industry's most rigorous standards for talent curation.",
-              },
-              {
-                title: "Integrity",
-                description: "Transparency and ethical professionalism are our foundation.",
-              },
-              {
-                title: "Innovation",
-                description: "We define the next era of fashion collaboration.",
-              },
-            ].map((value, idx) => (
-              <div
-                key={idx}
-                className="space-y-8"
-              >
-                <div className="w-12 h-px bg-accent" />
-                <h3 className="text-xl font-black text-foreground uppercase tracking-tight">{value.title}</h3>
-                <p className="text-muted-foreground leading-relaxed font-black uppercase text-sm">{value.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-48 border-t border-white/5 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-6xl md:text-8xl font-black mb-12 text-foreground uppercase tracking-tighter leading-[0.9]">
-              Craft Your <br /><span className="text-accent-purple">Legacy</span>
-            </h2>
-            <p className="text-muted-foreground mb-16 max-w-xl mx-auto font-black uppercase leading-relaxed">
-              Join AURAX to elevate your brand to the highest level.
-            </p>
-
-            <div className="flex flex-col sm:flex-row justify-center gap-8">
-              <Link href="/signup">
-                <Button className="rounded-none px-16 uppercase tracking-[0.4em] text-[10px] bg-accent-purple hover:bg-accent-purple-light transition-all duration-1000">
-                  Join the Network
-                </Button>
-              </Link>
-              <Link href="/contact">
-                <Button variant="outline" className="rounded-none px-16 uppercase tracking-[0.4em] text-[10px] border-border hover:bg-background transition-all duration-1000">
-                  Private Consultation
-                </Button>
-              </Link>
             </div>
-          </motion.div>
+          </Card>
+        </motion.div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {[
+            {
+              icon: ShieldCheck,
+              title: "Operational Trust",
+              text: "Every assignment is reviewed and approved through admin control.",
+            },
+            {
+              icon: Orbit,
+              title: "Scalable System",
+              text: "Designed for future expansion into messaging, payments, and AI matching.",
+            },
+            {
+              icon: Crown,
+              title: "Luxury Positioning",
+              text: "Built to serve premium fashion houses and elite design careers.",
+            },
+          ].map((item, idx) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ delay: idx * 0.08, duration: 0.5, ease }}
+            >
+              <Card className="lux-glass lux-glow-hover rounded-2xl p-6 h-full">
+                <item.icon className="mb-4 h-6 w-6 text-accent" />
+                <h3 className="mb-3 text-xl font-black uppercase">{item.title}</h3>
+                <p className="text-sm leading-relaxed text-white/65">{item.text}</p>
+              </Card>
+            </motion.div>
+          ))}
         </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease }}
+          className="lux-glass gold-glow-hover rounded-3xl border border-accent/25 p-8 text-center sm:p-10"
+        >
+          <div className="mb-4 inline-flex rounded-full border border-accent/35 bg-accent/10 p-2 text-accent">
+            <Sparkles size={18} />
+          </div>
+          <h2 className="mb-4 text-4xl font-black uppercase sm:text-5xl">Start Your Next Chapter</h2>
+          <p className="mx-auto mb-8 max-w-2xl text-white/65">
+            Join a premium platform engineered for modern fashion talent and high-performance hiring.
+          </p>
+          <div className="flex flex-col justify-center gap-4 sm:flex-row">
+            <Link href="/signup">
+              <Button className="rounded-full bg-accent px-8 text-black hover:bg-[#e0bb4a]">
+                Join AURAX
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/contact">
+              <Button variant="outline" className="rounded-full border-accent/35 text-accent hover:bg-accent/10">
+                Contact Concierge
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
       </section>
     </div>
   );
