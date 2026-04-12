@@ -48,7 +48,17 @@ export default function Navbar() {
       className="fixed left-1/2 top-4 z-50 w-[min(1280px,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl border border-white/15 bg-background/80 backdrop-blur-2xl shadow-[0_20px_48px_-28px_rgba(0,0,0,0.9)]"
     >
       <div className="flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="group flex items-center gap-3">
+        <Link
+          href="/"
+          onClick={(e) => {
+            setIsOpen(false);
+            if (pathname === "/") {
+              e.preventDefault();
+              window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+            }
+          }}
+          className="group flex items-center gap-3"
+        >
           <motion.div
             whileHover={{ scale: 1.04 }}
             transition={{ duration: 0.3, ease }}
