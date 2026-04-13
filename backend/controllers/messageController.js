@@ -142,7 +142,6 @@ export const getConversations = async (req, res) => {
       }
 
       const senderId = sender._id.toString();
-      const receiverId = receiver._id.toString();
       const isFromMe = senderId === me.toString();
       const partner = isFromMe ? receiver : sender;
       const partnerId = partner._id.toString();
