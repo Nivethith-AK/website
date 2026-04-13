@@ -48,16 +48,6 @@ interface Opportunity {
   };
 }
 
-interface JobVacancy {
-  _id: string;
-  title: string;
-  description: string;
-  location?: string;
-  employmentType?: string;
-  compensation?: string;
-  skills?: string[];
-}
-
 interface CompanyProfile {
   _id: string;
   companyName: string;
@@ -76,7 +66,6 @@ const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 export default function DesignersPage() {
   const [designers, setDesigners] = useState<Designer[]>([]);
   const [requestBoard, setRequestBoard] = useState<Opportunity[]>([]);
-  const [jobs, setJobs] = useState<JobVacancy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [selectedExperience, setSelectedExperience] = useState<string>("");
@@ -100,13 +89,6 @@ export default function DesignersPage() {
           ? requestBoardResponse.data
           : requestBoardResponse.data?.data || [];
         setRequestBoard(list);
-      }
-
-      const jobsResponse = await get<JobVacancy[]>("/jobs/public");
-      if (jobsResponse.success && jobsResponse.data) {
-        setJobs(jobsResponse.data);
-      } else {
-        setJobs([]);
       }
 
       setIsLoading(false);
@@ -243,40 +225,6 @@ export default function DesignersPage() {
           </div>
         ) : (
           <>
-            {requestBoard.length > 0 && (
-              <div className="mb-10">
-                <h2 className="mb-4 text-2xl font-black uppercase tracking-tight">Client Request Board</h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {requestBoard.map((job) => {
-                    const summary = (job.projectDescription || job.description || "").trim();
-                    const companyName = job.companyId?.companyName || job.company?.companyName || "Fashion Company";
-                    const budgetText = typeof job.budget === "number" ? `$${job.budget.toLocaleString()}` : "Budget on request";
-
-                    return (
-                      <Card key={job._id} className="lux-glass rounded-2xl p-5">
-                        <p className="text-lg font-black uppercase leading-tight">{job.projectTitle}</p>
-                        <p className="mt-2 text-sm text-white/60">{summary ? `${summary.slice(0, 120)}...` : "No description provided."}</p>
-                        <div className="mt-3 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.14em] text-white/70">
-                          <span className="rounded-full border border-white/12 px-2 py-1">{job.duration}</span>
-                          <span className="rounded-full border border-white/12 px-2 py-1">
-                            Need: {job.designersNeeded || job.requiredDesigners || 1}
-                          </span>
-                          <span className="rounded-full border border-white/12 px-2 py-1">{companyName}</span>
-                          <span className="rounded-full border border-white/12 px-2 py-1">{budgetText}</span>
-                        </div>
-                        <div className="mt-4 flex gap-2">
-                          <Button size="sm" variant="secondary" onClick={() => openContactDialog(job)}>
-                            <MessageSquare size={14} className="mr-1" />
-                            Contact Company
-                          </Button>
-                        </div>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
             {filteredDesigners.length === 0 ? (
               <div className="lux-glass rounded-2xl p-14 text-center">
                 <p className="mb-2 text-lg font-black uppercase">No Designers Found</p>
@@ -340,21 +288,36 @@ export default function DesignersPage() {
               </div>
             )}
 
-            {jobs.length > 0 ? (
+            {requestBoard.length > 0 ? (
               <div className="mt-12">
-                <h2 className="mb-4 text-2xl font-black uppercase tracking-tight">Admin Published Vacancies</h2>
+                <h2 className="mb-4 text-2xl font-black uppercase tracking-tight">Client Request Board</h2>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {jobs.map((job) => (
-                    <Card key={job._id} className="lux-glass rounded-2xl p-5">
-                      <p className="text-lg font-black uppercase leading-tight">{job.title}</p>
-                      <p className="mt-2 text-sm text-white/60">{job.description.slice(0, 140)}...</p>
-                      <div className="mt-3 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.14em] text-white/70">
-                        <span className="rounded-full border border-white/12 px-2 py-1">{job.employmentType || "Contract"}</span>
-                        <span className="rounded-full border border-white/12 px-2 py-1">{job.location || "Remote"}</span>
-                        {job.compensation ? <span className="rounded-full border border-white/12 px-2 py-1">{job.compensation}</span> : null}
-                      </div>
-                    </Card>
-                  ))}
+                  {requestBoard.map((job) => {
+                    const summary = (job.projectDescription || job.description || "").trim();
+                    const companyName = job.companyId?.companyName || job.company?.companyName || "Fashion Company";
+                    const budgetText = typeof job.budget === "number" ? `$${job.budget.toLocaleString()}` : "Budget on request";
+
+                    return (
+                      <Card key={job._id} className="lux-glass rounded-2xl p-5">
+                        <p className="text-lg font-black uppercase leading-tight">{job.projectTitle}</p>
+                        <p className="mt-2 text-sm text-white/60">{summary ? `${summary.slice(0, 120)}...` : "No description provided."}</p>
+                        <div className="mt-3 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.14em] text-white/70">
+                          <span className="rounded-full border border-white/12 px-2 py-1">{job.duration}</span>
+                          <span className="rounded-full border border-white/12 px-2 py-1">
+                            Need: {job.designersNeeded || job.requiredDesigners || 1}
+                          </span>
+                          <span className="rounded-full border border-white/12 px-2 py-1">{companyName}</span>
+                          <span className="rounded-full border border-white/12 px-2 py-1">{budgetText}</span>
+                        </div>
+                        <div className="mt-4 flex gap-2">
+                          <Button size="sm" variant="secondary" onClick={() => openContactDialog(job)}>
+                            <MessageSquare size={14} className="mr-1" />
+                            Contact Company
+                          </Button>
+                        </div>
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
             ) : null}
