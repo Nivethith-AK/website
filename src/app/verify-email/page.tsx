@@ -7,6 +7,7 @@ import { Card } from "@/components/Card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/lib/supabase";
+import { assertSupabaseConfig } from "@/lib/supabase";
 
 function VerifyEmailContent() {
   const params = useSearchParams();
@@ -19,6 +20,14 @@ function VerifyEmailContent() {
       if (!token) {
         setStatus("error");
         setMessage("Verification token is missing.");
+        return;
+      }
+
+      try {
+        assertSupabaseConfig();
+      } catch (err: any) {
+        setStatus("error");
+        setMessage(err.message || "Supabase is not configured.");
         return;
       }
 
