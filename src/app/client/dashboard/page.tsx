@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { get, post, put, upload } from "@/lib/api";
+import { get, post, put, upload, resolveAssetUrl } from "@/lib/api";
 import { connectSocket, getSocket } from "@/lib/socket";
 import { Card } from "@/components/Card";
 import { InboxPanel } from "@/components/messaging/InboxPanel";
@@ -677,7 +677,7 @@ export default function ClientDashboardPage() {
                       <div key={`${item.image}-${idx}`} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
                         <div className="mb-3 h-36 overflow-hidden rounded-lg border border-white/10 bg-black/20">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={`http://localhost:5000${item.image}`} alt={item.title} className="h-full w-full object-cover" />
+                          <img src={resolveAssetUrl(item.image)} alt={item.title} className="h-full w-full object-cover" />
                         </div>
                         <p className="font-semibold uppercase">{item.title}</p>
                         <p className="text-xs text-white/60">{item.description || "No description"}</p>
