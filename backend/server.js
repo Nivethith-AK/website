@@ -16,6 +16,7 @@ import clientRoutes from './routes/client.js';
 import messageRoutes from './routes/messages.js';
 import profileRoutes from './routes/profile.js';
 import jobRoutes from './routes/jobs.js';
+import projectChatRoutes from './routes/projectChats.js';
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ app.use('/api/clients', clientRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/jobs', jobRoutes);
+app.use('/api/project-chats', projectChatRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
