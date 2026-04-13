@@ -27,6 +27,7 @@ interface RequestItem {
   duration: string;
   budget?: number;
   status: string;
+  createdAt?: string;
   company?: {
     companyName: string;
     contactPerson: string;
@@ -119,13 +120,14 @@ export default function AdminRequestsPage() {
                     <TableHead>Status</TableHead>
                     <TableHead>Need</TableHead>
                     <TableHead>Budget</TableHead>
+                    <TableHead>Created</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="py-8 text-center text-white/60">
+                      <TableCell colSpan={7} className="py-8 text-center text-white/60">
                         No requests found.
                       </TableCell>
                     </TableRow>
@@ -154,6 +156,7 @@ export default function AdminRequestsPage() {
                         </TableCell>
                         <TableCell>{r.requiredDesigners}</TableCell>
                         <TableCell>{r.budget ? `$${r.budget.toLocaleString()}` : "-"}</TableCell>
+                        <TableCell>{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "-"}</TableCell>
                         <TableCell>
                           {r.status === "New" ? (
                             <div className="flex gap-2">

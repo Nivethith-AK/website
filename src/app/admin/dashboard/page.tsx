@@ -76,7 +76,7 @@ export default function AdminDashboard() {
     <AdminShell
       title="Admin Dashboard"
       subtitle="Track assignments, requests, and talent operations in real time."
-      rightSlot={<Badge variant="accent">Live Control</Badge>}
+      rightSlot={<Badge variant="accent">Access Everything</Badge>}
     >
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metricCards.map((card, idx) => (

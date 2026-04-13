@@ -98,7 +98,7 @@ export default function SignUp() {
         localStorage.setItem("token", response.token);
         setSuccess(true);
         setTimeout(() => {
-          router.push(role === "designer" ? "/designer/dashboard" : "/client/dashboard");
+          router.push("/login");
         }, 1200);
       } else {
         setError(response.message || "Sign up failed. Please try again.");
@@ -276,7 +276,7 @@ export default function SignUp() {
                       animate={{ opacity: 1, y: 0 }}
                       className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-[10px] uppercase tracking-[0.2em] text-emerald-200"
                     >
-                      Registration successful. Redirecting...
+                      Registration successful. Verify email, then wait for admin approval.
                     </motion.div>
                   )}
 
