@@ -26,6 +26,10 @@ interface RequestItem {
   company: { companyName: string };
 }
 
+interface RequestsResponse {
+  data: RequestItem[];
+}
+
 function AssignContent() {
   const params = useSearchParams();
   const router = useRouter();
@@ -40,10 +44,11 @@ function AssignContent() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [reqRes, desRes] = await Promise.all([get<any>("/admin/requests"), get<Designer[]>("/designers?limit=100")]);
+      const [reqRes, desRes] = await Promise.all([get<RequestsResponse>("/admin/requests?status=Approved&limit=200"), get<Designer[]>("/designers?limit=100")]);
 
       if (reqRes.success && reqRes.data && requestId) {
-        const target = reqRes.data.find((r: any) => r._id === requestId) || null;
+        const requests = Array.isArray(reqRes.data) ? reqRes.data : reqRes.data?.data || [];
+        const target = requests.find((r: RequestItem) => r._id === requestId) || null;
         setRequest(target);
       }
       if (desRes.success && desRes.data) setDesigners(desRes.data);
