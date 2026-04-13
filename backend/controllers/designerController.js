@@ -200,7 +200,7 @@ export const getAllDesigners = async (req, res) => {
     const designers = await Designer.find(filter)
       .limit(limit)
       .skip(skip)
-      .select('-portfolio');
+      .select('-portfolio -fashionProjects -experiences -cvFile');
 
     const total = await Designer.countDocuments(filter);
 
