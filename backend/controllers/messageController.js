@@ -5,17 +5,57 @@ import { getIO } from '../socket.js';
 const MAX_MESSAGES_PER_MINUTE = 8;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const DUPLICATE_COOLDOWN_MS = 45 * 1000;
+const MAX_ATTACHMENTS_PER_MESSAGE = 5;
+
+const allowedAttachmentMimeTypes = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/vnd.ms-powerpoint',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+]);
+
+const mapAttachments = (files = []) => {
+  return files.map((file) => ({
+    fileName: file.filename,
+    originalName: file.originalname,
+    fileUrl: `/uploads/${file.filename}`,
+    mimeType: file.mimetype,
+    size: file.size,
+  }));
+};
 
 export const sendMessage = async (req, res) => {
   try {
     const { receiverId, message } = req.body;
     const senderId = req.user.id;
     const trimmedMessage = typeof message === 'string' ? message.trim() : '';
+    const attachments = mapAttachments(req.files || []);
 
-    if (!receiverId || !trimmedMessage) {
+    if (!receiverId || (!trimmedMessage && attachments.length === 0)) {
       return res.status(400).json({
         success: false,
-        message: 'receiverId and message are required',
+        message: 'receiverId and message or attachment are required',
+      });
+    }
+
+    if (attachments.length > MAX_ATTACHMENTS_PER_MESSAGE) {
+      return res.status(400).json({
+        success: false,
+        message: `Maximum ${MAX_ATTACHMENTS_PER_MESSAGE} attachments allowed per message`,
+      });
+    }
+
+    const invalidAttachment = attachments.find((item) => !allowedAttachmentMimeTypes.has(item.mimeType));
+    if (invalidAttachment) {
+      return res.status(400).json({
+        success: false,
+        message: `Unsupported file type: ${invalidAttachment.mimeType}`,
       });
     }
 
@@ -73,6 +113,7 @@ export const sendMessage = async (req, res) => {
       senderId,
       receiverId,
       message: trimmedMessage,
+      attachments,
     });
 
     const populatedMessage = await Message.findById(newMessage._id)
@@ -274,11 +315,27 @@ export const adminSendPrivateMessage = async (req, res) => {
     const senderId = req.user.id;
     const { receiverId, message } = req.body;
     const trimmedMessage = typeof message === 'string' ? message.trim() : '';
+    const attachments = mapAttachments(req.files || []);
 
-    if (!receiverId || !trimmedMessage) {
+    if (!receiverId || (!trimmedMessage && attachments.length === 0)) {
       return res.status(400).json({
         success: false,
-        message: 'receiverId and message are required',
+        message: 'receiverId and message or attachment are required',
+      });
+    }
+
+    if (attachments.length > MAX_ATTACHMENTS_PER_MESSAGE) {
+      return res.status(400).json({
+        success: false,
+        message: `Maximum ${MAX_ATTACHMENTS_PER_MESSAGE} attachments allowed per message`,
+      });
+    }
+
+    const invalidAttachment = attachments.find((item) => !allowedAttachmentMimeTypes.has(item.mimeType));
+    if (invalidAttachment) {
+      return res.status(400).json({
+        success: false,
+        message: `Unsupported file type: ${invalidAttachment.mimeType}`,
       });
     }
 
@@ -294,6 +351,7 @@ export const adminSendPrivateMessage = async (req, res) => {
       senderId,
       receiverId,
       message: trimmedMessage,
+      attachments,
     });
 
     const populatedMessage = await Message.findById(created._id)
