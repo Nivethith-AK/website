@@ -15,6 +15,7 @@ import adminRoutes from './routes/admin.js';
 import clientRoutes from './routes/client.js';
 import messageRoutes from './routes/messages.js';
 import profileRoutes from './routes/profile.js';
+import jobRoutes from './routes/jobs.js';
 
 dotenv.config();
 
@@ -46,6 +47,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/jobs', jobRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

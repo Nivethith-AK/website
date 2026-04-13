@@ -227,3 +227,38 @@ export const getPublicCompanyOpportunities = async (req, res) => {
     });
   }
 };
+
+export const getCompanyRequestsBoard = async (req, res) => {
+  try {
+    const { page = 1, limit = 12 } = req.query;
+    const parsedPage = Number(page) || 1;
+    const parsedLimit = Number(limit) || 12;
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    const filter = {
+      isPublic: true,
+      status: { $in: ['New', 'Approved'] },
+    };
+
+    const requests = await ClientRequest.find(filter)
+      .populate('company', 'companyName industry contactPerson email phone website description portfolio')
+      .sort({ createdAt: -1 })
+      .limit(parsedLimit)
+      .skip(skip);
+
+    const total = await ClientRequest.countDocuments(filter);
+
+    return res.status(200).json({
+      success: true,
+      data: requests,
+      total,
+      pages: Math.ceil(total / parsedLimit),
+      currentPage: parsedPage,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
