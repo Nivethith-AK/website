@@ -104,8 +104,8 @@ export default function AdminRequestsPage() {
 
       <Tabs value={tab} onValueChange={setTab} className="mb-4">
         <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="new">New</TabsTrigger>
+          <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="approved">Approved</TabsTrigger>
           <TabsTrigger value="rejected">Rejected</TabsTrigger>
         </TabsList>
