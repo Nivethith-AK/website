@@ -32,7 +32,7 @@ export const isAllowedOrigin = (origin) => {
     return true;
   }
 
-  if (LOCAL_ORIGINS.includes(origin)) {
+  if (process.env.NODE_ENV !== 'production' && LOCAL_ORIGINS.includes(origin)) {
     return true;
   }
 
