@@ -358,14 +358,14 @@ export default function ClientDashboardPage() {
                       <TableHead>Created</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
-                    {requests.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="py-8 text-center text-white/60">
-                          No requests found.
-                        </TableCell>
-                      </TableRow>
-                    ) : (
+                <TableBody>
+                  {requests.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-8 text-center text-white/60">
+                        No requests found. Complete profile and publish your first request.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
                       requests.map((request) => (
                         <TableRow key={request._id}>
                           <TableCell>
