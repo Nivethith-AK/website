@@ -78,6 +78,12 @@ export const put = <T = any>(endpoint: string, data: any) =>
     body: JSON.stringify(data),
   });
 
+export const patch = <T = any>(endpoint: string, data: any) =>
+  apiCall<T>(endpoint, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+
 export const del = <T = any>(endpoint: string) =>
   apiCall<T>(endpoint, { method: 'DELETE' });
 

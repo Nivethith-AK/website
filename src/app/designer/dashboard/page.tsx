@@ -125,19 +125,6 @@ export default function DesignerDashboardPage() {
 
     fetchProfile();
 
-    const interval = window.setInterval(async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        return;
-      }
-
-      const unreadResponse = await get<{ unread: number }>("/messages/unread-count");
-      if (unreadResponse.success && unreadResponse.data) {
-        setInboxUnread(unreadResponse.data.unread || 0);
-      }
-    }, 10000);
-
-    return () => window.clearInterval(interval);
   }, [router]);
 
   const toggleSkill = (skill: string) => {
@@ -413,6 +400,7 @@ export default function DesignerDashboardPage() {
                 emptyTitle="No Conversations Yet"
                 emptyDescription="When you message a company from opportunities, the thread appears here."
                 composerPlaceholder="Share your fit for the role, timeline, and portfolio links..."
+                onUnreadCountChange={setInboxUnread}
               />
             </motion.div>
           </TabsContent>
