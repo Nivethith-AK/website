@@ -7,7 +7,6 @@ import { Search, Sparkles, CircleCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Designer {
