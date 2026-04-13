@@ -621,7 +621,6 @@ export default function ClientDashboardPage() {
 
                 <div className="mb-4">
                   <p className="text-xl font-black uppercase tracking-tight">Company Portfolio</p>
-                  <p className="mt-1 text-sm text-white/60">Upload brand visuals so designers can trust your opportunities quickly.</p>
                   <p className="mt-1 text-sm text-white/60">Upload brand visuals so designers can trust your request board presence quickly.</p>
                 </div>
 
