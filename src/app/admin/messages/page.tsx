@@ -5,6 +5,7 @@ import { get } from "@/lib/api";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Badge } from "@/components/ui/badge";
 import { AdminMessageCenter } from "@/components/admin/AdminMessageCenter";
+import { connectSocket, getSocket } from "@/lib/socket";
 
 interface UserItem {
   _id: string;
@@ -29,6 +30,29 @@ export default function AdminMessagesPage() {
     };
 
     fetchUsers();
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return;
+    }
+
+    const socket = connectSocket(token);
+    if (!socket) {
+      return;
+    }
+
+    const onUserRefresh = () => {
+      void fetchUsers();
+    };
+
+    socket.on("message:new", onUserRefresh);
+
+    return () => {
+      const activeSocket = getSocket();
+      if (activeSocket) {
+        activeSocket.off("message:new", onUserRefresh);
+      }
+    };
   }, []);
 
   return (
