@@ -23,12 +23,10 @@ dotenv.config();
 
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
-  process.exit(1);
 });
 
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled Rejection:', reason);
-  process.exit(1);
 });
 
 const __filename = fileURLToPath(import.meta.url);
@@ -87,7 +85,7 @@ const startServer = async () => {
   try {
     const db = await connectDB();
     if (!db && process.env.NODE_ENV === 'production') {
-      throw new Error('MongoDB connection is required in production');
+      console.warn('MongoDB unavailable in production; starting server in degraded mode.');
     }
 
     await ensureAdminUser();
@@ -99,7 +97,6 @@ const startServer = async () => {
 
     httpServer.on('error', (error) => {
       console.error('HTTP server error:', error);
-      process.exit(1);
     });
   } catch (error) {
     console.error('Server startup failed:', error);
