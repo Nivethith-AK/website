@@ -4,6 +4,7 @@ import {
   updateDesignerProfile,
   uploadProfileImage,
   uploadPortfolioImage,
+  uploadCvFile,
   getAllDesigners,
   getDesignerById,
   getPublicCompanyOpportunities,
@@ -35,5 +36,6 @@ router.get('/profile/me', protect, authorize('designer'), getDesignerProfile);
 router.put('/profile/me', protect, authorize('designer'), updateDesignerProfile);
 router.post('/upload/profile-image', protect, authorize('designer'), upload.single('profileImage'), uploadProfileImage);
 router.post('/upload/portfolio', protect, authorize('designer'), upload.single('portfolioImage'), uploadPortfolioImage);
+router.post('/upload/cv', protect, authorize('designer'), upload.single('cvFile'), uploadCvFile);
 
 export default router;

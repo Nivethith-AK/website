@@ -32,7 +32,17 @@ export const getDesignerProfile = async (req, res) => {
 
 export const updateDesignerProfile = async (req, res) => {
   try {
-    const { firstName, lastName, skills, experienceLevel, bio, availability, socialLinks } = req.body;
+    const {
+      firstName,
+      lastName,
+      skills,
+      experienceLevel,
+      bio,
+      availability,
+      socialLinks,
+      experiences,
+      fashionProjects,
+    } = req.body;
 
     const designer = await Designer.findByIdAndUpdate(
       req.user.id,
@@ -44,6 +54,8 @@ export const updateDesignerProfile = async (req, res) => {
         bio,
         availability,
         socialLinks,
+        experiences,
+        fashionProjects,
         updatedAt: Date.now(),
       },
       { new: true, runValidators: true }
@@ -127,6 +139,43 @@ export const uploadPortfolioImage = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const uploadCvFile = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No CV file uploaded',
+      });
+    }
+
+    const designer = await Designer.findByIdAndUpdate(
+      req.user.id,
+      {
+        cvFile: `/uploads/${req.file.filename}`,
+      },
+      { new: true }
+    );
+
+    if (!designer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Designer not found',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'CV uploaded successfully',
+      data: designer,
+    });
+  } catch (error) {
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
