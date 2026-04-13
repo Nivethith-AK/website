@@ -222,3 +222,50 @@ export const updateCompanyProfile = async (req, res) => {
     });
   }
 };
+
+export const uploadCompanyPortfolioItem = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded',
+      });
+    }
+
+    const { title, description } = req.body;
+
+    if (!title?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Portfolio title is required',
+      });
+    }
+
+    const company = await Company.findById(req.user.id);
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: 'Company not found',
+      });
+    }
+
+    company.portfolio.push({
+      image: `/uploads/${req.file.filename}`,
+      title: title.trim(),
+      description: (description || '').trim(),
+    });
+
+    await company.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Portfolio item uploaded successfully',
+      data: company,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
