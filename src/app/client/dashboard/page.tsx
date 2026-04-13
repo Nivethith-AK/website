@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { get, post, put } from "@/lib/api";
 import { Card } from "@/components/Card";
+import { InboxPanel } from "@/components/messaging/InboxPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -244,6 +245,7 @@ export default function ClientDashboardPage() {
             <TabsTrigger value="list">Request List</TabsTrigger>
             <TabsTrigger value="new">New Request</TabsTrigger>
             <TabsTrigger value="company">Company Profile</TabsTrigger>
+            <TabsTrigger value="inbox">Inbox</TabsTrigger>
           </TabsList>
 
           <TabsContent value="list">
@@ -515,6 +517,16 @@ export default function ClientDashboardPage() {
                   </FieldGroup>
                 </form>
               </Card>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="inbox">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+              <InboxPanel
+                emptyTitle="No Conversations Yet"
+                emptyDescription="When designers contact your opportunities, their threads appear here."
+                composerPlaceholder="Reply with role details, requirements, and next steps..."
+              />
             </motion.div>
           </TabsContent>
         </Tabs>

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { get, put } from "@/lib/api";
 import { Card } from "@/components/Card";
+import { InboxPanel } from "@/components/messaging/InboxPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -194,6 +195,7 @@ export default function DesignerDashboardPage() {
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="projects">Projects</TabsTrigger>
+            <TabsTrigger value="inbox">Inbox</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
@@ -372,6 +374,16 @@ export default function DesignerDashboardPage() {
                 </TableBody>
               </Table>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="inbox">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+              <InboxPanel
+                emptyTitle="No Conversations Yet"
+                emptyDescription="When you message a company from opportunities, the thread appears here."
+                composerPlaceholder="Share your fit for the role, timeline, and portfolio links..."
+              />
+            </motion.div>
           </TabsContent>
         </Tabs>
       </div>
