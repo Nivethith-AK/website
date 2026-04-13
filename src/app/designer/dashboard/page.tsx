@@ -7,6 +7,7 @@ import { get, put, upload } from "@/lib/api";
 import { connectSocket, getSocket } from "@/lib/socket";
 import { Card } from "@/components/Card";
 import { InboxPanel } from "@/components/messaging/InboxPanel";
+import { ProjectChatPanel } from "@/components/messaging/ProjectChatPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -320,6 +321,7 @@ export default function DesignerDashboardPage() {
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="projects">Projects (Admin Managed)</TabsTrigger>
+            <TabsTrigger value="project-chat">Project Chat</TabsTrigger>
             <TabsTrigger value="inbox" className="gap-1.5">
               Inbox
               {inboxUnread > 0 ? (
@@ -639,6 +641,12 @@ export default function DesignerDashboardPage() {
                 composerPlaceholder="Share your fit for the request, timeline, and portfolio links..."
                 onUnreadCountChange={setInboxUnread}
               />
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="project-chat">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+              <ProjectChatPanel roleLabel="Designer" />
             </motion.div>
           </TabsContent>
         </Tabs>
