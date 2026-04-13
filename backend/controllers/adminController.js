@@ -397,6 +397,63 @@ export const updateProjectStatus = async (req, res) => {
   }
 };
 
+export const updateProjectParticipants = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { designerIds = [], companyId, chatEnabled } = req.body;
+
+    const project = await Project.findById(id);
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found',
+      });
+    }
+
+    const uniqueDesignerIds = [...new Set((designerIds || []).map((item) => item.toString()))];
+
+    const resolvedCompanyId = companyId || project.company;
+    project.company = resolvedCompanyId;
+    project.designers = uniqueDesignerIds.map((designerId) => ({
+      designer: designerId,
+      status: 'Assigned',
+      assignedDate: new Date(),
+    }));
+
+    project.participants = [resolvedCompanyId, ...uniqueDesignerIds];
+
+    if (typeof chatEnabled === 'boolean') {
+      project.chatEnabled = chatEnabled;
+    }
+
+    await project.save();
+
+    await Designer.updateMany(
+      { _id: { $in: uniqueDesignerIds } },
+      { $addToSet: { assignedProjects: project._id } }
+    );
+
+    await Company.findByIdAndUpdate(resolvedCompanyId, {
+      $addToSet: { assignedDesigners: project._id },
+    });
+
+    const populatedProject = await Project.findById(project._id)
+      .populate('company', 'companyName email')
+      .populate('designers.designer', 'firstName lastName email');
+
+    return res.status(200).json({
+      success: true,
+      message: 'Project participants updated successfully',
+      data: populatedProject,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export const getAllProjects = async (req, res) => {
   try {
     const { status, page = 1, limit = 10 } = req.query;
