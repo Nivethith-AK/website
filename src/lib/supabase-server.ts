@@ -55,7 +55,11 @@ export const requireAuth = async (req: NextRequest, roles?: Array<"admin" | "des
     throw new Error("Forbidden");
   }
 
-  return ctx;
+  return {
+    ...ctx,
+    user: ctx.user,
+    profile: ctx.profile,
+  };
 };
 
 export const mapProfileUser = (row: any) => ({
