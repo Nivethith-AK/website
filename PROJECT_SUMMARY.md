@@ -349,10 +349,22 @@ git push heroku main
 ```
 MONGODB_URI=your_production_mongodb_url
 JWT_SECRET=your_production_jwt_secret
+JWT_EXPIRE=7d
 NODE_ENV=production
 PORT=5000
+FRONTEND_URL=https://your-frontend-domain.com
+CORS_ORIGINS=https://your-frontend-domain.com
+SMTP_USER=your-gmail-address@gmail.com
+SMTP_PASS=your-gmail-app-password
+SMTP_FROM=your-gmail-address@gmail.com
+
+# Frontend (Vercel)
 NEXT_PUBLIC_API_URL=https://your-api-domain.com/api
+NEXTAUTH_URL=https://your-frontend-domain.com
+NEXTAUTH_SECRET=your_nextauth_secret
 ```
+
+Use `.env.example` for a full production template.
 
 ---
 
