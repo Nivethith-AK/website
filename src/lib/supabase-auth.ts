@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { assertSupabaseConfig } from "@/lib/supabase";
 
 export type AppRole = "admin" | "designer" | "company";
 
@@ -17,6 +18,8 @@ interface RegisterPayload {
 }
 
 export const signUpWithProfile = async (payload: RegisterPayload) => {
+  assertSupabaseConfig();
+
   const { data, error } = await supabase.auth.signUp({
     email: payload.email.trim().toLowerCase(),
     password: payload.password,
@@ -55,6 +58,8 @@ export const signUpWithProfile = async (payload: RegisterPayload) => {
 };
 
 export const signInWithRole = async (email: string, password: string) => {
+  assertSupabaseConfig();
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email: email.trim().toLowerCase(),
     password,
