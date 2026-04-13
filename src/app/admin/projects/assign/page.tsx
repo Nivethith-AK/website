@@ -24,6 +24,8 @@ interface RequestItem {
   projectTitle: string;
   requiredDesigners: number;
   company: { companyName: string };
+  description?: string;
+  budget?: number;
 }
 
 function AssignContent() {
@@ -37,6 +39,7 @@ function AssignContent() {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [autoCreateChat, setAutoCreateChat] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,6 +73,7 @@ function AssignContent() {
     const response = await post("/admin/projects/assign", {
       requestId,
       designerIds: selected.map((d) => d._id),
+      autoCreateChat,
     });
     setIsSubmitting(false);
     if (response.success) {
@@ -150,6 +154,14 @@ function AssignContent() {
             <Button variant="secondary" className="w-full" isLoading={isSubmitting} onClick={submit}>
               Confirm
             </Button>
+            <label className="flex items-center gap-2 text-sm text-white/75">
+              <input
+                type="checkbox"
+                checked={autoCreateChat}
+                onChange={(e) => setAutoCreateChat(e.target.checked)}
+              />
+              Auto-create project chat for company and assigned designers
+            </label>
             <Button variant="outline" className="w-full" onClick={() => setOpen(false)}>
               Cancel
             </Button>
