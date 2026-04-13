@@ -1,14 +1,62 @@
 import Message from '../models/Message.js';
 import User from '../models/User.js';
 
+const MAX_MESSAGES_PER_MINUTE = 8;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const DUPLICATE_COOLDOWN_MS = 45 * 1000;
+
 export const sendMessage = async (req, res) => {
   try {
     const { receiverId, message } = req.body;
+    const senderId = req.user.id;
+    const trimmedMessage = typeof message === 'string' ? message.trim() : '';
 
-    if (!receiverId || !message) {
+    if (!receiverId || !trimmedMessage) {
       return res.status(400).json({
         success: false,
         message: 'receiverId and message are required',
+      });
+    }
+
+    if (receiverId.toString() === senderId.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: 'You cannot send a message to yourself',
+      });
+    }
+
+    if (trimmedMessage.length > 3000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Message is too long',
+      });
+    }
+
+    const rateWindowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS);
+    const recentSentCount = await Message.countDocuments({
+      senderId,
+      createdAt: { $gte: rateWindowStart },
+    });
+
+    if (recentSentCount >= MAX_MESSAGES_PER_MINUTE) {
+      return res.status(429).json({
+        success: false,
+        message: 'Too many messages sent. Please wait a moment before sending more.',
+      });
+    }
+
+    const duplicateWindowStart = new Date(Date.now() - DUPLICATE_COOLDOWN_MS);
+    const duplicateMessage = await Message.findOne({
+      senderId,
+      receiverId,
+      message: trimmedMessage,
+      createdAt: { $gte: duplicateWindowStart },
+    }).select('_id');
+
+    if (duplicateMessage) {
+      return res.status(429).json({
+        success: false,
+        message: 'Duplicate message detected. Please edit your message or wait a few seconds.',
       });
     }
 
@@ -21,9 +69,9 @@ export const sendMessage = async (req, res) => {
     }
 
     const newMessage = await Message.create({
-      senderId: req.user.id,
+      senderId,
       receiverId,
-      message,
+      message: trimmedMessage,
     });
 
     return res.status(201).json({
@@ -42,6 +90,8 @@ export const getMessagesByUser = async (req, res) => {
   try {
     const { userId } = req.params;
     const me = req.user.id;
+    const { limit = 200 } = req.query;
+    const parsedLimit = Math.min(Number(limit) || 200, 500);
 
     const messages = await Message.find({
       $or: [
@@ -51,12 +101,71 @@ export const getMessagesByUser = async (req, res) => {
     })
       .populate('senderId', 'name email role')
       .populate('receiverId', 'name email role')
-      .sort({ createdAt: 1 });
+      .sort({ createdAt: 1 })
+      .limit(parsedLimit);
 
     return res.status(200).json({
       success: true,
       data: messages,
       count: messages.length,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getConversations = async (req, res) => {
+  try {
+    const me = req.user.id;
+    const { limit = 200 } = req.query;
+    const parsedLimit = Math.min(Number(limit) || 200, 500);
+
+    const messages = await Message.find({
+      $or: [{ senderId: me }, { receiverId: me }],
+    })
+      .populate('senderId', 'name email role')
+      .populate('receiverId', 'name email role')
+      .sort({ createdAt: -1 })
+      .limit(parsedLimit);
+
+    const conversations = new Map();
+
+    for (const item of messages) {
+      const sender = item.senderId;
+      const receiver = item.receiverId;
+
+      if (!sender || !receiver) {
+        continue;
+      }
+
+      const senderId = sender._id.toString();
+      const receiverId = receiver._id.toString();
+      const isFromMe = senderId === me.toString();
+      const partner = isFromMe ? receiver : sender;
+      const partnerId = partner._id.toString();
+
+      if (!conversations.has(partnerId)) {
+        conversations.set(partnerId, {
+          partner: {
+            _id: partner._id,
+            name: partner.name,
+            email: partner.email,
+            role: partner.role,
+          },
+          lastMessage: item.message,
+          lastMessageAt: item.createdAt,
+          isFromMe,
+        });
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: Array.from(conversations.values()),
+      count: conversations.size,
     });
   } catch (error) {
     return res.status(500).json({
