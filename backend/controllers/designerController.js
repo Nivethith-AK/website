@@ -206,7 +206,7 @@ export const getPublicCompanyOpportunities = async (req, res) => {
     };
 
     const opportunities = await ClientRequest.find(filter)
-      .populate('company', 'companyName industry contactPerson')
+      .populate('company', 'companyName industry contactPerson email phone website description')
       .sort({ createdAt: -1 })
       .limit(parsedLimit)
       .skip(skip);
