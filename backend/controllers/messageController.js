@@ -112,19 +112,27 @@ export const getMessagesByUser = async (req, res) => {
     const { limit = 200 } = req.query;
     const parsedLimit = Math.min(Number(limit) || 200, 500);
 
-    await Message.updateMany(
-      {
-        senderId: userId,
-        receiverId: me,
-        isRead: false,
-      },
-      {
-        $set: {
-          isRead: true,
-          readAt: new Date(),
+    const unreadIncoming = await Message.find({
+      senderId: userId,
+      receiverId: me,
+      isRead: false,
+    }).select('_id');
+
+    const unreadIncomingIds = unreadIncoming.map((item) => item._id);
+
+    if (unreadIncomingIds.length > 0) {
+      await Message.updateMany(
+        {
+          _id: { $in: unreadIncomingIds },
         },
-      }
-    );
+        {
+          $set: {
+            isRead: true,
+            readAt: new Date(),
+          },
+        }
+      );
+    }
 
     const myUnread = await Message.countDocuments({
       receiverId: me,
@@ -133,6 +141,13 @@ export const getMessagesByUser = async (req, res) => {
 
     const io = getIO();
     io.to(`user:${me}`).emit('message:unread', { unread: myUnread });
+
+    if (unreadIncomingIds.length > 0) {
+      io.to(`user:${userId}`).emit('message:read', {
+        readerId: me,
+        messageIds: unreadIncomingIds,
+      });
+    }
 
     const messages = await Message.find({
       $or: [

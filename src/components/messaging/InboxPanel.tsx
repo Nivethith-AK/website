@@ -208,14 +208,33 @@ export function InboxPanel({
       }
     };
 
+    const onRead = (payload: { readerId?: string; messageIds?: string[] }) => {
+      const ids = new Set(payload?.messageIds || []);
+      if (!ids.size) return;
+
+      setMessages((prev) =>
+        prev.map((item) =>
+          ids.has(item._id)
+            ? {
+                ...item,
+                isRead: true,
+                readAt: new Date().toISOString(),
+              }
+            : item
+        )
+      );
+    };
+
     socket.on("message:new", onNewMessage);
     socket.on("message:unread", onUnread);
+    socket.on("message:read", onRead);
 
     return () => {
       const activeSocket = getSocket();
       if (activeSocket) {
         activeSocket.off("message:new", onNewMessage);
         activeSocket.off("message:unread", onUnread);
+        activeSocket.off("message:read", onRead);
       }
     };
   }, [fetchConversations, onUnreadCountChange, refreshUnreadCount, selectedPartnerId]);
