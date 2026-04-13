@@ -306,9 +306,7 @@ export default function DesignerDashboardPage() {
           <TabsList>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-            <TabsTrigger value="projects" disabled>
-              Projects (Admin Managed)
-            </TabsTrigger>
+            <TabsTrigger value="projects">Projects (Admin Managed)</TabsTrigger>
             <TabsTrigger value="inbox" className="gap-1.5">
               Inbox
               {inboxUnread > 0 ? (
@@ -600,7 +598,7 @@ export default function DesignerDashboardPage() {
                   {(profile.assignedProjects || []).length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={4} className="py-8 text-center text-white/60">
-                        No assigned projects.
+                        No admin-assigned projects yet.
                       </TableCell>
                     </TableRow>
                   ) : (
