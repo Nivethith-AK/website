@@ -28,6 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface RequestItem {
   _id: string;
@@ -98,6 +99,7 @@ export default function ClientDashboardPage() {
   const [portfolioDescription, setPortfolioDescription] = useState("");
   const [portfolioFile, setPortfolioFile] = useState<File | null>(null);
   const [isUploadingPortfolio, setIsUploadingPortfolio] = useState(false);
+  const [showPublishPrompt, setShowPublishPrompt] = useState(false);
 
   useEffect(() => {
     const loadRequests = async () => {
@@ -177,6 +179,16 @@ export default function ClientDashboardPage() {
     };
   }, [requests]);
 
+  const profileReadyToPublish = useMemo(() => {
+    return Boolean(
+      profileForm.companyName.trim() &&
+        profileForm.industry.trim() &&
+        profileForm.contactPerson.trim() &&
+        profileForm.phone.trim() &&
+        profileForm.address.trim()
+    );
+  }, [profileForm]);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -229,6 +241,7 @@ export default function ClientDashboardPage() {
     if (response.success && response.data) {
       setCompanyProfile(response.data);
       setProfileMessage("Company profile updated. New public opportunities now show this information.");
+      setShowPublishPrompt(true);
     } else {
       setProfileMessage(response.message || "Unable to update profile.");
     }
@@ -390,6 +403,12 @@ export default function ClientDashboardPage() {
               <Card className="lux-glass rounded-2xl p-6">
                 <form onSubmit={submit}>
                   <FieldGroup>
+                    {!profileReadyToPublish ? (
+                      <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs text-amber-100">
+                        Complete your company profile first, then publish requests.
+                      </div>
+                    ) : null}
+
                     <Field>
                       <FieldLabel htmlFor="projectTitle">Project Title</FieldLabel>
                       <Input
@@ -477,7 +496,7 @@ export default function ClientDashboardPage() {
                       <FieldDescription>Public requests are shown as fashion opportunities to designers.</FieldDescription>
                     </Field>
 
-                    <Button type="submit" variant="secondary" isLoading={isSubmitting}>
+                    <Button type="submit" variant="secondary" isLoading={isSubmitting} disabled={!profileReadyToPublish}>
                       {isSubmitting ? "Submitting" : "Create Request"}
                     </Button>
                   </FieldGroup>
@@ -679,6 +698,31 @@ export default function ClientDashboardPage() {
             </motion.div>
           </TabsContent>
         </Tabs>
+
+        <Dialog open={showPublishPrompt} onOpenChange={setShowPublishPrompt}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Profile Ready</DialogTitle>
+              <DialogDescription>
+                Your profile looks good. You can now publish a request from the <span className="font-semibold text-white">New Request</span> tab.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setShowPublishPrompt(false);
+                  setTab("new");
+                }}
+              >
+                Go to Publish Request
+              </Button>
+              <Button variant="outline" onClick={() => setShowPublishPrompt(false)}>
+                Stay Here
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
