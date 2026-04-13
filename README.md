@@ -239,6 +239,14 @@ The app is already wired to read these values from env, so domain changes won't 
 ### Copy-Paste Production Setup
 Use `.env.example` as your source of truth.
 
+### Supabase-Only Backend Mode
+If you are moving to Supabase-only backend, set these first:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (server only)
+
+In this mode, app logic should use Supabase Auth + Postgres + Storage + Realtime directly, and `NEXT_PUBLIC_API_URL` is not required unless you keep legacy Express routes.
+
 Frontend on Vercel:
 - `NEXT_PUBLIC_API_URL` -> backend URL + `/api`
 - `NEXTAUTH_URL` -> your public frontend URL
