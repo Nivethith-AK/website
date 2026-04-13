@@ -1,5 +1,6 @@
 import Message from '../models/Message.js';
 import User from '../models/User.js';
+import { getIO } from '../socket.js';
 
 const MAX_MESSAGES_PER_MINUTE = 8;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
@@ -74,9 +75,27 @@ export const sendMessage = async (req, res) => {
       message: trimmedMessage,
     });
 
+    const populatedMessage = await Message.findById(newMessage._id)
+      .populate('senderId', 'name email role')
+      .populate('receiverId', 'name email role');
+
+    const io = getIO();
+    const senderRoom = `user:${senderId}`;
+    const receiverRoom = `user:${receiverId}`;
+
+    io.to(senderRoom).emit('message:new', populatedMessage);
+    io.to(receiverRoom).emit('message:new', populatedMessage);
+
+    const receiverUnread = await Message.countDocuments({
+      receiverId,
+      isRead: false,
+    });
+
+    io.to(receiverRoom).emit('message:unread', { unread: receiverUnread });
+
     return res.status(201).json({
       success: true,
-      data: newMessage,
+      data: populatedMessage,
     });
   } catch (error) {
     return res.status(500).json({
@@ -106,6 +125,14 @@ export const getMessagesByUser = async (req, res) => {
         },
       }
     );
+
+    const myUnread = await Message.countDocuments({
+      receiverId: me,
+      isRead: false,
+    });
+
+    const io = getIO();
+    io.to(`user:${me}`).emit('message:unread', { unread: myUnread });
 
     const messages = await Message.find({
       $or: [
@@ -218,6 +245,60 @@ export const getUnreadCount = async (req, res) => {
       data: {
         unread: totalUnread,
       },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const adminSendPrivateMessage = async (req, res) => {
+  try {
+    const senderId = req.user.id;
+    const { receiverId, message } = req.body;
+    const trimmedMessage = typeof message === 'string' ? message.trim() : '';
+
+    if (!receiverId || !trimmedMessage) {
+      return res.status(400).json({
+        success: false,
+        message: 'receiverId and message are required',
+      });
+    }
+
+    const receiver = await User.findById(receiverId).select('_id');
+    if (!receiver) {
+      return res.status(404).json({
+        success: false,
+        message: 'Receiver not found',
+      });
+    }
+
+    const created = await Message.create({
+      senderId,
+      receiverId,
+      message: trimmedMessage,
+    });
+
+    const populatedMessage = await Message.findById(created._id)
+      .populate('senderId', 'name email role')
+      .populate('receiverId', 'name email role');
+
+    const io = getIO();
+    io.to(`user:${senderId}`).emit('message:new', populatedMessage);
+    io.to(`user:${receiverId}`).emit('message:new', populatedMessage);
+
+    const receiverUnread = await Message.countDocuments({
+      receiverId,
+      isRead: false,
+    });
+
+    io.to(`user:${receiverId}`).emit('message:unread', { unread: receiverUnread });
+
+    return res.status(201).json({
+      success: true,
+      data: populatedMessage,
     });
   } catch (error) {
     return res.status(500).json({
