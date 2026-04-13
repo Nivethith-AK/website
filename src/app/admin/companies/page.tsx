@@ -32,6 +32,7 @@ interface CompanyUser {
 
 export default function AdminCompaniesPage() {
   const [companies, setCompanies] = useState<CompanyUser[]>([]);
+  const [tab, setTab] = useState<"pending" | "all">("pending");
   const [query, setQuery] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -56,13 +57,17 @@ export default function AdminCompaniesPage() {
   const filtered = useMemo(() => {
     const normalized = query.toLowerCase();
     return companies.filter((company) => {
+      if (tab === "pending" && (!company.isVerified || company.isApproved)) {
+        return false;
+      }
+
       return (
         (company.companyName || company.name || "").toLowerCase().includes(normalized) ||
         company.email.toLowerCase().includes(normalized) ||
         (company.contactPerson || "").toLowerCase().includes(normalized)
       );
     });
-  }, [companies, query]);
+  }, [companies, query, tab]);
 
   const pendingCount = filtered.filter((c) => c.isVerified && !c.isApproved).length;
 
@@ -99,6 +104,11 @@ export default function AdminCompaniesPage() {
       subtitle="Approve or reject verified company accounts. Decision emails are sent automatically."
       rightSlot={<Badge variant="warning">{pendingCount} Pending</Badge>}
     >
+      <div className="mb-4 flex gap-2">
+        <Button variant={tab === "pending" ? "secondary" : "outline"} onClick={() => setTab("pending")}>Pending</Button>
+        <Button variant={tab === "all" ? "secondary" : "outline"} onClick={() => setTab("all")}>All Companies</Button>
+      </div>
+
       <div className="mb-4 max-w-md">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/45" size={14} />
@@ -150,14 +160,16 @@ export default function AdminCompaniesPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => reject(company._id)}
-                            disabled={processingId === company._id || !company.isVerified}
-                          >
-                            Reject
-                          </Button>
+                          {tab === "pending" ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => reject(company._id)}
+                              disabled={processingId === company._id || !company.isVerified}
+                            >
+                              Reject
+                            </Button>
+                          ) : null}
                           <Button
                             size="sm"
                             variant="outline"
@@ -168,15 +180,17 @@ export default function AdminCompaniesPage() {
                           >
                             View 360
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            isLoading={processingId === company._id}
-                            onClick={() => approve(company._id)}
-                            disabled={!readyForReview}
-                          >
-                            Approve
-                          </Button>
+                          {tab === "pending" ? (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              isLoading={processingId === company._id}
+                              onClick={() => approve(company._id)}
+                              disabled={!readyForReview}
+                            >
+                              Approve
+                            </Button>
+                          ) : null}
                         </div>
                       </TableCell>
                     </TableRow>

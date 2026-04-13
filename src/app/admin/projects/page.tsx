@@ -33,10 +33,18 @@ interface Project {
   }>;
 }
 
+interface RequestItem {
+  _id: string;
+  projectTitle: string;
+  company?: {
+    companyName?: string;
+  };
+}
+
 export default function AdminProjectsPage() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
-  const [approvedRequests, setApprovedRequests] = useState<Array<{ _id: string; projectTitle: string; company?: { companyName?: string } }>>([]);
+  const [approvedRequests, setApprovedRequests] = useState<RequestItem[]>([]);
   const [tab, setTab] = useState("all");
 
   useEffect(() => {
@@ -53,7 +61,9 @@ export default function AdminProjectsPage() {
 
       if (requestsResponse.success) {
         const list = Array.isArray(requestsResponse.data) ? requestsResponse.data : requestsResponse.data?.data || [];
-        setApprovedRequests(list);
+        const assignedTitles = new Set((Array.isArray(projectsResponse.data) ? projectsResponse.data : projectsResponse.data?.data || []).map((p: Project) => p.projectTitle));
+        const pendingAssignment = list.filter((item: RequestItem) => !assignedTitles.has(item.projectTitle));
+        setApprovedRequests(pendingAssignment);
       }
     };
     fetchProjects();
