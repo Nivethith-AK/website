@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { get, post } from "@/lib/api";
 import { Card } from "@/components/Card";
@@ -76,7 +76,7 @@ export function InboxPanel({
     });
   }, [conversations, query]);
 
-  const fetchMessages = async (partnerId: string) => {
+  const fetchMessages = useCallback(async (partnerId: string) => {
     if (!partnerId) {
       setMessages([]);
       return;
@@ -94,9 +94,9 @@ export function InboxPanel({
     }
 
     setIsLoadingMessages(false);
-  };
+  }, []);
 
-  const fetchConversations = async (preferredPartnerId?: string) => {
+  const fetchConversations = useCallback(async (preferredPartnerId?: string) => {
     setIsLoadingConversations(true);
 
     const response = await get<ConversationItem[]>("/messages?limit=200");
@@ -126,16 +126,16 @@ export function InboxPanel({
     setSelectedPartnerId(nextPartnerId);
     await fetchMessages(nextPartnerId);
     setIsLoadingConversations(false);
-  };
+  }, [fetchMessages]);
 
-  const onSelectConversation = async (partnerId: string) => {
+  const onSelectConversation = useCallback(async (partnerId: string) => {
     if (!partnerId || partnerId === selectedPartnerId) return;
     setSelectedPartnerId(partnerId);
     setDraft("");
     await fetchMessages(partnerId);
-  };
+  }, [fetchMessages, selectedPartnerId]);
 
-  const onSend = async () => {
+  const onSend = useCallback(async () => {
     if (!selectedPartnerId || !draft.trim()) return;
 
     setIsSending(true);
@@ -155,11 +155,15 @@ export function InboxPanel({
     }
 
     setIsSending(false);
-  };
+  }, [draft, fetchConversations, selectedPartnerId]);
 
   useEffect(() => {
-    fetchConversations();
-  }, []);
+    const timer = window.setTimeout(() => {
+      void fetchConversations();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [fetchConversations]);
 
   useEffect(() => {
     if (threadEndRef.current) {
