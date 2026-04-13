@@ -15,10 +15,10 @@ export const ensureAdminUser = async () => {
   }
 
   try {
-    const existing = await User.findOne({ email: DEFAULT_ADMIN_EMAIL }).select('+password');
+    let adminUser = await User.findOne({ email: DEFAULT_ADMIN_EMAIL }).select('+password');
 
-    if (!existing) {
-      await Admin.create({
+    if (!adminUser) {
+      adminUser = await Admin.create({
         name: 'Admin',
         email: DEFAULT_ADMIN_EMAIL,
         password: DEFAULT_ADMIN_PASSWORD,
@@ -27,25 +27,22 @@ export const ensureAdminUser = async () => {
         isVerified: true,
       });
       console.log('Default admin created: admin@gmail.com');
-      return;
-    }
-
-    if (existing.role !== 'admin') {
+    } else if (adminUser.role !== 'admin') {
       console.warn('Admin seed skipped: admin@gmail.com exists with a non-admin role');
       return;
+    } else {
+      const passwordMatches = await adminUser.matchPassword(DEFAULT_ADMIN_PASSWORD);
+      if (!passwordMatches) {
+        adminUser.password = DEFAULT_ADMIN_PASSWORD;
+        await adminUser.save();
+        console.log('Default admin password synced for admin@gmail.com');
+      }
     }
 
-    const passwordMatches = await existing.matchPassword(DEFAULT_ADMIN_PASSWORD);
-    if (!passwordMatches) {
-      existing.password = DEFAULT_ADMIN_PASSWORD;
-      await existing.save();
-      console.log('Default admin password synced for admin@gmail.com');
-    }
+    let testUser = await User.findOne({ email: DEFAULT_TEST_EMAIL }).select('+password');
 
-    const existingTest = await User.findOne({ email: DEFAULT_TEST_EMAIL }).select('+password');
-
-    if (!existingTest) {
-      await Company.create({
+    if (!testUser) {
+      testUser = await Company.create({
         name: 'Test User',
         email: DEFAULT_TEST_EMAIL,
         password: DEFAULT_TEST_PASSWORD,
@@ -59,14 +56,13 @@ export const ensureAdminUser = async () => {
         address: 'N/A',
       });
       console.log('Default test user created: test@gmail.com');
-      return;
-    }
-
-    const testPasswordMatches = await existingTest.matchPassword(DEFAULT_TEST_PASSWORD);
-    if (!testPasswordMatches) {
-      existingTest.password = DEFAULT_TEST_PASSWORD;
-      await existingTest.save();
-      console.log('Default test user password synced for test@gmail.com');
+    } else {
+      const testPasswordMatches = await testUser.matchPassword(DEFAULT_TEST_PASSWORD);
+      if (!testPasswordMatches) {
+        testUser.password = DEFAULT_TEST_PASSWORD;
+        await testUser.save();
+        console.log('Default test user password synced for test@gmail.com');
+      }
     }
   } catch (error) {
     console.warn(`Admin seed warning: ${error.message}`);
