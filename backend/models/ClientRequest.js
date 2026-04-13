@@ -39,6 +39,10 @@ const clientRequestSchema = new mongoose.Schema(
       enum: ['Student', 'Intern', 'Professional', 'Any'],
       default: 'Any',
     },
+    isPublic: {
+      type: Boolean,
+      default: false,
+    },
     status: {
       type: String,
       enum: ['New', 'Pending', 'Approved', 'In Progress', 'Completed', 'Rejected'],
