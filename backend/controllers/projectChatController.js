@@ -2,6 +2,31 @@ import Project from '../models/Project.js';
 import Message from '../models/Message.js';
 import { getIO } from '../socket.js';
 
+const MAX_ATTACHMENTS_PER_MESSAGE = 5;
+
+const allowedAttachmentMimeTypes = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/vnd.ms-powerpoint',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+]);
+
+const mapAttachments = (files = []) => {
+  return files.map((file) => ({
+    fileName: file.filename,
+    originalName: file.originalname,
+    fileUrl: `/uploads/${file.filename}`,
+    mimeType: file.mimetype,
+    size: file.size,
+  }));
+};
+
 export const getProjectConversations = async (req, res) => {
   try {
     const me = req.user.id;
@@ -84,11 +109,27 @@ export const sendProjectMessage = async (req, res) => {
     const { projectId } = req.params;
     const { message } = req.body;
     const trimmed = typeof message === 'string' ? message.trim() : '';
+    const attachments = mapAttachments(req.files || []);
 
-    if (!trimmed) {
+    if (!trimmed && attachments.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'message is required',
+        message: 'message or attachment is required',
+      });
+    }
+
+    if (attachments.length > MAX_ATTACHMENTS_PER_MESSAGE) {
+      return res.status(400).json({
+        success: false,
+        message: `Maximum ${MAX_ATTACHMENTS_PER_MESSAGE} attachments allowed per message`,
+      });
+    }
+
+    const invalidAttachment = attachments.find((item) => !allowedAttachmentMimeTypes.has(item.mimeType));
+    if (invalidAttachment) {
+      return res.status(400).json({
+        success: false,
+        message: `Unsupported file type: ${invalidAttachment.mimeType}`,
       });
     }
 
@@ -120,6 +161,7 @@ export const sendProjectMessage = async (req, res) => {
       receiverId: me,
       projectId,
       message: trimmed,
+      attachments,
     });
 
     const populated = await Message.findById(created._id).populate('senderId', 'name email role');
