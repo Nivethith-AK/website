@@ -43,8 +43,11 @@ export default function AdminRequestsPage() {
 
   useEffect(() => {
     const fetchRequests = async () => {
-      const response = await get<RequestItem[]>("/admin/requests");
-      if (response.success && response.data) setRequests(response.data);
+      const response = await get<any>("/admin/requests?limit=200");
+      if (response.success) {
+        const list = Array.isArray(response.data) ? response.data : response.data?.data || [];
+        setRequests(list);
+      }
     };
     fetchRequests();
   }, []);
