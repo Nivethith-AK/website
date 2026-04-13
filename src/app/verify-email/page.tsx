@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/Card";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { get } from "@/lib/api";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const params = useSearchParams();
   const token = params.get("token") || "";
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -53,5 +53,13 @@ export default function VerifyEmailPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background px-4 py-28 text-center text-white/70">Loading...</div>}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
