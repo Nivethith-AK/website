@@ -160,12 +160,21 @@ export const approveRequest = async (req, res) => {
         updatedAt: Date.now(),
       },
       { new: true }
-    );
+    ).populate('company', 'companyName email');
 
     if (!request) {
       return res.status(404).json({
         success: false,
         message: 'Request not found',
+      });
+    }
+
+    if (request.company?.email) {
+      await sendRequestStatusEmail({
+        to: request.company.email,
+        companyName: request.company.companyName,
+        projectTitle: request.projectTitle,
+        approved: true,
       });
     }
 
@@ -194,12 +203,22 @@ export const rejectRequest = async (req, res) => {
         updatedAt: Date.now(),
       },
       { new: true }
-    );
+    ).populate('company', 'companyName email');
 
     if (!request) {
       return res.status(404).json({
         success: false,
         message: 'Request not found',
+      });
+    }
+
+    if (request.company?.email) {
+      await sendRequestStatusEmail({
+        to: request.company.email,
+        companyName: request.company.companyName,
+        projectTitle: request.projectTitle,
+        approved: false,
+        rejectionReason,
       });
     }
 
