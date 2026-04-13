@@ -33,13 +33,6 @@ export const authMiddleware = async (req, res, next) => {
       });
     }
 
-    if (user.role !== 'admin' && !user.isApproved) {
-      return res.status(403).json({
-        success: false,
-        message: 'Your account is pending admin approval',
-      });
-    }
-
     req.user = {
       id: user._id.toString(),
       role: user.role,
@@ -71,3 +64,18 @@ export const roleMiddleware = (...roles) => {
 };
 
 export const authorize = roleMiddleware;
+
+export const requireApproved = (req, res, next) => {
+  if (req.user.role === 'admin') {
+    return next();
+  }
+
+  if (!req.user.isApproved) {
+    return res.status(403).json({
+      success: false,
+      message: 'Your account is pending admin approval',
+    });
+  }
+
+  return next();
+};
