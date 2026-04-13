@@ -268,11 +268,11 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    if (maybeHandleDevTestLogin(email, password, res)) {
-      return;
-    }
-
     if (mongoose.connection.readyState !== 1) {
+      if (maybeHandleDevTestLogin(email, password, res)) {
+        return;
+      }
+
       return res.status(503).json({
         success: false,
         message: 'Database unavailable. Try test@gmail.com in local development.',
