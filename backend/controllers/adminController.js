@@ -254,43 +254,89 @@ export const rejectRequest = async (req, res) => {
 
 export const assignDesignersToProject = async (req, res) => {
   try {
-    const { requestId, designerIds } = req.body;
+    const { requestId, designerIds, companyId, projectTitle, description, budget, autoCreateChat = true } = req.body;
 
-    const request = await ClientRequest.findById(requestId);
-    if (!request) {
+    let request = null;
+    let resolvedCompanyId = companyId;
+    let resolvedProjectTitle = projectTitle;
+    let resolvedDescription = description;
+    let resolvedBudget = budget;
+
+    if (requestId) {
+      request = await ClientRequest.findById(requestId);
+      if (!request) {
+        return res.status(404).json({
+          success: false,
+          message: 'Request not found',
+        });
+      }
+
+      resolvedCompanyId = request.company;
+      resolvedProjectTitle = request.projectTitle;
+      resolvedDescription = request.description;
+      resolvedBudget = request.budget;
+    }
+
+    if (!resolvedCompanyId || !resolvedProjectTitle) {
+      return res.status(400).json({
+        success: false,
+        message: 'companyId and projectTitle are required',
+      });
+    }
+
+    const companyExists = await Company.findById(resolvedCompanyId).select('_id');
+    if (!companyExists) {
       return res.status(404).json({
         success: false,
-        message: 'Request not found',
+        message: 'Company not found',
+      });
+    }
+
+    const uniqueDesignerIds = [...new Set((designerIds || []).map((id) => id.toString()))];
+    if (uniqueDesignerIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'At least one designer is required',
       });
     }
 
     // Create project
     const project = await Project.create({
-      clientRequest: requestId,
-      company: request.company,
-      projectTitle: request.projectTitle,
-      description: request.description,
-      budget: request.budget,
-      designers: designerIds.map(id => ({
+      clientRequest: requestId || null,
+      company: resolvedCompanyId,
+      projectTitle: resolvedProjectTitle,
+      description: resolvedDescription,
+      budget: resolvedBudget,
+      designers: uniqueDesignerIds.map(id => ({
         designer: id,
         status: 'Assigned',
       })),
+      participants: [resolvedCompanyId, ...uniqueDesignerIds],
+      chatEnabled: Boolean(autoCreateChat),
+      createdBy: req.user.id,
       status: 'Active',
     });
 
     // Update request status
-    await ClientRequest.findByIdAndUpdate(
-      requestId,
-      {
-        status: 'In Progress',
-        assignedDesigners: designerIds,
-        updatedAt: Date.now(),
-      }
-    );
+    if (requestId) {
+      await ClientRequest.findByIdAndUpdate(
+        requestId,
+        {
+          status: 'In Progress',
+          assignedDesigners: uniqueDesignerIds,
+          updatedAt: Date.now(),
+        }
+      );
+    }
+
+    // Update company projects
+    await Company.findByIdAndUpdate(resolvedCompanyId, {
+      $addToSet: { assignedDesigners: project._id },
+    });
 
     // Update designers
     await Designer.updateMany(
-      { _id: { $in: designerIds } },
+      { _id: { $in: uniqueDesignerIds } },
       { $push: { assignedProjects: project._id } }
     );
 
