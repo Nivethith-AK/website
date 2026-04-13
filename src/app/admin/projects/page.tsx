@@ -24,10 +24,12 @@ interface Project {
   status: string;
   chatEnabled?: boolean;
   company: {
+    _id?: string;
     companyName: string;
   };
   designers: Array<{
     designer: {
+      _id?: string;
       firstName: string;
       lastName: string;
     };
@@ -81,7 +83,7 @@ export default function AdminProjectsPage() {
 
   const toggleChat = async (project: Project) => {
     const response = await put(`/admin/projects/${project._id}/participants`, {
-      companyId: project.company,
+      companyId: project.company?._id,
       designerIds: (project.designers || []).map((entry: any) => entry.designer?._id || entry.designer).filter(Boolean),
       chatEnabled: !project.chatEnabled,
     });

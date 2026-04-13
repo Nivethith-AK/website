@@ -465,7 +465,7 @@ export const getAllProjects = async (req, res) => {
     }
 
     const projects = await Project.find(filter)
-      .populate('company', 'companyName email phone')
+      .populate('company', 'companyName name email phone')
       .populate('designers.designer', 'firstName lastName email')
       .limit(limit)
       .skip(skip)
