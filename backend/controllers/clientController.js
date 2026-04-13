@@ -162,7 +162,7 @@ export const deleteClientRequest = async (req, res) => {
 
 export const getCompanyProfile = async (req, res) => {
   try {
-    const company = await Company.findById(req.params.id);
+    const company = await Company.findById(req.user.id);
 
     if (!company) {
       return res.status(404).json({
