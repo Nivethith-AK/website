@@ -49,11 +49,11 @@ export default function AdminRequestsPage() {
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [query, setQuery] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const [tab, setTab] = useState("all");
+  const [tab, setTab] = useState("new");
 
   useEffect(() => {
     const fetchRequests = async () => {
-      const response = await get<any>("/admin/requests?status=New&limit=200");
+      const response = await get<any>("/admin/requests?limit=200");
       if (response.success) {
         const list = Array.isArray(response.data) ? response.data : response.data?.data || [];
         const sorted = [...list].sort((a, b) => (statusOrder[a.status] || 999) - (statusOrder[b.status] || 999));
