@@ -7,6 +7,7 @@ import {
   getAllDesigners,
   getDesignerById,
   getPublicCompanyOpportunities,
+  getCompanyRequestsBoard,
 } from '../controllers/designerController.js';
 import { protect, authorize } from '../middleware/auth.js';
 import multer from 'multer';
@@ -26,6 +27,7 @@ const upload = multer({ storage });
 // Public routes
 router.get('/', getAllDesigners);
 router.get('/opportunities', getPublicCompanyOpportunities);
+router.get('/requests-board', getCompanyRequestsBoard);
 router.get('/:id', getDesignerById);
 
 // Protected routes
