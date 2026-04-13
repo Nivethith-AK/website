@@ -31,11 +31,27 @@ export const ensureAdminUser = async () => {
       console.warn('Admin seed skipped: admin@gmail.com exists with a non-admin role');
       return;
     } else {
+      let shouldSaveAdmin = false;
+
+      if (!adminUser.isApproved) {
+        adminUser.isApproved = true;
+        shouldSaveAdmin = true;
+      }
+
+      if (!adminUser.isVerified) {
+        adminUser.isVerified = true;
+        shouldSaveAdmin = true;
+      }
+
       const passwordMatches = await adminUser.matchPassword(DEFAULT_ADMIN_PASSWORD);
       if (!passwordMatches) {
         adminUser.password = DEFAULT_ADMIN_PASSWORD;
+        shouldSaveAdmin = true;
+      }
+
+      if (shouldSaveAdmin) {
         await adminUser.save();
-        console.log('Default admin password synced for admin@gmail.com');
+        console.log('Default admin credentials synced for admin@gmail.com');
       }
     }
 
@@ -57,11 +73,27 @@ export const ensureAdminUser = async () => {
       });
       console.log('Default test user created: test@gmail.com');
     } else {
+      let shouldSaveTest = false;
+
+      if (!testUser.isApproved) {
+        testUser.isApproved = true;
+        shouldSaveTest = true;
+      }
+
+      if (!testUser.isVerified) {
+        testUser.isVerified = true;
+        shouldSaveTest = true;
+      }
+
       const testPasswordMatches = await testUser.matchPassword(DEFAULT_TEST_PASSWORD);
       if (!testPasswordMatches) {
         testUser.password = DEFAULT_TEST_PASSWORD;
+        shouldSaveTest = true;
+      }
+
+      if (shouldSaveTest) {
         await testUser.save();
-        console.log('Default test user password synced for test@gmail.com');
+        console.log('Default test user credentials synced for test@gmail.com');
       }
     }
   } catch (error) {
