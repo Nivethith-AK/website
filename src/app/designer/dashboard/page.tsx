@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { get, put } from "@/lib/api";
+import { connectSocket, getSocket } from "@/lib/socket";
 import { Card } from "@/components/Card";
 import { InboxPanel } from "@/components/messaging/InboxPanel";
 import { Button } from "@/components/ui/button";
@@ -124,6 +125,29 @@ export default function DesignerDashboardPage() {
     };
 
     fetchProfile();
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return;
+    }
+
+    const socket = connectSocket(token);
+    if (!socket) {
+      return;
+    }
+
+    const onUnread = (payload: { unread?: number }) => {
+      setInboxUnread(payload?.unread || 0);
+    };
+
+    socket.on("message:unread", onUnread);
+
+    return () => {
+      const activeSocket = getSocket();
+      if (activeSocket) {
+        activeSocket.off("message:unread", onUnread);
+      }
+    };
 
   }, [router]);
 
