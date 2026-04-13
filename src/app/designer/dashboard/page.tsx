@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { get, put } from "@/lib/api";
+import { get, put, upload } from "@/lib/api";
 import { connectSocket, getSocket } from "@/lib/socket";
 import { Card } from "@/components/Card";
 import { InboxPanel } from "@/components/messaging/InboxPanel";
@@ -55,6 +55,22 @@ interface DesignerProfile {
   skills: string[];
   profileImage?: string;
   portfolio: PortfolioItem[];
+  cvFile?: string;
+  experiences?: Array<{
+    company?: string;
+    role?: string;
+    startDate?: string;
+    endDate?: string;
+    description?: string;
+  }>;
+  fashionProjects?: Array<{
+    title?: string;
+    client?: string;
+    year?: string;
+    role?: string;
+    description?: string;
+    link?: string;
+  }>;
   bio?: string;
   availability: string;
   isApproved: boolean;
@@ -80,6 +96,8 @@ export default function DesignerDashboardPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [inboxUnread, setInboxUnread] = useState(0);
+  const [isUploadingCv, setIsUploadingCv] = useState(false);
+  const [cvMessage, setCvMessage] = useState("");
 
   const [form, setForm] = useState({
     firstName: "",
@@ -88,6 +106,8 @@ export default function DesignerDashboardPage() {
     experienceLevel: "Student",
     bio: "",
     availability: "Available",
+    experiences: [{ company: "", role: "", startDate: "", endDate: "", description: "" }],
+    fashionProjects: [{ title: "", client: "", year: "", role: "", description: "", link: "" }],
   });
 
   useEffect(() => {
@@ -112,6 +132,14 @@ export default function DesignerDashboardPage() {
           experienceLevel: response.data.experienceLevel || "Student",
           bio: response.data.bio || "",
           availability: response.data.availability || "Available",
+          experiences:
+            response.data.experiences && response.data.experiences.length > 0
+              ? response.data.experiences
+              : [{ company: "", role: "", startDate: "", endDate: "", description: "" }],
+          fashionProjects:
+            response.data.fashionProjects && response.data.fashionProjects.length > 0
+              ? response.data.fashionProjects
+              : [{ title: "", client: "", year: "", role: "", description: "", link: "" }],
         });
       } else {
         router.push("/login");
@@ -166,6 +194,55 @@ export default function DesignerDashboardPage() {
       setIsEditing(false);
     }
     setIsSaving(false);
+  };
+
+  const addExperience = () => {
+    setForm((prev) => ({
+      ...prev,
+      experiences: [...prev.experiences, { company: "", role: "", startDate: "", endDate: "", description: "" }],
+    }));
+  };
+
+  const updateExperience = (index: number, key: string, value: string) => {
+    setForm((prev) => {
+      const updated = [...prev.experiences];
+      updated[index] = { ...updated[index], [key]: value };
+      return { ...prev, experiences: updated };
+    });
+  };
+
+  const addFashionProject = () => {
+    setForm((prev) => ({
+      ...prev,
+      fashionProjects: [...prev.fashionProjects, { title: "", client: "", year: "", role: "", description: "", link: "" }],
+    }));
+  };
+
+  const updateFashionProject = (index: number, key: string, value: string) => {
+    setForm((prev) => {
+      const updated = [...prev.fashionProjects];
+      updated[index] = { ...updated[index], [key]: value };
+      return { ...prev, fashionProjects: updated };
+    });
+  };
+
+  const uploadCv = async (file: File | null) => {
+    if (!file) return;
+    setIsUploadingCv(true);
+    setCvMessage("");
+
+    const formData = new FormData();
+    formData.append("cvFile", file);
+
+    const response = await upload<DesignerProfile>("/designers/upload/cv", formData);
+    if (response.success && response.data) {
+      setProfile(response.data);
+      setCvMessage("CV uploaded successfully.");
+    } else {
+      setCvMessage(response.message || "Unable to upload CV.");
+    }
+
+    setIsUploadingCv(false);
   };
 
   const activeCount = useMemo(() => profile?.assignedProjects?.filter((p) => p.status !== "Completed").length || 0, [profile]);
@@ -275,6 +352,94 @@ export default function DesignerDashboardPage() {
                       <FieldDescription>Keep it concise and value-driven.</FieldDescription>
                     </Field>
 
+                    <Field>
+                      <FieldLabel>Experience</FieldLabel>
+                      <div className="space-y-3">
+                        {form.experiences.map((exp, index) => (
+                          <div key={`exp-${index}`} className="rounded-xl border border-white/12 bg-white/[0.03] p-3">
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                              <Input
+                                value={exp.company || ""}
+                                onChange={(e) => updateExperience(index, "company", e.target.value)}
+                                placeholder="Company"
+                              />
+                              <Input
+                                value={exp.role || ""}
+                                onChange={(e) => updateExperience(index, "role", e.target.value)}
+                                placeholder="Role"
+                              />
+                              <Input
+                                value={exp.startDate || ""}
+                                onChange={(e) => updateExperience(index, "startDate", e.target.value)}
+                                placeholder="Start Date"
+                              />
+                              <Input
+                                value={exp.endDate || ""}
+                                onChange={(e) => updateExperience(index, "endDate", e.target.value)}
+                                placeholder="End Date / Present"
+                              />
+                            </div>
+                            <Textarea
+                              value={exp.description || ""}
+                              onChange={(e) => updateExperience(index, "description", e.target.value)}
+                              placeholder="Fashion experience highlights"
+                              className="mt-3"
+                            />
+                          </div>
+                        ))}
+                        <Button type="button" variant="outline" onClick={addExperience}>
+                          Add Experience
+                        </Button>
+                      </div>
+                    </Field>
+
+                    <Field>
+                      <FieldLabel>Fashion Projects</FieldLabel>
+                      <div className="space-y-3">
+                        {form.fashionProjects.map((proj, index) => (
+                          <div key={`proj-${index}`} className="rounded-xl border border-white/12 bg-white/[0.03] p-3">
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                              <Input
+                                value={proj.title || ""}
+                                onChange={(e) => updateFashionProject(index, "title", e.target.value)}
+                                placeholder="Project Title"
+                              />
+                              <Input
+                                value={proj.client || ""}
+                                onChange={(e) => updateFashionProject(index, "client", e.target.value)}
+                                placeholder="Client / Brand"
+                              />
+                              <Input
+                                value={proj.year || ""}
+                                onChange={(e) => updateFashionProject(index, "year", e.target.value)}
+                                placeholder="Year"
+                              />
+                              <Input
+                                value={proj.role || ""}
+                                onChange={(e) => updateFashionProject(index, "role", e.target.value)}
+                                placeholder="Your Role"
+                              />
+                            </div>
+                            <Textarea
+                              value={proj.description || ""}
+                              onChange={(e) => updateFashionProject(index, "description", e.target.value)}
+                              placeholder="Project details"
+                              className="mt-3"
+                            />
+                            <Input
+                              value={proj.link || ""}
+                              onChange={(e) => updateFashionProject(index, "link", e.target.value)}
+                              placeholder="Project link (optional)"
+                              className="mt-3"
+                            />
+                          </div>
+                        ))}
+                        <Button type="button" variant="outline" onClick={addFashionProject}>
+                          Add Fashion Project
+                        </Button>
+                      </div>
+                    </Field>
+
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <Field>
                         <FieldLabel htmlFor="experienceLevel">Experience Level</FieldLabel>
@@ -344,6 +509,16 @@ export default function DesignerDashboardPage() {
                       <p className="text-sm text-white/60">{profile.email}</p>
                     </div>
                     <p className="text-sm text-white/70">{profile.bio || "No bio available."}</p>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      <div className="rounded-xl border border-white/12 bg-white/[0.03] p-3">
+                        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-accent">Experience Entries</p>
+                        <p className="mt-2 text-xl font-black">{profile.experiences?.length || 0}</p>
+                      </div>
+                      <div className="rounded-xl border border-white/12 bg-white/[0.03] p-3">
+                        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-accent">Fashion Projects</p>
+                        <p className="mt-2 text-xl font-black">{profile.fashionProjects?.length || 0}</p>
+                      </div>
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       {(profile.skills || []).map((skill) => (
                         <Badge key={skill}>{skill}</Badge>
@@ -360,6 +535,31 @@ export default function DesignerDashboardPage() {
 
           <TabsContent value="portfolio">
             <Card className="lux-glass rounded-2xl p-6">
+              <div className="mb-5 rounded-xl border border-white/12 bg-white/[0.03] p-4">
+                <p className="text-sm font-black uppercase">Curriculum Vitae</p>
+                <p className="mt-1 text-xs text-white/60">Upload or replace your CV for companies and admin review.</p>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <Input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => uploadCv(e.target.files?.[0] || null)}
+                    disabled={isUploadingCv}
+                    className="max-w-sm"
+                  />
+                  {profile.cvFile ? (
+                    <a
+                      href={profile.cvFile.startsWith("http") ? profile.cvFile : `http://localhost:5000${profile.cvFile}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent"
+                    >
+                      View Current CV
+                    </a>
+                  ) : null}
+                </div>
+                {cvMessage ? <p className="mt-2 text-xs text-white/70">{cvMessage}</p> : null}
+              </div>
+
               {profile.portfolio.length === 0 ? (
                 <p className="text-white/60">No portfolio items uploaded yet.</p>
               ) : (
@@ -422,8 +622,8 @@ export default function DesignerDashboardPage() {
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
               <InboxPanel
                 emptyTitle="No Conversations Yet"
-                emptyDescription="When you message a company from opportunities, the thread appears here."
-                composerPlaceholder="Share your fit for the role, timeline, and portfolio links..."
+                emptyDescription="When you message a company from the request board, the thread appears here."
+                composerPlaceholder="Share your fit for the request, timeline, and portfolio links..."
                 onUnreadCountChange={setInboxUnread}
               />
             </motion.div>
