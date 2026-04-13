@@ -137,6 +137,19 @@ export const getConversations = async (req, res) => {
     const { limit = 200 } = req.query;
     const parsedLimit = Math.min(Number(limit) || 200, 500);
 
+    const unreadMessages = await Message.find({
+      receiverId: me,
+      isRead: false,
+    })
+      .select('senderId')
+      .lean();
+
+    const unreadCountBySender = new Map();
+    for (const item of unreadMessages) {
+      const senderId = item.senderId.toString();
+      unreadCountBySender.set(senderId, (unreadCountBySender.get(senderId) || 0) + 1);
+    }
+
     const messages = await Message.find({
       $or: [{ senderId: me }, { receiverId: me }],
     })
@@ -161,11 +174,7 @@ export const getConversations = async (req, res) => {
       const partnerId = partner._id.toString();
 
       if (!conversations.has(partnerId)) {
-        const unreadCount = await Message.countDocuments({
-          senderId: partner._id,
-          receiverId: me,
-          isRead: false,
-        });
+        const unreadCount = unreadCountBySender.get(partnerId) || 0;
 
         conversations.set(partnerId, {
           partner: {
