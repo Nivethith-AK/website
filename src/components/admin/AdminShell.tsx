@@ -2,7 +2,7 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Users, ClipboardList, Briefcase } from "lucide-react";
+import { LayoutDashboard, Users, ClipboardList, Briefcase, Building2, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AdminShellProps {
@@ -15,8 +15,10 @@ interface AdminShellProps {
 const navItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Designers", href: "/admin/designers", icon: Users },
+  { label: "Companies", href: "/admin/companies", icon: Building2 },
   { label: "Requests", href: "/admin/requests", icon: ClipboardList },
   { label: "Projects", href: "/admin/projects", icon: Briefcase },
+  { label: "Messages", href: "/admin/messages", icon: Mail },
 ];
 
 export function AdminShell({ title, subtitle, children, rightSlot }: AdminShellProps) {
