@@ -18,6 +18,7 @@ const navItems = [
   { label: "Companies", href: "/admin/companies", icon: Building2 },
   { label: "Requests", href: "/admin/requests", icon: ClipboardList },
   { label: "Projects (Admin)", href: "/admin/projects", icon: Briefcase },
+  { label: "Create Project", href: "/admin/projects/create", icon: Briefcase },
   { label: "Vacancies", href: "/admin/vacancies", icon: ClipboardPen },
   { label: "Messages", href: "/admin/messages", icon: Mail },
 ];
