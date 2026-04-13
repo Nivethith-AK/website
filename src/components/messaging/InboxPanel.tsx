@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { get, post } from "@/lib/api";
+import { connectSocket, getSocket } from "@/lib/socket";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,7 @@ interface InboxPanelProps {
   emptyTitle: string;
   emptyDescription: string;
   composerPlaceholder?: string;
+  onUnreadCountChange?: (count: number) => void;
 }
 
 const getUserId = (user: MessageUser | string | undefined) => {
@@ -50,6 +52,7 @@ export function InboxPanel({
   emptyTitle,
   emptyDescription,
   composerPlaceholder = "Write your message...",
+  onUnreadCountChange,
 }: InboxPanelProps) {
   const [query, setQuery] = useState("");
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
@@ -60,7 +63,19 @@ export function InboxPanel({
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [liveUnread, setLiveUnread] = useState(0);
   const threadEndRef = useRef<HTMLDivElement | null>(null);
+
+  const refreshUnreadCount = useCallback(async () => {
+    const unreadResponse = await get<{ unread: number }>("/messages/unread-count");
+    if (unreadResponse.success && unreadResponse.data) {
+      const unread = unreadResponse.data.unread || 0;
+      setLiveUnread(unread);
+      if (onUnreadCountChange) {
+        onUnreadCountChange(unread);
+      }
+    }
+  }, [onUnreadCountChange]);
 
   const selectedConversation = useMemo(
     () => conversations.find((item) => item.partner._id === selectedPartnerId) || null,
@@ -116,6 +131,12 @@ export function InboxPanel({
     const list = response.data || [];
     setConversations(list);
 
+    const unreadTotal = list.reduce((acc, item) => acc + (item.unreadCount || 0), 0);
+    setLiveUnread(unreadTotal);
+    if (onUnreadCountChange) {
+      onUnreadCountChange(unreadTotal);
+    }
+
     if (!list.length) {
       setSelectedPartnerId("");
       setMessages([]);
@@ -169,6 +190,37 @@ export function InboxPanel({
   }, [fetchConversations]);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    const socket = connectSocket(token);
+    if (!socket) return;
+
+    const onNewMessage = async () => {
+      await fetchConversations(selectedPartnerId || undefined);
+    };
+
+    const onUnread = (payload: { unread?: number }) => {
+      const unread = payload?.unread || 0;
+      setLiveUnread(unread);
+      if (onUnreadCountChange) {
+        onUnreadCountChange(unread);
+      }
+    };
+
+    socket.on("message:new", onNewMessage);
+    socket.on("message:unread", onUnread);
+
+    return () => {
+      const activeSocket = getSocket();
+      if (activeSocket) {
+        activeSocket.off("message:new", onNewMessage);
+        activeSocket.off("message:unread", onUnread);
+      }
+    };
+  }, [fetchConversations, onUnreadCountChange, refreshUnreadCount, selectedPartnerId]);
+
+  useEffect(() => {
     if (threadEndRef.current) {
       threadEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
@@ -178,7 +230,10 @@ export function InboxPanel({
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
       <Card className="lux-glass rounded-2xl p-4">
         <div className="mb-3">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Conversations</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Conversations</p>
+            {liveUnread > 0 ? <Badge variant="warning">{liveUnread} Unread</Badge> : null}
+          </div>
         </div>
 
         <div className="relative mb-4">
