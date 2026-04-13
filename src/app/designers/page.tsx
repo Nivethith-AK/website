@@ -53,8 +53,20 @@ export default function DesignersPage() {
   useEffect(() => {
     const fetchDesigners = async () => {
       setIsLoading(true);
-      const response = await get<Designer[]>("/designers?limit=24");
-      setDesigners(response.success && response.data ? response.data : []);
+      const [designersResponse, opportunitiesResponse] = await Promise.all([
+        get<Designer[]>("/designers?limit=24"),
+        get<any>("/designers/opportunities?limit=12"),
+      ]);
+
+      setDesigners(designersResponse.success && designersResponse.data ? designersResponse.data : []);
+
+      if (opportunitiesResponse.success) {
+        const list = Array.isArray(opportunitiesResponse.data)
+          ? opportunitiesResponse.data
+          : opportunitiesResponse.data?.data || [];
+        setOpportunities(list);
+      }
+
       setIsLoading(false);
     };
 
