@@ -78,6 +78,7 @@ export default function DesignerDashboardPage() {
   const [tab, setTab] = useState("profile");
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [inboxUnread, setInboxUnread] = useState(0);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -96,7 +97,11 @@ export default function DesignerDashboardPage() {
         return;
       }
 
-      const response = await get<DesignerProfile>("/designers/profile/me");
+      const [response, unreadResponse] = await Promise.all([
+        get<DesignerProfile>("/designers/profile/me"),
+        get<{ unread: number }>("/messages/unread-count"),
+      ]);
+
       if (response.success && response.data) {
         setProfile(response.data);
         setForm({
@@ -110,10 +115,29 @@ export default function DesignerDashboardPage() {
       } else {
         router.push("/login");
       }
+
+      if (unreadResponse.success && unreadResponse.data) {
+        setInboxUnread(unreadResponse.data.unread || 0);
+      }
+
       setIsLoading(false);
     };
 
     fetchProfile();
+
+    const interval = window.setInterval(async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return;
+      }
+
+      const unreadResponse = await get<{ unread: number }>("/messages/unread-count");
+      if (unreadResponse.success && unreadResponse.data) {
+        setInboxUnread(unreadResponse.data.unread || 0);
+      }
+    }, 10000);
+
+    return () => window.clearInterval(interval);
   }, [router]);
 
   const toggleSkill = (skill: string) => {
@@ -195,7 +219,14 @@ export default function DesignerDashboardPage() {
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="inbox">Inbox</TabsTrigger>
+            <TabsTrigger value="inbox" className="gap-1.5">
+              Inbox
+              {inboxUnread > 0 ? (
+                <span className="rounded-full border border-accent/35 bg-accent/15 px-1.5 py-0.5 text-[9px] leading-none text-accent">
+                  {inboxUnread > 99 ? "99+" : inboxUnread}
+                </span>
+              ) : null}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
