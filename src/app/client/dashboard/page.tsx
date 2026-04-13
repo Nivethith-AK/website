@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { get, post } from "@/lib/api";
+import { get, post, put } from "@/lib/api";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +45,18 @@ interface RequestItem {
   isPublic?: boolean;
 }
 
+interface CompanyProfile {
+  _id: string;
+  companyName: string;
+  industry: string;
+  contactPerson: string;
+  phone: string;
+  website?: string;
+  address: string;
+  description?: string;
+  companyImage?: string;
+}
+
 const durations = ["1 week", "2 weeks", "1 month", "2 months", "3 months", "6 months", "1 year", "Custom"];
 
 export default function ClientDashboardPage() {
@@ -53,6 +65,7 @@ export default function ClientDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [tab, setTab] = useState("list");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [formData, setFormData] = useState({
     projectTitle: "",
     description: "",
@@ -61,6 +74,18 @@ export default function ClientDashboardPage() {
     budget: "",
     isPublic: false,
   });
+  const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null);
+  const [profileForm, setProfileForm] = useState({
+    companyName: "",
+    industry: "",
+    contactPerson: "",
+    phone: "",
+    website: "",
+    address: "",
+    description: "",
+    companyImage: "",
+  });
+  const [profileMessage, setProfileMessage] = useState("");
 
   useEffect(() => {
     const loadRequests = async () => {
@@ -70,12 +95,31 @@ export default function ClientDashboardPage() {
         return;
       }
 
-      const response = await get<RequestItem[]>("/clients/requests");
-      if (response.success && response.data) {
-        setRequests(response.data);
+      const [requestResponse, profileResponse] = await Promise.all([
+        get<RequestItem[]>("/clients/requests"),
+        get<CompanyProfile>("/clients/profile"),
+      ]);
+
+      if (requestResponse.success && requestResponse.data) {
+        setRequests(requestResponse.data);
       } else {
         router.push("/login");
       }
+
+      if (profileResponse.success && profileResponse.data) {
+        setCompanyProfile(profileResponse.data);
+        setProfileForm({
+          companyName: profileResponse.data.companyName || "",
+          industry: profileResponse.data.industry || "",
+          contactPerson: profileResponse.data.contactPerson || "",
+          phone: profileResponse.data.phone || "",
+          website: profileResponse.data.website || "",
+          address: profileResponse.data.address || "",
+          description: profileResponse.data.description || "",
+          companyImage: profileResponse.data.companyImage || "",
+        });
+      }
+
       setIsLoading(false);
     };
 
@@ -122,6 +166,33 @@ export default function ClientDashboardPage() {
     }
 
     setIsSubmitting(false);
+  };
+
+  const saveCompanyProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingProfile(true);
+    setProfileMessage("");
+
+    const payload = {
+      companyName: profileForm.companyName.trim(),
+      industry: profileForm.industry.trim(),
+      contactPerson: profileForm.contactPerson.trim(),
+      phone: profileForm.phone.trim(),
+      website: profileForm.website.trim() || undefined,
+      address: profileForm.address.trim(),
+      description: profileForm.description.trim() || undefined,
+      companyImage: profileForm.companyImage.trim() || undefined,
+    };
+
+    const response = await put<CompanyProfile>("/clients/profile", payload);
+    if (response.success && response.data) {
+      setCompanyProfile(response.data);
+      setProfileMessage("Company profile updated. New public opportunities now show this information.");
+    } else {
+      setProfileMessage(response.message || "Unable to update profile.");
+    }
+
+    setIsSavingProfile(false);
   };
 
   if (isLoading) {
@@ -172,6 +243,7 @@ export default function ClientDashboardPage() {
           <TabsList>
             <TabsTrigger value="list">Request List</TabsTrigger>
             <TabsTrigger value="new">New Request</TabsTrigger>
+            <TabsTrigger value="company">Company Profile</TabsTrigger>
           </TabsList>
 
           <TabsContent value="list">
@@ -323,6 +395,123 @@ export default function ClientDashboardPage() {
                     <Button type="submit" variant="secondary" isLoading={isSubmitting}>
                       {isSubmitting ? "Submitting" : "Create Request"}
                     </Button>
+                  </FieldGroup>
+                </form>
+              </Card>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="company">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+              <Card className="lux-glass rounded-2xl p-6">
+                <div className="mb-5">
+                  <p className="text-2xl font-black uppercase tracking-tight">Company Profile</p>
+                  <p className="mt-1 text-sm text-white/60">
+                    Keep this information updated so designers can evaluate your opportunities faster.
+                  </p>
+                </div>
+
+                <form onSubmit={saveCompanyProfile}>
+                  <FieldGroup>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <Field>
+                        <FieldLabel htmlFor="companyName">Company Name</FieldLabel>
+                        <Input
+                          id="companyName"
+                          value={profileForm.companyName}
+                          onChange={(e) => setProfileForm((prev) => ({ ...prev, companyName: e.target.value }))}
+                          required
+                        />
+                      </Field>
+
+                      <Field>
+                        <FieldLabel htmlFor="industry">Industry</FieldLabel>
+                        <Input
+                          id="industry"
+                          value={profileForm.industry}
+                          onChange={(e) => setProfileForm((prev) => ({ ...prev, industry: e.target.value }))}
+                          required
+                        />
+                      </Field>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <Field>
+                        <FieldLabel htmlFor="contactPerson">Contact Person</FieldLabel>
+                        <Input
+                          id="contactPerson"
+                          value={profileForm.contactPerson}
+                          onChange={(e) => setProfileForm((prev) => ({ ...prev, contactPerson: e.target.value }))}
+                          required
+                        />
+                      </Field>
+
+                      <Field>
+                        <FieldLabel htmlFor="phone">Phone</FieldLabel>
+                        <Input
+                          id="phone"
+                          value={profileForm.phone}
+                          onChange={(e) => setProfileForm((prev) => ({ ...prev, phone: e.target.value }))}
+                          required
+                        />
+                      </Field>
+                    </div>
+
+                    <Field>
+                      <FieldLabel htmlFor="address">Address</FieldLabel>
+                      <Input
+                        id="address"
+                        value={profileForm.address}
+                        onChange={(e) => setProfileForm((prev) => ({ ...prev, address: e.target.value }))}
+                        required
+                      />
+                    </Field>
+
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <Field>
+                        <FieldLabel htmlFor="website">Website</FieldLabel>
+                        <Input
+                          id="website"
+                          value={profileForm.website}
+                          onChange={(e) => setProfileForm((prev) => ({ ...prev, website: e.target.value }))}
+                          placeholder="https://yourcompany.com"
+                        />
+                      </Field>
+
+                      <Field>
+                        <FieldLabel htmlFor="companyImage">Company Image URL</FieldLabel>
+                        <Input
+                          id="companyImage"
+                          value={profileForm.companyImage}
+                          onChange={(e) => setProfileForm((prev) => ({ ...prev, companyImage: e.target.value }))}
+                          placeholder="https://.../logo.jpg"
+                        />
+                      </Field>
+                    </div>
+
+                    <Field>
+                      <FieldLabel htmlFor="companyDescription">Description</FieldLabel>
+                      <Textarea
+                        id="companyDescription"
+                        value={profileForm.description}
+                        onChange={(e) => setProfileForm((prev) => ({ ...prev, description: e.target.value }))}
+                        placeholder="Tell designers about your brand vision, customer base, and style direction"
+                      />
+                      <FieldDescription>
+                        This description appears with your public opportunities on the Designers page.
+                      </FieldDescription>
+                    </Field>
+
+                    {profileMessage ? <p className="text-sm text-white/75">{profileMessage}</p> : null}
+
+                    <div className="flex flex-wrap gap-3">
+                      <Button type="submit" variant="secondary" isLoading={isSavingProfile}>
+                        {isSavingProfile ? "Saving" : "Save Company Profile"}
+                      </Button>
+                      <Badge variant="accent">
+                        {companyProfile?.companyName ? `Live: ${companyProfile.companyName}` : "Profile not loaded yet"}
+                      </Badge>
+                    </div>
                   </FieldGroup>
                 </form>
               </Card>
