@@ -1,15 +1,19 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
+import { isAllowedOrigin } from './config/origins.js';
 
 let io;
 
 export const initSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
-      origin:
-        process.env.NODE_ENV === 'production'
-          ? [process.env.FRONTEND_URL || 'https://yourdomain.com']
-          : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001'],
+      origin: (origin, callback) => {
+        if (isAllowedOrigin(origin)) {
+          return callback(null, true);
+        }
+
+        return callback(new Error(`Socket origin blocked: ${origin}`));
+      },
       credentials: true,
     },
   });
