@@ -131,13 +131,13 @@ export default function AdminDashboard() {
         <Card className="lux-glass rounded-2xl p-6">
           <p className="mb-4 text-[10px] font-black uppercase tracking-[0.26em] text-accent">Action Routing</p>
           <div className="space-y-3">
-              {[
-                { label: "Review Designers", href: "/admin/designers" },
-                { label: "Review Companies", href: "/admin/companies" },
-                { label: "Handle New Requests", href: "/admin/requests" },
-                { label: "Manage Projects", href: "/admin/projects" },
-                { label: "Private Messages", href: "/admin/messages" },
-              ].map((action) => (
+            {[
+              { label: "Review Designers", href: "/admin/designers" },
+              { label: "Review Companies", href: "/admin/companies" },
+              { label: "Handle New Requests", href: "/admin/requests" },
+              { label: "Manage Projects", href: "/admin/projects" },
+              { label: "Private Messages", href: "/admin/messages" },
+            ].map((action) => (
               <button
                 key={action.href}
                 onClick={() => router.push(action.href)}
@@ -167,6 +167,15 @@ export default function AdminDashboard() {
                 <TableCell>
                   <Badge variant={(stats?.pendingDesigners || 0) > 0 ? "warning" : "success"}>
                     {(stats?.pendingDesigners || 0) > 0 ? "Needs Review" : "Stable"}
+                  </Badge>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-semibold">Pending Companies</TableCell>
+                <TableCell>{stats?.pendingCompanies || 0}</TableCell>
+                <TableCell>
+                  <Badge variant={(stats?.pendingCompanies || 0) > 0 ? "warning" : "success"}>
+                    {(stats?.pendingCompanies || 0) > 0 ? "Needs Review" : "Stable"}
                   </Badge>
                 </TableCell>
               </TableRow>
