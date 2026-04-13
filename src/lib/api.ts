@@ -1,6 +1,17 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-export const getApiRootUrl = () => API_URL.replace(/\/api\/?$/, '');
+export const getApiBaseUrl = () => API_URL;
+
+export const getApiRootUrl = () => getApiBaseUrl().replace(/\/api\/?$/, '');
+
+export const resolveAssetUrl = (path?: string | null) => {
+  if (!path) return '';
+  if (/^(https?:)?\/\//i.test(path) || path.startsWith('data:') || path.startsWith('blob:')) {
+    return path;
+  }
+
+  return `${getApiRootUrl()}${path.startsWith('/') ? '' : '/'}${path}`;
+};
 
 export interface User {
   _id: string;
