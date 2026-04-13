@@ -399,13 +399,20 @@ export const getAllCompanies = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const { page = 1, limit = 20, role } = req.query;
+    const { page = 1, limit = 20, role, approval = 'all' } = req.query;
     const parsedPage = Number(page) || 1;
     const parsedLimit = Number(limit) || 20;
     const skip = (parsedPage - 1) * parsedLimit;
 
     const filter = {};
     if (role) filter.role = role;
+    if (approval === 'pending') {
+      filter.isApproved = false;
+      filter.isVerified = true;
+      filter.role = 'company';
+    } else if (approval === 'approved') {
+      filter.isApproved = true;
+    }
 
     const users = await User.find(filter)
       .select('-password')
