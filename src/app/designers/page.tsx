@@ -75,7 +75,7 @@ const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function DesignersPage() {
   const [designers, setDesigners] = useState<Designer[]>([]);
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [requestBoard, setRequestBoard] = useState<Opportunity[]>([]);
   const [jobs, setJobs] = useState<JobVacancy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -88,18 +88,18 @@ export default function DesignersPage() {
   useEffect(() => {
     const fetchDesigners = async () => {
       setIsLoading(true);
-      const [designersResponse, opportunitiesResponse] = await Promise.all([
+      const [designersResponse, requestBoardResponse] = await Promise.all([
         get<Designer[]>("/designers?limit=24"),
         get<any>("/designers/requests-board?limit=12"),
       ]);
 
       setDesigners(designersResponse.success && designersResponse.data ? designersResponse.data : []);
 
-      if (opportunitiesResponse.success) {
-        const list = Array.isArray(opportunitiesResponse.data)
-          ? opportunitiesResponse.data
-          : opportunitiesResponse.data?.data || [];
-        setOpportunities(list);
+      if (requestBoardResponse.success) {
+        const list = Array.isArray(requestBoardResponse.data)
+          ? requestBoardResponse.data
+          : requestBoardResponse.data?.data || [];
+        setRequestBoard(list);
       }
 
       const jobsResponse = await get<JobVacancy[]>("/jobs/public");
@@ -243,11 +243,11 @@ export default function DesignersPage() {
           </div>
         ) : (
           <>
-            {opportunities.length > 0 && (
+            {requestBoard.length > 0 && (
               <div className="mb-10">
                 <h2 className="mb-4 text-2xl font-black uppercase tracking-tight">Client Request Board</h2>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {opportunities.map((job) => {
+                  {requestBoard.map((job) => {
                     const summary = (job.projectDescription || job.description || "").trim();
                     const companyName = job.companyId?.companyName || job.company?.companyName || "Fashion Company";
                     const budgetText = typeof job.budget === "number" ? `$${job.budget.toLocaleString()}` : "Budget on request";
@@ -394,7 +394,7 @@ export default function DesignersPage() {
                   </div>
                 </Card>
               ) : (
-                <p className="text-sm text-amber-200">Company details are unavailable for this opportunity.</p>
+                <p className="text-sm text-amber-200">Company details are unavailable for this request.</p>
               )}
 
               <div>
