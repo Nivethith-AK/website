@@ -365,7 +365,22 @@ export function InboxPanel({
                             : "border border-white/12 bg-white/[0.04] text-white/85"
                         }`}
                       >
-                        <p>{item.message}</p>
+                        {item.message ? <p>{item.message}</p> : null}
+                        {item.attachments && item.attachments.length > 0 ? (
+                          <div className="mt-2 space-y-1">
+                            {item.attachments.map((file, idx) => (
+                              <a
+                                key={`${item._id}-att-${idx}`}
+                                href={file.fileUrl.startsWith("http") ? file.fileUrl : `http://localhost:5000${file.fileUrl}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="block text-xs text-accent underline"
+                              >
+                                {file.originalName}
+                              </a>
+                            ))}
+                          </div>
+                        ) : null}
                         <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-white/45">
                           {new Date(item.createdAt).toLocaleTimeString()}
                         </p>
@@ -383,6 +398,12 @@ export function InboxPanel({
             </div>
 
             <div className="mt-4 space-y-3">
+              <Input
+                type="file"
+                multiple
+                accept="image/*,.pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx"
+                onChange={(e) => setAttachmentFiles(Array.from(e.target.files || []))}
+              />
               <Textarea
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
@@ -391,7 +412,12 @@ export function InboxPanel({
               />
               {feedback ? <p className="text-sm text-white/70">{feedback}</p> : null}
               <div className="flex gap-2">
-                <Button variant="secondary" onClick={onSend} isLoading={isSending} disabled={!draft.trim() || isSending}>
+                <Button
+                  variant="secondary"
+                  onClick={onSend}
+                  isLoading={isSending}
+                  disabled={(!draft.trim() && attachmentFiles.length === 0) || isSending}
+                >
                   Send Message
                 </Button>
                 <Button variant="outline" onClick={() => fetchConversations(selectedPartnerId)}>
