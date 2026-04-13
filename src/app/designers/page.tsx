@@ -20,6 +20,43 @@ interface Designer {
   skills: string[];
   profileImage?: string;
   availability?: "Available" | "Busy";
+  bio?: string;
+  portfolio?: Array<{
+    image?: string;
+    title?: string;
+    description?: string;
+  }>;
+  experiences?: Array<{
+    company?: string;
+    role?: string;
+    startDate?: string;
+    endDate?: string;
+    description?: string;
+  }>;
+  fashionProjects?: Array<{
+    title?: string;
+    client?: string;
+    year?: string;
+    role?: string;
+    description?: string;
+    link?: string;
+  }>;
+  assignedProjects?: Array<{
+    _id: string;
+    projectTitle: string;
+    status: string;
+    company?: {
+      companyName?: string;
+    };
+  }>;
+  completedProjects?: Array<{
+    _id: string;
+    projectTitle: string;
+    status: string;
+    company?: {
+      companyName?: string;
+    };
+  }>;
 }
 
 interface Opportunity {
@@ -70,6 +107,7 @@ export default function DesignersPage() {
   const [query, setQuery] = useState("");
   const [selectedExperience, setSelectedExperience] = useState<string>("");
   const [activeOpportunity, setActiveOpportunity] = useState<Opportunity | null>(null);
+  const [activeDesigner, setActiveDesigner] = useState<Designer | null>(null);
   const [message, setMessage] = useState("");
   const [actionMessage, setActionMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -128,6 +166,13 @@ export default function DesignersPage() {
     setActiveOpportunity(job);
     setMessage(`Hi ${job.company?.contactPerson || "team"}, I am interested in ${job.projectTitle}.`);
     setActionMessage("");
+  };
+
+  const openDesignerDialog = async (designerId: string) => {
+    const response = await get<Designer>(`/designers/${designerId}`);
+    if (response.success && response.data) {
+      setActiveDesigner(response.data);
+    }
   };
 
   const sendMessage = async () => {
@@ -282,6 +327,12 @@ export default function DesignersPage() {
                           </span>
                         ))}
                       </div>
+
+                      <div className="mt-4">
+                        <Button size="sm" variant="outline" onClick={() => openDesignerDialog(designer._id)}>
+                          View Portfolio
+                        </Button>
+                      </div>
                     </Card>
                   </motion.div>
                 ))}
@@ -381,6 +432,132 @@ export default function DesignersPage() {
                 </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={Boolean(activeDesigner)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setActiveDesigner(null);
+            }
+          }}
+        >
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>
+                {activeDesigner?.firstName} {activeDesigner?.lastName}
+              </DialogTitle>
+              <DialogDescription>
+                Portfolio, current work, completed work, and fashion experience.
+              </DialogDescription>
+            </DialogHeader>
+
+            {!activeDesigner ? null : (
+              <div className="space-y-6">
+                <div>
+                  <p className="text-sm text-white/70">{activeDesigner.bio || "No bio available."}</p>
+                </div>
+
+                <div>
+                  <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-accent">Portfolio</p>
+                  {activeDesigner.portfolio && activeDesigner.portfolio.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                      {activeDesigner.portfolio.map((item, idx) => (
+                        <Card key={`portfolio-${idx}`} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                          <div className="mb-2 h-32 overflow-hidden rounded-lg border border-white/10 bg-black/20">
+                            {item.image ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={item.image.startsWith("http") ? item.image : `http://localhost:5000${item.image}`}
+                                alt={item.title || "portfolio item"}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : null}
+                          </div>
+                          <p className="text-sm font-semibold uppercase">{item.title || "Untitled"}</p>
+                          <p className="text-xs text-white/60">{item.description || "No description"}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-white/60">No portfolio items yet.</p>
+                  )}
+                </div>
+
+                <div>
+                  <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-accent">Current Projects</p>
+                  {activeDesigner.assignedProjects && activeDesigner.assignedProjects.length > 0 ? (
+                    <div className="space-y-2">
+                      {activeDesigner.assignedProjects.map((project) => (
+                        <Card key={project._id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                          <p className="font-semibold uppercase">{project.projectTitle}</p>
+                          <p className="text-xs text-white/60">{project.status} • {project.company?.companyName || "Company"}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-white/60">No current projects listed.</p>
+                  )}
+                </div>
+
+                <div>
+                  <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-accent">Completed Projects</p>
+                  {activeDesigner.completedProjects && activeDesigner.completedProjects.length > 0 ? (
+                    <div className="space-y-2">
+                      {activeDesigner.completedProjects.map((project) => (
+                        <Card key={project._id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                          <p className="font-semibold uppercase">{project.projectTitle}</p>
+                          <p className="text-xs text-white/60">{project.status} • {project.company?.companyName || "Company"}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-white/60">No completed projects listed.</p>
+                  )}
+                </div>
+
+                <div>
+                  <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-accent">Experience</p>
+                  {activeDesigner.experiences && activeDesigner.experiences.length > 0 ? (
+                    <div className="space-y-2">
+                      {activeDesigner.experiences.map((exp, idx) => (
+                        <Card key={`exp-${idx}`} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                          <p className="font-semibold uppercase">{exp.role || "Role"} • {exp.company || "Company"}</p>
+                          <p className="text-xs text-white/60">{exp.startDate || "Start"} - {exp.endDate || "Present"}</p>
+                          <p className="text-xs text-white/60">{exp.description || "No details"}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-white/60">No experience entries listed.</p>
+                  )}
+                </div>
+
+                <div>
+                  <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-accent">Fashion Projects</p>
+                  {activeDesigner.fashionProjects && activeDesigner.fashionProjects.length > 0 ? (
+                    <div className="space-y-2">
+                      {activeDesigner.fashionProjects.map((project, idx) => (
+                        <Card key={`fashion-${idx}`} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                          <p className="font-semibold uppercase">{project.title || "Project"}</p>
+                          <p className="text-xs text-white/60">{project.client || "Client"} • {project.year || "Year"}</p>
+                          <p className="text-xs text-white/60">{project.role || "Role"}</p>
+                          <p className="text-xs text-white/60">{project.description || "No details"}</p>
+                          {project.link ? (
+                            <a href={project.link} target="_blank" rel="noreferrer" className="text-xs text-accent underline">
+                              View Link
+                            </a>
+                          ) : null}
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-white/60">No fashion projects listed.</p>
+                  )}
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </section>
