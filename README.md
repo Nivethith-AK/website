@@ -234,6 +234,25 @@ Update only:
 
 The app is already wired to read these values from env, so domain changes won't require code edits.
 
+### Copy-Paste Production Setup
+Use `.env.production.example` as your source of truth.
+
+Frontend on Vercel:
+- `NEXT_PUBLIC_API_URL` -> backend URL + `/api`
+- `NEXTAUTH_URL` -> your public frontend URL
+- `NEXTAUTH_SECRET` -> strong random secret
+- `FRONTEND_URL` -> your public frontend URL
+
+Backend on Render/Railway:
+- `MONGODB_URI` -> MongoDB Atlas connection string
+- `JWT_SECRET` -> same strong secret
+- `FRONTEND_URL` -> your public frontend URL
+- `SMTP_USER` -> Gmail address
+- `SMTP_PASS` -> Gmail app password
+- `SMTP_FROM` -> Gmail address
+- `PORT` -> `5000`
+- `NODE_ENV` -> `production`
+
 ---
 
 ## 🎨 Design System
