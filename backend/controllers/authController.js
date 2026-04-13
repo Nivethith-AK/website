@@ -44,7 +44,7 @@ const notifyVerification = async (email, token) => {
 
 const maybeHandleDevTestLogin = (email, password, res) => {
   const isDev = process.env.NODE_ENV !== 'production';
-  const testEmail = process.env.DEV_TEST_EMAIL || 'test@gmail.com';
+  const testEmail = process.env.DEV_TEST_EMAIL || 'backup-dev-login@gmail.com';
   const testPassword = process.env.DEV_TEST_PASSWORD || '123456';
 
   if (!isDev) return false;
@@ -275,7 +275,7 @@ export const loginUser = async (req, res) => {
 
       return res.status(503).json({
         success: false,
-        message: 'Database unavailable. Try test@gmail.com in local development.',
+        message: 'Database unavailable. Try configured DEV_TEST_EMAIL in local development.',
       });
     }
 
