@@ -18,6 +18,14 @@ const messageSchema = new mongoose.Schema(
       trim: true,
       maxlength: 3000,
     },
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
+    readAt: {
+      type: Date,
+      default: null,
+    },
     createdAt: {
       type: Date,
       default: Date.now,
@@ -27,6 +35,7 @@ const messageSchema = new mongoose.Schema(
 );
 
 messageSchema.index({ senderId: 1, receiverId: 1, createdAt: -1 });
+messageSchema.index({ receiverId: 1, isRead: 1, createdAt: -1 });
 
 const Message = mongoose.model('Message', messageSchema);
 
