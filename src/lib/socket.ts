@@ -8,6 +8,10 @@ let socket: Socket | null = null;
 export const connectSocket = (token: string) => {
   if (!token) return null;
 
+  if (!process.env.NEXT_PUBLIC_API_URL) {
+    return null;
+  }
+
   if (socket && socket.connected) {
     return socket;
   }
@@ -16,7 +20,12 @@ export const connectSocket = (token: string) => {
     socket.disconnect();
   }
 
-  socket = io(getApiRootUrl(), {
+  const root = getApiRootUrl();
+  if (!root) {
+    return null;
+  }
+
+  socket = io(root, {
     transports: ["websocket"],
     auth: { token },
   });
