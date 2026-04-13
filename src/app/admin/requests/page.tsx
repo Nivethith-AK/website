@@ -59,7 +59,11 @@ export default function AdminRequestsPage() {
   };
 
   useEffect(() => {
-    fetchRequests();
+    const timer = window.setTimeout(() => {
+      void fetchRequests();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   const filtered = useMemo(() => {
