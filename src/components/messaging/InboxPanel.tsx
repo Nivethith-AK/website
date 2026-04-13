@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Search } from "lucide-react";
-import { get, post } from "@/lib/api";
+import { get, post, resolveAssetUrl } from "@/lib/api";
 import { connectSocket, getSocket } from "@/lib/socket";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/ui/button";
@@ -179,7 +179,7 @@ export function InboxPanel({
       formData.append("message", draft.trim());
       attachmentFiles.forEach((file) => formData.append("attachments", file));
 
-      response = await fetch("http://localhost:5000/api/messages", {
+      response = await fetch(`${resolveAssetUrl('/api/messages')}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
@@ -371,7 +371,7 @@ export function InboxPanel({
                             {item.attachments.map((file, idx) => (
                               <a
                                 key={`${item._id}-att-${idx}`}
-                                href={file.fileUrl.startsWith("http") ? file.fileUrl : `http://localhost:5000${file.fileUrl}`}
+                                href={resolveAssetUrl(file.fileUrl)}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="block text-xs text-accent underline"
