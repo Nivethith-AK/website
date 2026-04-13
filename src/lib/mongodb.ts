@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/fashion-agency";
+const MONGODB_URI =
+  process.env.MONGODB_URI ||
+  (process.env.NODE_ENV === "production"
+    ? (() => {
+        throw new Error("MONGODB_URI is required in production");
+      })()
+    : "mongodb://127.0.0.1:27017/fashion-agency");
 
 let cached = (global as any).mongoose;
 
