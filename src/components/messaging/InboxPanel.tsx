@@ -150,7 +150,7 @@ export function InboxPanel({
     setSelectedPartnerId(nextPartnerId);
     await fetchMessages(nextPartnerId);
     setIsLoadingConversations(false);
-  }, [fetchMessages]);
+  }, [fetchMessages, onUnreadCountChange]);
 
   const onSelectConversation = useCallback(async (partnerId: string) => {
     if (!partnerId || partnerId === selectedPartnerId) return;

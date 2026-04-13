@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { get, patch } from "@/lib/api";
 import { AdminShell } from "@/components/admin/AdminShell";
@@ -34,17 +34,21 @@ export default function AdminCompaniesPage() {
   const [query, setQuery] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
 
-  const fetchCompanies = async () => {
+  const fetchCompanies = useCallback(async () => {
     const response = await get<any>("/admin/users?role=company&limit=300");
     if (response.success) {
       const list = Array.isArray(response.data) ? response.data : response.data?.data || [];
       setCompanies(list);
     }
-  };
+  }, []);
 
-  if (companies.length === 0) {
-    void fetchCompanies();
-  }
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void fetchCompanies();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [fetchCompanies]);
 
   const filtered = useMemo(() => {
     const normalized = query.toLowerCase();
