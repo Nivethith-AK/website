@@ -14,6 +14,7 @@ import {
   getAllUsers,
   approveUser,
   deleteUser,
+  purgeUserByEmail,
   getUserOverview,
 } from '../controllers/adminController.js';
 import { protect, authorize } from '../middleware/auth.js';
@@ -49,5 +50,6 @@ router.get('/users', getAllUsers);
 router.get('/users/:userId/overview', getUserOverview);
 router.patch('/approve-user', approveUser);
 router.delete('/delete-user', deleteUser);
+router.post('/users/purge-by-email', purgeUserByEmail);
 
 export default router;

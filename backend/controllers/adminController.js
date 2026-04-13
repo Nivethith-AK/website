@@ -535,6 +535,70 @@ export const deleteUser = async (req, res) => {
   }
 };
 
+export const purgeUserByEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid email is required',
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail }).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found for this email',
+      });
+    }
+
+    if (user.role === 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Admin accounts cannot be purged with this action',
+      });
+    }
+
+    await Message.deleteMany({
+      $or: [{ senderId: user._id }, { receiverId: user._id }],
+    });
+
+    if (user.role === 'company') {
+      await ClientRequest.deleteMany({ company: user._id });
+      await Project.deleteMany({ company: user._id });
+    }
+
+    if (user.role === 'designer') {
+      await ClientRequest.updateMany(
+        { assignedDesigners: user._id },
+        { $pull: { assignedDesigners: user._id } }
+      );
+
+      await Project.updateMany(
+        { 'designers.designer': user._id },
+        { $pull: { designers: { designer: user._id } } }
+      );
+    }
+
+    await User.deleteOne({ _id: user._id });
+
+    return res.status(200).json({
+      success: true,
+      message: `User ${normalizedEmail} purged successfully`,
+      data: user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export const getUserOverview = async (req, res) => {
   try {
     const { userId } = req.params;
