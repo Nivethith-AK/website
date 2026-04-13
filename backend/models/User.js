@@ -45,6 +45,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    rejectionReason: {
+      type: String,
+      default: '',
+      maxlength: 1000,
+    },
     about: {
       type: String,
       default: '',
