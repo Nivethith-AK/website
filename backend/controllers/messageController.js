@@ -93,6 +93,20 @@ export const getMessagesByUser = async (req, res) => {
     const { limit = 200 } = req.query;
     const parsedLimit = Math.min(Number(limit) || 200, 500);
 
+    await Message.updateMany(
+      {
+        senderId: userId,
+        receiverId: me,
+        isRead: false,
+      },
+      {
+        $set: {
+          isRead: true,
+          readAt: new Date(),
+        },
+      }
+    );
+
     const messages = await Message.find({
       $or: [
         { senderId: me, receiverId: userId },
@@ -147,6 +161,12 @@ export const getConversations = async (req, res) => {
       const partnerId = partner._id.toString();
 
       if (!conversations.has(partnerId)) {
+        const unreadCount = await Message.countDocuments({
+          senderId: partner._id,
+          receiverId: me,
+          isRead: false,
+        });
+
         conversations.set(partnerId, {
           partner: {
             _id: partner._id,
@@ -157,6 +177,7 @@ export const getConversations = async (req, res) => {
           lastMessage: item.message,
           lastMessageAt: item.createdAt,
           isFromMe,
+          unreadCount,
         });
       }
     }
@@ -165,6 +186,29 @@ export const getConversations = async (req, res) => {
       success: true,
       data: Array.from(conversations.values()),
       count: conversations.size,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getUnreadCount = async (req, res) => {
+  try {
+    const me = req.user.id;
+
+    const totalUnread = await Message.countDocuments({
+      receiverId: me,
+      isRead: false,
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        unread: totalUnread,
+      },
     });
   } catch (error) {
     return res.status(500).json({
