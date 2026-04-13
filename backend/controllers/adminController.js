@@ -533,3 +533,101 @@ export const deleteUser = async (req, res) => {
     });
   }
 };
+
+export const getUserOverview = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId).select('-password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    let requests = [];
+    let projects = [];
+
+    if (user.role === 'company') {
+      requests = await ClientRequest.find({ company: userId })
+        .populate('assignedDesigners', 'firstName lastName email')
+        .sort({ createdAt: -1 })
+        .limit(50);
+
+      projects = await Project.find({ company: userId })
+        .populate('designers.designer', 'firstName lastName email')
+        .sort({ createdAt: -1 })
+        .limit(50);
+    }
+
+    if (user.role === 'designer') {
+      projects = await Project.find({ 'designers.designer': userId })
+        .populate('company', 'companyName email')
+        .sort({ createdAt: -1 })
+        .limit(50);
+    }
+
+    const sentMessages = await User.aggregate([
+      { $match: { _id: user._id } },
+      {
+        $lookup: {
+          from: 'messages',
+          localField: '_id',
+          foreignField: 'senderId',
+          as: 'sent',
+        },
+      },
+      {
+        $project: {
+          sentCount: { $size: '$sent' },
+        },
+      },
+    ]);
+
+    const receivedMessages = await User.aggregate([
+      { $match: { _id: user._id } },
+      {
+        $lookup: {
+          from: 'messages',
+          localField: '_id',
+          foreignField: 'receiverId',
+          as: 'received',
+        },
+      },
+      {
+        $project: {
+          receivedCount: { $size: '$received' },
+        },
+      },
+    ]);
+
+    const latestMessages = await (await import('../models/Message.js')).default
+      .find({
+        $or: [{ senderId: userId }, { receiverId: userId }],
+      })
+      .populate('senderId', 'name email role')
+      .populate('receiverId', 'name email role')
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        user,
+        requests,
+        projects,
+        messages: latestMessages,
+        metrics: {
+          sentCount: sentMessages[0]?.sentCount || 0,
+          receivedCount: receivedMessages[0]?.receivedCount || 0,
+        },
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
