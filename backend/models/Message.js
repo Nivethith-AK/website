@@ -10,7 +10,13 @@ const messageSchema = new mongoose.Schema(
     receiverId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      required: false,
+      default: null,
+    },
+    projectId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
+      default: null,
     },
     message: {
       type: String,
@@ -36,6 +42,7 @@ const messageSchema = new mongoose.Schema(
 
 messageSchema.index({ senderId: 1, receiverId: 1, createdAt: -1 });
 messageSchema.index({ receiverId: 1, isRead: 1, createdAt: -1 });
+messageSchema.index({ projectId: 1, createdAt: 1 });
 
 const Message = mongoose.model('Message', messageSchema);
 
