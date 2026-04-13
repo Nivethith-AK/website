@@ -134,11 +134,24 @@ export default function DesignerDashboardPage() {
           availability: response.data.availability || "Available",
           experiences:
             response.data.experiences && response.data.experiences.length > 0
-              ? response.data.experiences
+              ? response.data.experiences.map((exp) => ({
+                  company: exp.company || "",
+                  role: exp.role || "",
+                  startDate: exp.startDate || "",
+                  endDate: exp.endDate || "",
+                  description: exp.description || "",
+                }))
               : [{ company: "", role: "", startDate: "", endDate: "", description: "" }],
           fashionProjects:
             response.data.fashionProjects && response.data.fashionProjects.length > 0
-              ? response.data.fashionProjects
+              ? response.data.fashionProjects.map((project) => ({
+                  title: project.title || "",
+                  client: project.client || "",
+                  year: project.year || "",
+                  role: project.role || "",
+                  description: project.description || "",
+                  link: project.link || "",
+                }))
               : [{ title: "", client: "", year: "", role: "", description: "", link: "" }],
         });
       } else {
