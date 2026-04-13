@@ -43,3 +43,44 @@ export const getAuthContext = async (req: NextRequest) => {
 
   return { token, user, profile: profile ?? null };
 };
+
+export const requireAuth = async (req: NextRequest, roles?: Array<"admin" | "designer" | "company">) => {
+  const ctx = await getAuthContext(req);
+
+  if (!ctx.user || !ctx.profile) {
+    throw new Error("Unauthorized");
+  }
+
+  if (roles && !roles.includes(ctx.profile.role)) {
+    throw new Error("Forbidden");
+  }
+
+  return ctx;
+};
+
+export const mapProfileUser = (row: any) => ({
+  _id: row.id,
+  id: row.id,
+  name: `${row.first_name || ""} ${row.last_name || ""}`.trim() || row.company_name || row.email,
+  email: row.email,
+  role: row.role,
+  isApproved: !!row.is_approved,
+  isVerified: true,
+  firstName: row.first_name || "",
+  lastName: row.last_name || "",
+  companyName: row.company_name || "",
+  contactPerson: row.contact_person || "",
+  industry: row.industry || "",
+  phone: row.phone || "",
+  address: row.address || "",
+  bio: row.bio || "",
+  experienceLevel: row.experience_level || "Student",
+  availability: row.availability || "Available",
+  skills: Array.isArray(row.skills) ? row.skills : [],
+  profileImage: row.profile_image || "",
+  cvFile: row.cv_file || "",
+  portfolio: Array.isArray(row.portfolio_items) ? row.portfolio_items : [],
+  experiences: Array.isArray(row.experience_entries) ? row.experience_entries : [],
+  fashionProjects: Array.isArray(row.fashion_projects) ? row.fashion_projects : [],
+  rejectionReason: row.rejection_reason || "",
+});
