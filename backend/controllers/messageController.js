@@ -2,9 +2,9 @@ import Message from '../models/Message.js';
 import User from '../models/User.js';
 import { getIO } from '../socket.js';
 
-const MAX_MESSAGES_PER_MINUTE = 8;
+const MAX_MESSAGES_PER_MINUTE = 40;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const DUPLICATE_COOLDOWN_MS = 45 * 1000;
+const DUPLICATE_COOLDOWN_MS = 10 * 1000;
 const MAX_ATTACHMENTS_PER_MESSAGE = 5;
 
 const allowedAttachmentMimeTypes = new Set([
@@ -86,19 +86,22 @@ export const sendMessage = async (req, res) => {
       });
     }
 
-    const duplicateWindowStart = new Date(Date.now() - DUPLICATE_COOLDOWN_MS);
-    const duplicateMessage = await Message.findOne({
-      senderId,
-      receiverId,
-      message: trimmedMessage,
-      createdAt: { $gte: duplicateWindowStart },
-    }).select('_id');
+    if (trimmedMessage && attachments.length === 0) {
+      const duplicateWindowStart = new Date(Date.now() - DUPLICATE_COOLDOWN_MS);
+      const duplicateMessage = await Message.findOne({
+        senderId,
+        receiverId,
+        projectId: null,
+        message: trimmedMessage,
+        createdAt: { $gte: duplicateWindowStart },
+      }).select('_id');
 
-    if (duplicateMessage) {
-      return res.status(429).json({
-        success: false,
-        message: 'Duplicate message detected. Please edit your message or wait a few seconds.',
-      });
+      if (duplicateMessage) {
+        return res.status(429).json({
+          success: false,
+          message: 'Duplicate message detected. Please edit your message or wait a few seconds.',
+        });
+      }
     }
 
     const receiver = await User.findById(receiverId).select('_id role');
@@ -112,6 +115,7 @@ export const sendMessage = async (req, res) => {
     const newMessage = await Message.create({
       senderId,
       receiverId,
+      projectId: null,
       message: trimmedMessage,
       attachments,
     });
@@ -192,8 +196,8 @@ export const getMessagesByUser = async (req, res) => {
 
     const messages = await Message.find({
       $or: [
-        { senderId: me, receiverId: userId },
-        { senderId: userId, receiverId: me },
+        { senderId: me, receiverId: userId, projectId: null },
+        { senderId: userId, receiverId: me, projectId: null },
       ],
     })
       .populate('senderId', 'name email role')
@@ -234,6 +238,7 @@ export const getConversations = async (req, res) => {
     }
 
     const messages = await Message.find({
+      projectId: null,
       $or: [{ senderId: me }, { receiverId: me }],
     })
       .populate('senderId', 'name email role')
@@ -350,6 +355,7 @@ export const adminSendPrivateMessage = async (req, res) => {
     const created = await Message.create({
       senderId,
       receiverId,
+      projectId: null,
       message: trimmedMessage,
       attachments,
     });
