@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { get, put, upload } from "@/lib/api";
+import { get, put, upload, resolveAssetUrl } from "@/lib/api";
 import { connectSocket, getSocket } from "@/lib/socket";
 import { Card } from "@/components/Card";
 import { InboxPanel } from "@/components/messaging/InboxPanel";
@@ -544,7 +544,7 @@ export default function DesignerDashboardPage() {
                           {profile.profileImage ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
-                              src={profile.profileImage.startsWith("http") ? profile.profileImage : `http://localhost:5000${profile.profileImage}`}
+                              src={resolveAssetUrl(profile.profileImage)}
                               alt={`${profile.firstName} ${profile.lastName}`}
                               className="h-full w-full object-cover"
                             />
@@ -606,7 +606,7 @@ export default function DesignerDashboardPage() {
                   />
                   {profile.cvFile ? (
                     <a
-                      href={profile.cvFile.startsWith("http") ? profile.cvFile : `http://localhost:5000${profile.cvFile}`}
+                      href={resolveAssetUrl(profile.cvFile)}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent"
@@ -627,7 +627,7 @@ export default function DesignerDashboardPage() {
                       <div className="mb-3 h-40 overflow-hidden rounded-lg border border-white/10 bg-white/5">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={item.image.startsWith("http") ? item.image : `http://localhost:5000${item.image}`}
+                            src={resolveAssetUrl(item.image)}
                           alt={item.title}
                           className="h-full w-full object-cover"
                         />
