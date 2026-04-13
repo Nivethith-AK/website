@@ -2,13 +2,11 @@ import express from 'express';
 import {
   createClientRequest,
   getCompanyRequests,
-  updateClientRequest,
-  deleteClientRequest,
   getCompanyProfile,
   updateCompanyProfile,
   uploadCompanyPortfolioItem,
 } from '../controllers/clientController.js';
-import { protect, authorize } from '../middleware/auth.js';
+import { protect, authorize, requireApproved } from '../middleware/auth.js';
 import multer from 'multer';
 
 const router = express.Router();
@@ -26,10 +24,9 @@ const upload = multer({ storage });
 router.use(protect, authorize('company'));
 
 // Request management
+router.use('/requests', requireApproved);
 router.post('/requests', createClientRequest);
 router.get('/requests', getCompanyRequests);
-router.put('/requests/:id', updateClientRequest);
-router.delete('/requests/:id', deleteClientRequest);
 
 // Company profile
 router.get('/profile', getCompanyProfile);
