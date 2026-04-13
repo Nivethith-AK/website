@@ -33,6 +33,11 @@ interface ChatMessage {
   createdAt: string;
   isRead?: boolean;
   readAt?: string | null;
+  attachments?: Array<{
+    fileUrl: string;
+    originalName: string;
+    mimeType: string;
+  }>;
 }
 
 interface InboxPanelProps {
@@ -59,6 +64,7 @@ export function InboxPanel({
   const [selectedPartnerId, setSelectedPartnerId] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
+  const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
   const [feedback, setFeedback] = useState("");
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
@@ -160,18 +166,36 @@ export function InboxPanel({
   }, [fetchMessages, selectedPartnerId]);
 
   const onSend = useCallback(async () => {
-    if (!selectedPartnerId || !draft.trim()) return;
+    if (!selectedPartnerId || (!draft.trim() && attachmentFiles.length === 0)) return;
 
     setIsSending(true);
     setFeedback("");
 
-    const response = await post<ChatMessage>("/messages", {
-      receiverId: selectedPartnerId,
-      message: draft.trim(),
-    });
+    let response;
+
+    if (attachmentFiles.length > 0) {
+      const formData = new FormData();
+      formData.append("receiverId", selectedPartnerId);
+      formData.append("message", draft.trim());
+      attachmentFiles.forEach((file) => formData.append("attachments", file));
+
+      response = await fetch("http://localhost:5000/api/messages", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+        },
+        body: formData,
+      }).then((r) => r.json());
+    } else {
+      response = await post<ChatMessage>("/messages", {
+        receiverId: selectedPartnerId,
+        message: draft.trim(),
+      });
+    }
 
     if (response.success && response.data) {
       setDraft("");
+      setAttachmentFiles([]);
       setMessages((prev) => [...prev, response.data as ChatMessage]);
       await fetchConversations(selectedPartnerId);
     } else {
@@ -179,7 +203,7 @@ export function InboxPanel({
     }
 
     setIsSending(false);
-  }, [draft, fetchConversations, selectedPartnerId]);
+  }, [attachmentFiles.length, draft, fetchConversations, selectedPartnerId]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
