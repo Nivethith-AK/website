@@ -1,5 +1,7 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+export const getApiRootUrl = () => API_URL.replace(/\/api\/?$/, '');
+
 export interface User {
   _id: string;
   email: string;
@@ -22,11 +24,15 @@ export const apiCall = async <T = any>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> => {
   const url = `${API_URL}${endpoint}`;
-  
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
+
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   // Get token from localStorage
   if (typeof window !== 'undefined') {
@@ -74,3 +80,9 @@ export const put = <T = any>(endpoint: string, data: any) =>
 
 export const del = <T = any>(endpoint: string) =>
   apiCall<T>(endpoint, { method: 'DELETE' });
+
+export const upload = <T = any>(endpoint: string, formData: FormData) =>
+  apiCall<T>(endpoint, {
+    method: 'POST',
+    body: formData,
+  });
