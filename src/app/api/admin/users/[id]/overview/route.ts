@@ -37,7 +37,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       createdAt: row.created_at,
     }));
 
-    const projects = (projRows.data || []).map((row) => ({
+    const projectRows = projRows.data || [];
+
+    const projects = projectRows.map((row) => ({
       _id: row.id,
       projectTitle: row.project_title,
       status: row.status,
