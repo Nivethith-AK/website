@@ -33,15 +33,28 @@ interface Designer {
 
 export default function AdminDesignersPage() {
   const [designers, setDesigners] = useState<Designer[]>([]);
+  const [allDesigners, setAllDesigners] = useState<Designer[]>([]);
   const [query, setQuery] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isOverviewOpen, setIsOverviewOpen] = useState(false);
+  const [tab, setTab] = useState<"pending" | "all">("pending");
 
   useEffect(() => {
     const fetchDesigners = async () => {
-      const response = await get<Designer[]>("/admin/designers/pending");
-      if (response.success && response.data) setDesigners(response.data);
+      const [pendingResponse, allResponse] = await Promise.all([
+        get<Designer[]>("/admin/designers/pending"),
+        get<any>("/admin/users?role=designer&limit=400"),
+      ]);
+
+      if (pendingResponse.success && pendingResponse.data) {
+        setDesigners(pendingResponse.data);
+      }
+
+      if (allResponse.success) {
+        const list = Array.isArray(allResponse.data) ? allResponse.data : allResponse.data?.data || [];
+        setAllDesigners(list);
+      }
     };
     fetchDesigners();
   }, []);
@@ -49,7 +62,10 @@ export default function AdminDesignersPage() {
   const approve = async (id: string) => {
     setProcessingId(id);
     const response = await put(`/admin/designers/${id}/approve`, {});
-    if (response.success) setDesigners((prev) => prev.filter((d) => d._id !== id));
+    if (response.success) {
+      setDesigners((prev) => prev.filter((d) => d._id !== id));
+      setAllDesigners((prev) => prev.map((d) => (d._id === id ? { ...d, isApproved: true } : d)));
+    }
     setProcessingId(null);
   };
 
@@ -58,18 +74,23 @@ export default function AdminDesignersPage() {
     if (reason === null) return;
     setProcessingId(id);
     const response = await put(`/admin/designers/${id}/reject`, { rejectionReason: reason });
-    if (response.success) setDesigners((prev) => prev.filter((d) => d._id !== id));
+    if (response.success) {
+      setDesigners((prev) => prev.filter((d) => d._id !== id));
+      setAllDesigners((prev) => prev.map((d) => (d._id === id ? { ...d, isApproved: false, rejectionReason: reason } : d)));
+    }
     setProcessingId(null);
   };
+
+  const activeList = useMemo(() => (tab === "pending" ? designers : allDesigners), [tab, designers, allDesigners]);
 
   const filtered = useMemo(() => {
     const v = query.toLowerCase();
 
-    return designers.filter((d) => {
+    return activeList.filter((d) => {
       const fullName = d.firstName && d.lastName ? `${d.firstName} ${d.lastName}` : d.name || "";
       return fullName.toLowerCase().includes(v) || d.email.toLowerCase().includes(v);
     });
-  }, [designers, query]);
+  }, [activeList, query]);
 
   return (
     <AdminShell
@@ -77,6 +98,11 @@ export default function AdminDesignersPage() {
       subtitle="Approve or reject incoming designer applications."
       rightSlot={<Badge variant="warning">{filtered.length} Pending</Badge>}
     >
+      <div className="mb-4 flex gap-2">
+        <Button variant={tab === "pending" ? "secondary" : "outline"} onClick={() => setTab("pending")}>Pending</Button>
+        <Button variant={tab === "all" ? "secondary" : "outline"} onClick={() => setTab("all")}>All Designers</Button>
+      </div>
+
       <div className="mb-4 max-w-md">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/45" size={14} />
