@@ -217,7 +217,9 @@ FRONTEND_URL=https://website-sage-one-13.vercel.app
 ### Backend (Render/Railway)
 MONGODB_URI=your_mongodb_atlas_uri
 JWT_SECRET=your_secret
+JWT_EXPIRE=7d
 FRONTEND_URL=https://website-sage-one-13.vercel.app
+CORS_ORIGINS=https://website-sage-one-13.vercel.app
 SMTP_USER=your_gmail_address
 SMTP_PASS=your_gmail_app_password
 SMTP_FROM=your_gmail_address
@@ -235,7 +237,7 @@ Update only:
 The app is already wired to read these values from env, so domain changes won't require code edits.
 
 ### Copy-Paste Production Setup
-Use `.env.production.example` as your source of truth.
+Use `.env.example` as your source of truth.
 
 Frontend on Vercel:
 - `NEXT_PUBLIC_API_URL` -> backend URL + `/api`
@@ -246,12 +248,22 @@ Frontend on Vercel:
 Backend on Render/Railway:
 - `MONGODB_URI` -> MongoDB Atlas connection string
 - `JWT_SECRET` -> same strong secret
+- `JWT_EXPIRE` -> `7d`
 - `FRONTEND_URL` -> your public frontend URL
+- `CORS_ORIGINS` -> comma-separated allowed frontend URLs
 - `SMTP_USER` -> Gmail address
 - `SMTP_PASS` -> Gmail app password
 - `SMTP_FROM` -> Gmail address
 - `PORT` -> `5000`
 - `NODE_ENV` -> `production`
+
+### Non-Technical Deploy Flow
+1. Deploy backend first on Render/Railway and set backend env vars from `.env.example`
+2. Confirm backend health endpoint works: `https://your-backend-domain.com/api/health`
+3. Open Vercel project settings and set frontend env vars from `.env.example`
+4. Set `NEXT_PUBLIC_API_URL` to your backend URL ending with `/api`
+5. Redeploy Vercel, then test signup/login/admin/designer pages on live URL
+6. After buying `.com`, update `NEXTAUTH_URL`, `FRONTEND_URL`, and `CORS_ORIGINS`
 
 ---
 
@@ -275,7 +287,7 @@ Backend on Render/Railway:
 
 - **Setup Guide**: See SETUP_GUIDE.md
 - **Project Summary**: See PROJECT_SUMMARY.md
-- **Production Env Template**: `.env.production.example`
+- **Production Env Template**: `.env.example`
 - **Troubleshooting**: Check SETUP_GUIDE.md section
 
 ---
