@@ -8,6 +8,8 @@ import { get } from "@/lib/api";
 import { Card } from "@/components/Card";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -33,6 +35,9 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [purgeEmail, setPurgeEmail] = useState("");
+  const [purgeMessage, setPurgeMessage] = useState("");
+  const [isPurging, setIsPurging] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -71,6 +76,40 @@ export default function AdminDashboard() {
     { label: "Companies", value: stats?.totalCompanies || 0, icon: Briefcase, tone: "purple" as const },
     { label: "Active Projects", value: stats?.activeProjects || 0, icon: CheckCircle2, tone: "success" as const },
   ];
+
+  const purgeByEmail = async () => {
+    const email = purgeEmail.trim().toLowerCase();
+    if (!email) {
+      setPurgeMessage("Enter an email to purge.");
+      return;
+    }
+
+    const confirmed = window.confirm(`Permanently purge user and related data for ${email}?`);
+    if (!confirmed) {
+      return;
+    }
+
+    setIsPurging(true);
+    setPurgeMessage("");
+
+    const response = await fetch("http://localhost:5000/api/admin/users/purge-by-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+      },
+      body: JSON.stringify({ email }),
+    }).then((r) => r.json());
+
+    if (response.success) {
+      setPurgeMessage(`Purged ${email} successfully.`);
+      setPurgeEmail("");
+    } else {
+      setPurgeMessage(response.message || "Failed to purge user.");
+    }
+
+    setIsPurging(false);
+  };
 
   return (
     <AdminShell
@@ -151,6 +190,23 @@ export default function AdminDashboard() {
       </section>
 
       <section className="mt-7">
+        <Card className="mb-5 lux-glass rounded-2xl p-5">
+          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-accent">Emergency User Purge</p>
+          <p className="mt-1 text-sm text-white/60">Delete user by email with one click for re-registration cleanup.</p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Input
+              value={purgeEmail}
+              onChange={(e) => setPurgeEmail(e.target.value)}
+              placeholder="user@example.com"
+              className="max-w-sm"
+            />
+            <Button variant="outline" onClick={purgeByEmail} isLoading={isPurging}>
+              Purge Email
+            </Button>
+          </div>
+          {purgeMessage ? <p className="mt-3 text-sm text-white/70">{purgeMessage}</p> : null}
+        </Card>
+
         <Card className="lux-glass rounded-2xl p-0 overflow-hidden">
           <Table>
             <TableHeader>

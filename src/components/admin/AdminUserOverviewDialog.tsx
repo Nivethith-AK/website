@@ -180,7 +180,7 @@ export function AdminUserOverviewDialog({ open, onOpenChange, userId }: AdminUse
                         <div key={item._id} className="rounded-lg border border-white/10 p-3">
                           <p className="text-sm">{item.message}</p>
                           <p className="mt-1 text-xs text-white/60">
-                            {item.senderId?.email || "Unknown"} -> {item.receiverId?.email || "Unknown"} • {new Date(item.createdAt).toLocaleString()}
+                            {item.senderId?.email || "Unknown"} {"->"} {item.receiverId?.email || "Unknown"} • {new Date(item.createdAt).toLocaleString()}
                           </p>
                         </div>
                       ))}
