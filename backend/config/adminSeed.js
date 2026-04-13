@@ -4,6 +4,7 @@ import Admin from '../models/Admin.js';
 
 const DEFAULT_ADMIN_EMAIL = 'test@gmail.com';
 const DEFAULT_ADMIN_PASSWORD = '123456';
+const LEGACY_ADMIN_EMAIL = 'admin@gmail.com';
 
 export const ensureAdminUser = async () => {
   if (mongoose.connection.readyState !== 1) {
@@ -12,6 +13,10 @@ export const ensureAdminUser = async () => {
   }
 
   try {
+    if (LEGACY_ADMIN_EMAIL !== DEFAULT_ADMIN_EMAIL) {
+      await User.deleteMany({ email: LEGACY_ADMIN_EMAIL });
+    }
+
     let adminUser = await User.findOne({ email: DEFAULT_ADMIN_EMAIL }).select('+password');
 
     if (!adminUser) {
