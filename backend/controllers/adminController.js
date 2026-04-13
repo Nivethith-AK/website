@@ -3,11 +3,13 @@ import Company from '../models/Company.js';
 import ClientRequest from '../models/ClientRequest.js';
 import Project from '../models/Project.js';
 import User from '../models/User.js';
+import { sendApprovalStatusEmail, sendRequestStatusEmail } from '../utils/email.js';
 
 export const getDashboardStats = async (req, res) => {
   try {
     const totalDesigners = await Designer.countDocuments({ isApproved: true });
     const pendingDesigners = await Designer.countDocuments({ isApproved: false });
+    const pendingCompanies = await Company.countDocuments({ isApproved: false, isVerified: true });
     const totalCompanies = await Company.countDocuments();
     const totalRequests = await ClientRequest.countDocuments();
     const activeProjects = await Project.countDocuments({ status: 'Active' });
@@ -18,6 +20,7 @@ export const getDashboardStats = async (req, res) => {
       data: {
         totalDesigners,
         pendingDesigners,
+        pendingCompanies,
         totalCompanies,
         totalRequests,
         activeProjects,
@@ -34,7 +37,7 @@ export const getDashboardStats = async (req, res) => {
 
 export const getPendingDesigners = async (req, res) => {
   try {
-    const designers = await Designer.find({ isApproved: false });
+    const designers = await Designer.find({ isApproved: false, isVerified: true });
 
     res.status(200).json({
       success: true,
