@@ -5,7 +5,8 @@ const projectSchema = new mongoose.Schema(
     clientRequest: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'ClientRequest',
-      required: true,
+      required: false,
+      default: null,
     },
     company: {
       type: mongoose.Schema.Types.ObjectId,
@@ -43,6 +44,21 @@ const projectSchema = new mongoose.Schema(
     endDate: Date,
     budget: Number,
     adminNotes: String,
+    participants: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    chatEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
     createdAt: {
       type: Date,
       default: Date.now,
