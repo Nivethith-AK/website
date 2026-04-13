@@ -82,8 +82,13 @@ export default function AdminProjectsPage() {
   };
 
   const toggleChat = async (project: Project) => {
+    const companyId = project.company?._id;
+    if (!companyId) {
+      return;
+    }
+
     const response = await put(`/admin/projects/${project._id}/participants`, {
-      companyId: project.company?._id,
+      companyId,
       designerIds: (project.designers || []).map((entry: any) => entry.designer?._id || entry.designer).filter(Boolean),
       chatEnabled: !project.chatEnabled,
     });
