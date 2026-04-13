@@ -7,7 +7,6 @@ import { Search, Sparkles, CircleCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -100,6 +99,11 @@ export default function DesignersPage() {
     }
   };
 
+  const formatImageUrl = (url?: string) => {
+    if (!url) return null;
+    return url.startsWith("http") ? url : `http://localhost:5000${url}`;
+  };
+
   return (
     <div className="min-h-screen bg-background pt-36 text-foreground">
       <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
@@ -190,7 +194,7 @@ export default function DesignersPage() {
                           <div className="h-12 w-12 overflow-hidden rounded-xl border border-white/15 bg-white/5">
                             {designer.profileImage ? (
                               // eslint-disable-next-line @next/next/no-img-element
-                              <img src={designer.profileImage} alt={designer.firstName} className="h-full w-full object-cover" />
+                              <img src={formatImageUrl(designer.profileImage) || designer.profileImage} alt={designer.firstName} className="h-full w-full object-cover" />
                             ) : (
                               <div className="flex h-full w-full items-center justify-center text-sm font-black uppercase text-white/55">
                                 {designer.firstName?.[0]}
@@ -276,7 +280,7 @@ export default function DesignersPage() {
                             {item.image ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img
-                                src={item.image.startsWith("http") ? item.image : `http://localhost:5000${item.image}`}
+                                src={formatImageUrl(item.image) || item.image}
                                 alt={item.title || "portfolio item"}
                                 className="h-full w-full object-cover"
                               />
