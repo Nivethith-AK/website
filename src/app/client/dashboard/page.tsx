@@ -240,7 +240,7 @@ export default function ClientDashboardPage() {
     const response = await put<CompanyProfile>("/clients/profile", payload);
     if (response.success && response.data) {
       setCompanyProfile(response.data);
-      setProfileMessage("Company profile updated. New public opportunities now show this information.");
+      setProfileMessage("Company profile updated. New public request board entries now show this information.");
       setShowPublishPrompt(true);
     } else {
       setProfileMessage(response.message || "Unable to update profile.");
@@ -493,7 +493,7 @@ export default function ClientDashboardPage() {
                           <SelectItem value="public">Public (Visible in Designers page)</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FieldDescription>Public requests are shown as fashion opportunities to designers.</FieldDescription>
+                      <FieldDescription>Public requests are shown on the designer request board.</FieldDescription>
                     </Field>
 
                     <Button type="submit" variant="secondary" isLoading={isSubmitting} disabled={!profileReadyToPublish}>
@@ -511,7 +511,7 @@ export default function ClientDashboardPage() {
                 <div className="mb-5">
                   <p className="text-2xl font-black uppercase tracking-tight">Company Profile</p>
                   <p className="mt-1 text-sm text-white/60">
-                    Keep this information updated so designers can evaluate your opportunities faster.
+                    Keep this information updated so designers can evaluate your requests faster.
                   </p>
                 </div>
 
@@ -602,7 +602,7 @@ export default function ClientDashboardPage() {
                         placeholder="Tell designers about your brand vision, customer base, and style direction"
                       />
                       <FieldDescription>
-                        This description appears with your public opportunities on the Designers page.
+                        This description appears with your public requests on the Designers page.
                       </FieldDescription>
                     </Field>
 
@@ -622,6 +622,7 @@ export default function ClientDashboardPage() {
                 <div className="mb-4">
                   <p className="text-xl font-black uppercase tracking-tight">Company Portfolio</p>
                   <p className="mt-1 text-sm text-white/60">Upload brand visuals so designers can trust your opportunities quickly.</p>
+                  <p className="mt-1 text-sm text-white/60">Upload brand visuals so designers can trust your request board presence quickly.</p>
                 </div>
 
                 <form onSubmit={uploadPortfolio}>
@@ -691,7 +692,7 @@ export default function ClientDashboardPage() {
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
               <InboxPanel
                 emptyTitle="No Conversations Yet"
-                emptyDescription="When designers contact your opportunities, their threads appear here."
+                emptyDescription="When designers contact your requests, their threads appear here."
                 composerPlaceholder="Reply with role details, requirements, and next steps..."
                 onUnreadCountChange={setInboxUnread}
               />
