@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { get, post, put } from "@/lib/api";
+import { get, post, put, upload } from "@/lib/api";
 import { Card } from "@/components/Card";
 import { InboxPanel } from "@/components/messaging/InboxPanel";
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,11 @@ interface CompanyProfile {
   address: string;
   description?: string;
   companyImage?: string;
+  portfolio?: Array<{
+    image: string;
+    title: string;
+    description?: string;
+  }>;
 }
 
 const durations = ["1 week", "2 weeks", "1 month", "2 months", "3 months", "6 months", "1 year", "Custom"];
@@ -88,6 +93,10 @@ export default function ClientDashboardPage() {
   });
   const [profileMessage, setProfileMessage] = useState("");
   const [inboxUnread, setInboxUnread] = useState(0);
+  const [portfolioTitle, setPortfolioTitle] = useState("");
+  const [portfolioDescription, setPortfolioDescription] = useState("");
+  const [portfolioFile, setPortfolioFile] = useState<File | null>(null);
+  const [isUploadingPortfolio, setIsUploadingPortfolio] = useState(false);
 
   useEffect(() => {
     const loadRequests = async () => {
@@ -132,19 +141,6 @@ export default function ClientDashboardPage() {
 
     loadRequests();
 
-    const interval = window.setInterval(async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        return;
-      }
-
-      const unreadResponse = await get<{ unread: number }>("/messages/unread-count");
-      if (unreadResponse.success && unreadResponse.data) {
-        setInboxUnread(unreadResponse.data.unread || 0);
-      }
-    }, 10000);
-
-    return () => window.clearInterval(interval);
   }, [router]);
 
   const stats = useMemo(() => {
@@ -214,6 +210,42 @@ export default function ClientDashboardPage() {
     }
 
     setIsSavingProfile(false);
+  };
+
+  const uploadPortfolio = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileMessage("");
+
+    if (!portfolioFile) {
+      setProfileMessage("Please choose an image file for portfolio upload.");
+      return;
+    }
+
+    if (!portfolioTitle.trim()) {
+      setProfileMessage("Portfolio title is required.");
+      return;
+    }
+
+    setIsUploadingPortfolio(true);
+
+    const formData = new FormData();
+    formData.append("portfolioImage", portfolioFile);
+    formData.append("title", portfolioTitle.trim());
+    formData.append("description", portfolioDescription.trim());
+
+    const response = await upload<CompanyProfile>("/clients/upload/portfolio", formData);
+
+    if (response.success && response.data) {
+      setCompanyProfile(response.data);
+      setPortfolioTitle("");
+      setPortfolioDescription("");
+      setPortfolioFile(null);
+      setProfileMessage("Portfolio item uploaded successfully.");
+    } else {
+      setProfileMessage(response.message || "Portfolio upload failed.");
+    }
+
+    setIsUploadingPortfolio(false);
   };
 
   if (isLoading) {
@@ -531,8 +563,6 @@ export default function ClientDashboardPage() {
                       </FieldDescription>
                     </Field>
 
-                    {profileMessage ? <p className="text-sm text-white/75">{profileMessage}</p> : null}
-
                     <div className="flex flex-wrap gap-3">
                       <Button type="submit" variant="secondary" isLoading={isSavingProfile}>
                         {isSavingProfile ? "Saving" : "Save Company Profile"}
@@ -543,6 +573,73 @@ export default function ClientDashboardPage() {
                     </div>
                   </FieldGroup>
                 </form>
+
+                <div className="my-8 h-px bg-white/10" />
+
+                <div className="mb-4">
+                  <p className="text-xl font-black uppercase tracking-tight">Company Portfolio</p>
+                  <p className="mt-1 text-sm text-white/60">Upload brand visuals so designers can trust your opportunities quickly.</p>
+                </div>
+
+                <form onSubmit={uploadPortfolio}>
+                  <FieldGroup>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <Field>
+                        <FieldLabel htmlFor="portfolioTitle">Portfolio Title</FieldLabel>
+                        <Input
+                          id="portfolioTitle"
+                          value={portfolioTitle}
+                          onChange={(e) => setPortfolioTitle(e.target.value)}
+                          placeholder="Spring Editorial Campaign"
+                        />
+                      </Field>
+                      <Field>
+                        <FieldLabel htmlFor="portfolioImageFile">Image File</FieldLabel>
+                        <Input
+                          id="portfolioImageFile"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setPortfolioFile(e.target.files?.[0] || null)}
+                        />
+                      </Field>
+                    </div>
+
+                    <Field>
+                      <FieldLabel htmlFor="portfolioDescription">Portfolio Description</FieldLabel>
+                      <Textarea
+                        id="portfolioDescription"
+                        value={portfolioDescription}
+                        onChange={(e) => setPortfolioDescription(e.target.value)}
+                        placeholder="Short context for this visual and campaign direction"
+                      />
+                    </Field>
+
+                    <Button type="submit" variant="secondary" isLoading={isUploadingPortfolio}>
+                      {isUploadingPortfolio ? "Uploading" : "Upload Portfolio Item"}
+                    </Button>
+                  </FieldGroup>
+                </form>
+
+                {profileMessage ? <p className="mt-4 text-sm text-white/75">{profileMessage}</p> : null}
+
+                <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+                  {(companyProfile?.portfolio || []).length === 0 ? (
+                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-white/60 md:col-span-3">
+                      No portfolio items uploaded yet.
+                    </div>
+                  ) : (
+                    (companyProfile?.portfolio || []).map((item, idx) => (
+                      <div key={`${item.image}-${idx}`} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                        <div className="mb-3 h-36 overflow-hidden rounded-lg border border-white/10 bg-black/20">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={`http://localhost:5000${item.image}`} alt={item.title} className="h-full w-full object-cover" />
+                        </div>
+                        <p className="font-semibold uppercase">{item.title}</p>
+                        <p className="text-xs text-white/60">{item.description || "No description"}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
               </Card>
             </motion.div>
           </TabsContent>
@@ -553,6 +650,7 @@ export default function ClientDashboardPage() {
                 emptyTitle="No Conversations Yet"
                 emptyDescription="When designers contact your opportunities, their threads appear here."
                 composerPlaceholder="Reply with role details, requirements, and next steps..."
+                onUnreadCountChange={setInboxUnread}
               />
             </motion.div>
           </TabsContent>
