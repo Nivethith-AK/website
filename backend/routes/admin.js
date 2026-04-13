@@ -9,6 +9,7 @@ import {
   rejectRequest,
   assignDesignersToProject,
   updateProjectStatus,
+  updateProjectParticipants,
   getAllProjects,
   getAllCompanies,
   getAllUsers,
@@ -41,6 +42,7 @@ router.put('/requests/:id/reject', rejectRequest);
 router.get('/projects', getAllProjects);
 router.post('/projects/assign', assignDesignersToProject);
 router.put('/projects/:id/status', updateProjectStatus);
+router.put('/projects/:id/participants', updateProjectParticipants);
 
 // Company management
 router.get('/companies', getAllCompanies);
