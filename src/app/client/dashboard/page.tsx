@@ -87,6 +87,7 @@ export default function ClientDashboardPage() {
     companyImage: "",
   });
   const [profileMessage, setProfileMessage] = useState("");
+  const [inboxUnread, setInboxUnread] = useState(0);
 
   useEffect(() => {
     const loadRequests = async () => {
@@ -96,9 +97,10 @@ export default function ClientDashboardPage() {
         return;
       }
 
-      const [requestResponse, profileResponse] = await Promise.all([
+      const [requestResponse, profileResponse, unreadResponse] = await Promise.all([
         get<RequestItem[]>("/clients/requests"),
         get<CompanyProfile>("/clients/profile"),
+        get<{ unread: number }>("/messages/unread-count"),
       ]);
 
       if (requestResponse.success && requestResponse.data) {
@@ -121,10 +123,28 @@ export default function ClientDashboardPage() {
         });
       }
 
+      if (unreadResponse.success && unreadResponse.data) {
+        setInboxUnread(unreadResponse.data.unread || 0);
+      }
+
       setIsLoading(false);
     };
 
     loadRequests();
+
+    const interval = window.setInterval(async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return;
+      }
+
+      const unreadResponse = await get<{ unread: number }>("/messages/unread-count");
+      if (unreadResponse.success && unreadResponse.data) {
+        setInboxUnread(unreadResponse.data.unread || 0);
+      }
+    }, 10000);
+
+    return () => window.clearInterval(interval);
   }, [router]);
 
   const stats = useMemo(() => {
@@ -245,7 +265,14 @@ export default function ClientDashboardPage() {
             <TabsTrigger value="list">Request List</TabsTrigger>
             <TabsTrigger value="new">New Request</TabsTrigger>
             <TabsTrigger value="company">Company Profile</TabsTrigger>
-            <TabsTrigger value="inbox">Inbox</TabsTrigger>
+            <TabsTrigger value="inbox" className="gap-1.5">
+              Inbox
+              {inboxUnread > 0 ? (
+                <span className="rounded-full border border-accent/35 bg-accent/15 px-1.5 py-0.5 text-[9px] leading-none text-accent">
+                  {inboxUnread > 99 ? "99+" : inboxUnread}
+                </span>
+              ) : null}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="list">
