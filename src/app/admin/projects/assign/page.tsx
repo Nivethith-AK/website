@@ -143,7 +143,7 @@ function AssignContent() {
           <DialogHeader>
             <DialogTitle>Assign Designers</DialogTitle>
             <DialogDescription>
-              Confirm assignment for {selected.length} designer(s) to this request.
+              Confirm admin assignment for {selected.length} designer(s) to this request.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
