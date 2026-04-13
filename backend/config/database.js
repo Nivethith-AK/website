@@ -7,12 +7,8 @@ const connectDB = async () => {
   try {
     if (!process.env.MONGODB_URI) {
       const errorMessage = 'Missing MONGODB_URI environment variable';
-      if (process.env.NODE_ENV === 'production') {
-        throw new Error(errorMessage);
-      }
-
-      console.warn(`MongoDB Connection Warning: ${errorMessage}`);
-      console.warn('Continuing in development mode with database warnings...');
+      console.error(`MongoDB Connection Error: ${errorMessage}`);
+      console.warn('Continuing with database disabled; dependent features may fail.');
       return null;
     }
 
