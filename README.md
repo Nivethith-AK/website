@@ -196,6 +196,11 @@ npm run build
 vercel deploy
 ```
 
+Current Vercel URL:
+- `https://website-sage-one-13.vercel.app`
+
+When you buy your `.com` domain later, update only the environment variables below. No code changes are needed.
+
 ### Backend (Render/Railway)
 ```bash
 Deploy the Express backend separately and point the frontend to it.
@@ -205,20 +210,29 @@ Deploy the Express backend separately and point the frontend to it.
 ```
 ### Frontend (Vercel)
 NEXT_PUBLIC_API_URL=https://your-backend-domain.com/api
-NEXTAUTH_URL=https://your-vercel-domain.vercel.app
+NEXTAUTH_URL=https://website-sage-one-13.vercel.app
 NEXTAUTH_SECRET=your_secret
-FRONTEND_URL=https://your-vercel-domain.vercel.app
+FRONTEND_URL=https://website-sage-one-13.vercel.app
 
 ### Backend (Render/Railway)
 MONGODB_URI=your_mongodb_atlas_uri
 JWT_SECRET=your_secret
-FRONTEND_URL=https://your-vercel-domain.vercel.app
+FRONTEND_URL=https://website-sage-one-13.vercel.app
 SMTP_USER=your_gmail_address
 SMTP_PASS=your_gmail_app_password
 SMTP_FROM=your_gmail_address
 PORT=5000
 NODE_ENV=production
 ```
+
+### After buying a custom domain
+Update only:
+- `NEXTAUTH_URL`
+- `FRONTEND_URL`
+- `NEXT_PUBLIC_API_URL` if the backend URL changes
+- `CORS_ORIGINS` if you set multiple allowed frontends
+
+The app is already wired to read these values from env, so domain changes won't require code edits.
 
 ---
 
