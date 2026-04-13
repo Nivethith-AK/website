@@ -256,6 +256,7 @@ The app is already wired to read these values from env, so domain changes won't 
 
 - **Setup Guide**: See SETUP_GUIDE.md
 - **Project Summary**: See PROJECT_SUMMARY.md
+- **Production Env Template**: `.env.production.example`
 - **Troubleshooting**: Check SETUP_GUIDE.md section
 
 ---
