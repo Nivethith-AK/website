@@ -14,6 +14,7 @@ import {
   getAllUsers,
   approveUser,
   deleteUser,
+  getUserOverview,
 } from '../controllers/adminController.js';
 import { protect, authorize } from '../middleware/auth.js';
 
@@ -45,6 +46,7 @@ router.get('/companies', getAllCompanies);
 
 // User management
 router.get('/users', getAllUsers);
+router.get('/users/:userId/overview', getUserOverview);
 router.patch('/approve-user', approveUser);
 router.delete('/delete-user', deleteUser);
 

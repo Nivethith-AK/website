@@ -3,6 +3,7 @@ import Company from '../models/Company.js';
 import ClientRequest from '../models/ClientRequest.js';
 import Project from '../models/Project.js';
 import User from '../models/User.js';
+import Message from '../models/Message.js';
 import { sendApprovalStatusEmail, sendRequestStatusEmail } from '../utils/email.js';
 
 export const getDashboardStats = async (req, res) => {
@@ -602,10 +603,9 @@ export const getUserOverview = async (req, res) => {
       },
     ]);
 
-    const latestMessages = await (await import('../models/Message.js')).default
-      .find({
-        $or: [{ senderId: userId }, { receiverId: userId }],
-      })
+    const latestMessages = await Message.find({
+      $or: [{ senderId: userId }, { receiverId: userId }],
+    })
       .populate('senderId', 'name email role')
       .populate('receiverId', 'name email role')
       .sort({ createdAt: -1 })
