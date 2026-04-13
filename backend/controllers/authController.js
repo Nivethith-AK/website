@@ -131,7 +131,7 @@ export const registerUser = async (req, res) => {
         email,
         password,
         role: 'company',
-        isApproved: true,
+        isApproved: false,
         isVerified: false,
         verificationToken: createVerificationToken(),
         companyName: req.body.companyName || name,
@@ -240,7 +240,7 @@ export const registerCompany = async (req, res) => {
       phone,
       address,
       role: 'company',
-      isApproved: true,
+      isApproved: false,
       isVerified: false,
       verificationToken: createVerificationToken(),
     });
@@ -303,6 +303,13 @@ export const loginUser = async (req, res) => {
       return res.status(403).json({
         success: false,
         message: 'Please verify your email before logging in',
+      });
+    }
+
+    if (!user.isApproved && user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account is pending admin approval',
       });
     }
 
