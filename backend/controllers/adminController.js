@@ -58,6 +58,7 @@ export const approveDesigner = async (req, res) => {
       req.params.id,
       {
         isApproved: true,
+        rejectionReason: '',
         updatedAt: Date.now(),
       },
       { new: true }
@@ -69,6 +70,13 @@ export const approveDesigner = async (req, res) => {
         message: 'Designer not found',
       });
     }
+
+    await sendApprovalStatusEmail({
+      to: designer.email,
+      name: designer.name,
+      approved: true,
+      role: 'designer',
+    });
 
     res.status(200).json({
       success: true,
@@ -103,6 +111,14 @@ export const rejectDesigner = async (req, res) => {
         message: 'Designer not found',
       });
     }
+
+    await sendApprovalStatusEmail({
+      to: designer.email,
+      name: designer.name,
+      approved: false,
+      role: 'designer',
+      rejectionReason,
+    });
 
     res.status(200).json({
       success: true,
