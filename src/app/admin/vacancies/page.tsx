@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { del, get, post, put } from "@/lib/api";
 import { AdminShell } from "@/components/admin/AdminShell";
@@ -46,16 +46,20 @@ export default function AdminVacanciesPage() {
     status: "Draft",
   });
 
-  const fetchVacancies = async () => {
+  const fetchVacancies = useCallback(async () => {
     const response = await get<Vacancy[]>("/jobs/admin");
     if (response.success && response.data) {
       setVacancies(response.data);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchVacancies();
-  }, []);
+    const timer = window.setTimeout(() => {
+      void fetchVacancies();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [fetchVacancies]);
 
   const publishedCount = useMemo(() => vacancies.filter((item) => item.status === "Published").length, [vacancies]);
 
