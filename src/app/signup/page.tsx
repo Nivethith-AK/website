@@ -95,7 +95,7 @@ export default function SignUp() {
       const response = await post(endpoint, payload);
 
       if (response.success && response.token) {
-        localStorage.setItem("token", response.token);
+        localStorage.removeItem("token");
         setSuccess(true);
         setTimeout(() => {
           router.push("/login");
