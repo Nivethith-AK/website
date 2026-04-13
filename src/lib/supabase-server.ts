@@ -37,7 +37,7 @@ export const getAuthContext = async (req: NextRequest) => {
 
   const { data: profile } = await admin
     .from("profiles")
-    .select("id,email,role,is_approved,first_name,last_name,experience_level,company_name,contact_person,phone,address,industry,bio,availability,skills,profile_image,cv_file")
+    .select("id,email,role,is_approved,first_name,last_name,experience_level,company_name,contact_person,phone,address,industry,website,bio,availability,skills,profile_image,cv_file,portfolio_items,fashion_projects,experience_entries,rejection_reason")
     .eq("id", user.id)
     .single();
 
@@ -71,6 +71,7 @@ export const mapProfileUser = (row: any) => ({
   companyName: row.company_name || "",
   contactPerson: row.contact_person || "",
   industry: row.industry || "",
+  website: row.website || "",
   phone: row.phone || "",
   address: row.address || "",
   bio: row.bio || "",
@@ -80,7 +81,11 @@ export const mapProfileUser = (row: any) => ({
   profileImage: row.profile_image || "",
   cvFile: row.cv_file || "",
   portfolio: Array.isArray(row.portfolio_items) ? row.portfolio_items : [],
+  portfolio_items: Array.isArray(row.portfolio_items) ? row.portfolio_items : [],
   experiences: Array.isArray(row.experience_entries) ? row.experience_entries : [],
+  experience_entries: Array.isArray(row.experience_entries) ? row.experience_entries : [],
   fashionProjects: Array.isArray(row.fashion_projects) ? row.fashion_projects : [],
+  fashion_projects: Array.isArray(row.fashion_projects) ? row.fashion_projects : [],
   rejectionReason: row.rejection_reason || "",
+  rejection_reason: row.rejection_reason || "",
 });
