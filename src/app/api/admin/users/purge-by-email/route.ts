@@ -25,7 +25,6 @@ export async function POST(req: NextRequest) {
     await Promise.all([
       supabase.from("messages").delete().eq("sender_id", userRow.id),
       supabase.from("messages").delete().eq("receiver_id", userRow.id),
-      supabase.from("messages").delete().eq("project_id", userRow.id),
       supabase.from("client_requests").delete().eq("company_id", userRow.id),
       supabase.from("projects").delete().eq("company_id", userRow.id),
       supabase.from("profiles").delete().eq("id", userRow.id),
