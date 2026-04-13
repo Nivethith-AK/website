@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { get, post } from "@/lib/api";
+import { get, post, resolveAssetUrl } from "@/lib/api";
 import { connectSocket, getSocket } from "@/lib/socket";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/ui/button";
@@ -122,7 +122,7 @@ export function ProjectChatPanel({ roleLabel }: ProjectChatPanelProps) {
       const formData = new FormData();
       formData.append("message", draft.trim());
       attachmentFiles.forEach((file) => formData.append("attachments", file));
-      response = await fetch(`http://localhost:5000/api/project-chats/${selectedProjectId}/messages`, {
+      response = await fetch(`${resolveAssetUrl(`/api/project-chats/${selectedProjectId}/messages`)}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
@@ -198,7 +198,7 @@ export function ProjectChatPanel({ roleLabel }: ProjectChatPanelProps) {
                         {item.attachments.map((file, idx) => (
                           <a
                             key={`${item._id}-file-${idx}`}
-                            href={file.fileUrl.startsWith("http") ? file.fileUrl : `http://localhost:5000${file.fileUrl}`}
+                                href={resolveAssetUrl(file.fileUrl)}
                             target="_blank"
                             rel="noreferrer"
                             className="block text-xs text-accent underline"
