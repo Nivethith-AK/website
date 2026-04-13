@@ -18,12 +18,34 @@ interface Designer {
   availability?: "Available" | "Busy";
 }
 
+interface Opportunity {
+  _id: string;
+  projectTitle: string;
+  projectDescription?: string;
+  description?: string;
+  designersNeeded?: number;
+  requiredDesigners?: number;
+  duration: string;
+  budget?: number;
+  companyId?: {
+    companyName?: string;
+    contactPerson?: string;
+    industry?: string;
+  };
+  company?: {
+    companyName?: string;
+    contactPerson?: string;
+    industry?: string;
+  };
+}
+
 const experienceOptions = ["Student", "Intern", "Professional"];
 
 const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function DesignersPage() {
   const [designers, setDesigners] = useState<Designer[]>([]);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [selectedExperience, setSelectedExperience] = useState<string>("");
