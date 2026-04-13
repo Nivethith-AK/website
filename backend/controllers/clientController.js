@@ -185,7 +185,7 @@ export const getCompanyProfile = async (req, res) => {
 
 export const updateCompanyProfile = async (req, res) => {
   try {
-    const { companyName, industry, contactPerson, phone, website, address, description } = req.body;
+    const { companyName, industry, contactPerson, phone, website, address, description, companyImage } = req.body;
 
     const company = await Company.findByIdAndUpdate(
       req.user.id,
@@ -197,6 +197,7 @@ export const updateCompanyProfile = async (req, res) => {
         website,
         address,
         description,
+        companyImage,
         updatedAt: Date.now(),
       },
       { new: true, runValidators: true }
