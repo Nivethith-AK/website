@@ -61,7 +61,7 @@ export function ComboboxInput({ placeholder }: { placeholder?: string }) {
     >
       <input
         type="text"
-        className="bg-transparent outline-none w-full text-sm tracking-widest font-black uppercase placeholder:text-muted-foreground/30 cursor-pointer"
+        className="bg-transparent outline-none w-full text-sm font-semibold placeholder:text-muted-foreground/30 cursor-pointer"
         placeholder={placeholder}
         value={searchQuery || value}
         onChange={(e) => {
