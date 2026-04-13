@@ -42,6 +42,7 @@ interface RequestItem {
     lastName: string;
     email: string;
   }>;
+  isPublic?: boolean;
 }
 
 const durations = ["1 week", "2 weeks", "1 month", "2 months", "3 months", "6 months", "1 year", "Custom"];
@@ -58,6 +59,7 @@ export default function ClientDashboardPage() {
     requiredDesigners: 1,
     duration: "1 month",
     budget: "",
+    isPublic: false,
   });
 
   useEffect(() => {
@@ -102,6 +104,7 @@ export default function ClientDashboardPage() {
       budget: formData.budget ? Number(formData.budget) : undefined,
       requiredSkills: [],
       preferredExperience: "Any",
+      isPublic: formData.isPublic,
     };
 
     const response = await post<RequestItem>("/clients/requests", payload);
@@ -113,6 +116,7 @@ export default function ClientDashboardPage() {
         requiredDesigners: 1,
         duration: "1 month",
         budget: "",
+        isPublic: false,
       });
       setTab("list");
     }
@@ -298,6 +302,23 @@ export default function ClientDashboardPage() {
                         />
                       </Field>
                     </div>
+
+                    <Field>
+                      <FieldLabel htmlFor="isPublic">Visibility</FieldLabel>
+                      <Select
+                        value={formData.isPublic ? "public" : "private"}
+                        onValueChange={(v) => setFormData((prev) => ({ ...prev, isPublic: v === "public" }))}
+                      >
+                        <SelectTrigger id="isPublic">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="private">Private (Admin + Company)</SelectItem>
+                          <SelectItem value="public">Public (Visible in Designers page)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FieldDescription>Public requests are shown as fashion opportunities to designers.</FieldDescription>
+                    </Field>
 
                     <Button type="submit" variant="secondary" isLoading={isSubmitting}>
                       {isSubmitting ? "Submitting" : "Create Request"}
