@@ -200,7 +200,7 @@ export const getAllDesigners = async (req, res) => {
     const designers = await Designer.find(filter)
       .limit(limit)
       .skip(skip)
-      .select('-portfolio -fashionProjects -experiences -cvFile');
+      .select('firstName lastName email experienceLevel skills profileImage availability bio');
 
     const total = await Designer.countDocuments(filter);
 
@@ -221,7 +221,23 @@ export const getAllDesigners = async (req, res) => {
 
 export const getDesignerById = async (req, res) => {
   try {
-    const designer = await Designer.findById(req.params.id).populate('assignedProjects');
+    const designer = await Designer.findById(req.params.id)
+      .populate({
+        path: 'assignedProjects',
+        select: 'projectTitle status company',
+        populate: {
+          path: 'company',
+          select: 'companyName name',
+        },
+      })
+      .populate({
+        path: 'completedProjects',
+        select: 'projectTitle status company',
+        populate: {
+          path: 'company',
+          select: 'companyName name',
+        },
+      });
 
     if (!designer || !designer.isApproved) {
       return res.status(404).json({
