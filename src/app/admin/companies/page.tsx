@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { get, patch } from "@/lib/api";
 import { AdminShell } from "@/components/admin/AdminShell";
@@ -42,9 +42,9 @@ export default function AdminCompaniesPage() {
     }
   };
 
-  useEffect(() => {
-    fetchCompanies();
-  }, []);
+  if (companies.length === 0) {
+    void fetchCompanies();
+  }
 
   const filtered = useMemo(() => {
     const normalized = query.toLowerCase();
