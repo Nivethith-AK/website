@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { post } from "@/lib/api";
+import { signInWithRole } from "@/lib/supabase-auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/Card";
 import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
@@ -38,18 +38,13 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await post("/auth/login", { email, password });
+      const result = await signInWithRole(email, password);
+      localStorage.setItem("token", result.accessToken);
 
-      if (response.success && response.token && response.user) {
-        localStorage.setItem("token", response.token);
-        const role = response.user.role;
-        if (role === "admin") router.push("/admin/dashboard");
-        else if (role === "designer") router.push("/designer/dashboard");
-        else if (role === "company") router.push("/client/dashboard");
-        else router.push("/");
-      } else {
-        setError(response.message || "Invalid email or password");
-      }
+      if (result.role === "admin") router.push("/admin/dashboard");
+      else if (result.role === "designer") router.push("/designer/dashboard");
+      else if (result.role === "company") router.push("/client/dashboard");
+      else router.push("/");
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {
