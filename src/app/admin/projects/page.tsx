@@ -22,6 +22,7 @@ interface Project {
   projectTitle: string;
   budget?: number;
   status: string;
+  chatEnabled?: boolean;
   company: {
     companyName: string;
   };
@@ -78,6 +79,20 @@ export default function AdminProjectsPage() {
     if (response.success) setProjects((prev) => prev.map((p) => (p._id === id ? { ...p, status: "Completed" } : p)));
   };
 
+  const toggleChat = async (project: Project) => {
+    const response = await put(`/admin/projects/${project._id}/participants`, {
+      companyId: project.company,
+      designerIds: (project.designers || []).map((entry: any) => entry.designer?._id || entry.designer).filter(Boolean),
+      chatEnabled: !project.chatEnabled,
+    });
+
+    if (response.success) {
+      setProjects((prev) =>
+        prev.map((item) => (item._id === project._id ? { ...item, chatEnabled: !project.chatEnabled } : item))
+      );
+    }
+  };
+
   return (
     <AdminShell title="Project Grid" subtitle="Monitor and update admin-managed delivery lanes.">
       <div className="mb-4 flex flex-wrap gap-2">
@@ -116,6 +131,7 @@ export default function AdminProjectsPage() {
                     <TableHead>Company</TableHead>
                     <TableHead>Designers</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Team Chat</TableHead>
                     <TableHead>Budget</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
@@ -123,7 +139,7 @@ export default function AdminProjectsPage() {
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="py-8 text-center text-white/60">
+                      <TableCell colSpan={7} className="py-8 text-center text-white/60">
                         No projects available.
                       </TableCell>
                     </TableRow>
@@ -137,6 +153,14 @@ export default function AdminProjectsPage() {
                         </TableCell>
                         <TableCell>
                           <Badge variant={project.status === "Active" ? "warning" : "success"}>{project.status}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={project.chatEnabled ? "success" : "warning"}>{project.chatEnabled ? "Enabled" : "Disabled"}</Badge>
+                            <Button size="sm" variant="outline" onClick={() => toggleChat(project)}>
+                              {project.chatEnabled ? "Disable" : "Enable"}
+                            </Button>
+                          </div>
                         </TableCell>
                         <TableCell>{project.budget ? `$${project.budget.toLocaleString()}` : "-"}</TableCell>
                         <TableCell>
