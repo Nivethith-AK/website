@@ -370,7 +370,19 @@ export const getAllProjects = async (req, res) => {
 
 export const getAllCompanies = async (req, res) => {
   try {
-    const companies = await Company.find().select('-password');
+    const { status = 'all' } = req.query;
+    const filter = {};
+
+    if (status === 'pending') {
+      filter.isApproved = false;
+      filter.isVerified = true;
+    } else if (status === 'approved') {
+      filter.isApproved = true;
+    } else if (status === 'unverified') {
+      filter.isVerified = false;
+    }
+
+    const companies = await Company.find(filter).select('-password').sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -420,7 +432,7 @@ export const getAllUsers = async (req, res) => {
 
 export const approveUser = async (req, res) => {
   try {
-    const { userId, isApproved = true } = req.body;
+    const { userId, isApproved = true, rejectionReason = '' } = req.body;
 
     if (!userId) {
       return res.status(400).json({
@@ -431,7 +443,10 @@ export const approveUser = async (req, res) => {
 
     const user = await User.findByIdAndUpdate(
       userId,
-      { isApproved: Boolean(isApproved) },
+      {
+        isApproved: Boolean(isApproved),
+        rejectionReason: isApproved ? '' : rejectionReason,
+      },
       { new: true }
     ).select('-password');
 
@@ -442,9 +457,17 @@ export const approveUser = async (req, res) => {
       });
     }
 
+    await sendApprovalStatusEmail({
+      to: user.email,
+      name: user.name,
+      approved: Boolean(isApproved),
+      role: user.role,
+      rejectionReason,
+    });
+
     return res.status(200).json({
       success: true,
-      message: 'User approval updated',
+      message: `User ${isApproved ? 'approved' : 'rejected'} successfully`,
       data: user,
     });
   } catch (error) {
