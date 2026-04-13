@@ -21,6 +21,7 @@ interface ConversationItem {
   lastMessage: string;
   lastMessageAt: string;
   isFromMe: boolean;
+  unreadCount?: number;
 }
 
 interface ChatMessage {
@@ -29,6 +30,8 @@ interface ChatMessage {
   receiverId: MessageUser | string;
   message: string;
   createdAt: string;
+  isRead?: boolean;
+  readAt?: string | null;
 }
 
 interface InboxPanelProps {
@@ -198,6 +201,7 @@ export function InboxPanel({
             {filteredConversations.map((item) => {
               const active = item.partner._id === selectedPartnerId;
               const partnerName = item.partner.name || item.partner.email || "Unknown User";
+              const unread = item.unreadCount || 0;
 
               return (
                 <button
@@ -212,9 +216,12 @@ export function InboxPanel({
                 >
                   <div className="flex items-center justify-between gap-3">
                     <p className="truncate text-sm font-black uppercase tracking-[0.08em]">{partnerName}</p>
-                    <Badge variant="default" className="shrink-0">
-                      {item.partner.role || "user"}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      {unread > 0 ? <Badge variant="warning">{unread} New</Badge> : null}
+                      <Badge variant="default" className="shrink-0">
+                        {item.partner.role || "user"}
+                      </Badge>
+                    </div>
                   </div>
                   <p className="mt-1 truncate text-xs text-white/60">{item.lastMessage}</p>
                   <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-white/45">
@@ -264,6 +271,11 @@ export function InboxPanel({
                         <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-white/45">
                           {new Date(item.createdAt).toLocaleTimeString()}
                         </p>
+                        {isMine ? (
+                          <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-white/45">
+                            {item.isRead ? "Read" : "Sent"}
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                   );
