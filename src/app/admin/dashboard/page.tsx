@@ -20,6 +20,7 @@ import {
 interface DashboardStats {
   totalDesigners: number;
   pendingDesigners: number;
+  pendingCompanies: number;
   totalCompanies: number;
   totalRequests: number;
   activeProjects: number;
@@ -66,6 +67,7 @@ export default function AdminDashboard() {
   const metricCards = [
     { label: "Designers", value: stats?.totalDesigners || 0, icon: Users, tone: "accent" as const },
     { label: "Pending Review", value: stats?.pendingDesigners || 0, icon: Clock3, tone: "warning" as const },
+    { label: "Pending Companies", value: stats?.pendingCompanies || 0, icon: Briefcase, tone: "warning" as const },
     { label: "Companies", value: stats?.totalCompanies || 0, icon: Briefcase, tone: "purple" as const },
     { label: "Active Projects", value: stats?.activeProjects || 0, icon: CheckCircle2, tone: "success" as const },
   ];
@@ -129,11 +131,13 @@ export default function AdminDashboard() {
         <Card className="lux-glass rounded-2xl p-6">
           <p className="mb-4 text-[10px] font-black uppercase tracking-[0.26em] text-accent">Action Routing</p>
           <div className="space-y-3">
-            {[
-              { label: "Review Designers", href: "/admin/designers" },
-              { label: "Handle Requests", href: "/admin/requests" },
-              { label: "Manage Projects", href: "/admin/projects" },
-            ].map((action) => (
+              {[
+                { label: "Review Designers", href: "/admin/designers" },
+                { label: "Review Companies", href: "/admin/companies" },
+                { label: "Handle Requests", href: "/admin/requests" },
+                { label: "Manage Projects", href: "/admin/projects" },
+                { label: "Private Messages", href: "/admin/messages" },
+              ].map((action) => (
               <button
                 key={action.href}
                 onClick={() => router.push(action.href)}
