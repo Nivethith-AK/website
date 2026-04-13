@@ -1,5 +1,4 @@
-import { supabase } from "@/lib/supabase";
-import { assertSupabaseConfig } from "@/lib/supabase";
+import { assertSupabaseConfig, supabase } from "@/lib/supabase";
 
 export type AppRole = "admin" | "designer" | "company";
 
@@ -38,7 +37,7 @@ export const signUpWithProfile = async (payload: RegisterPayload) => {
     id: userId,
     email: payload.email.trim().toLowerCase(),
     role: payload.role,
-    is_approved: payload.role === "designer" ? false : false,
+    is_approved: false,
     first_name: payload.firstName ?? null,
     last_name: payload.lastName ?? null,
     experience_level: payload.experienceLevel ?? null,
