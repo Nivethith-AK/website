@@ -16,9 +16,11 @@ const connectDB = async () => {
     return conn;
   } catch (error) {
     console.warn(`MongoDB Connection Warning: ${error.message}`);
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
+
     console.warn('Continuing in development mode with database warnings...');
-    // Don't exit - allow development to continue
-    // This enables frontend development while backend connectivity is being resolved
     return null;
   }
 };
