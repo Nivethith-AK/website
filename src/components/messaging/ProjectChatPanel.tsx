@@ -71,7 +71,11 @@ export function ProjectChatPanel({ roleLabel }: ProjectChatPanelProps) {
   }, [loadProjects]);
 
   useEffect(() => {
-    void loadMessages(selectedProjectId);
+    const timer = window.setTimeout(() => {
+      void loadMessages(selectedProjectId);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [selectedProjectId, loadMessages]);
 
   useEffect(() => {
