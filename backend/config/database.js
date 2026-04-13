@@ -5,6 +5,17 @@ dotenv.config();
 
 const connectDB = async () => {
   try {
+    if (!process.env.MONGODB_URI) {
+      const errorMessage = 'Missing MONGODB_URI environment variable';
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error(errorMessage);
+      }
+
+      console.warn(`MongoDB Connection Warning: ${errorMessage}`);
+      console.warn('Continuing in development mode with database warnings...');
+      return null;
+    }
+
     mongoose.set('bufferCommands', false);
 
     const conn = await mongoose.connect(process.env.MONGODB_URI, {

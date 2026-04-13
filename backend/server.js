@@ -21,6 +21,16 @@ import projectChatRoutes from './routes/projectChats.js';
 
 dotenv.config();
 
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
+  process.exit(1);
+});
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -74,16 +84,27 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
-  const db = await connectDB();
-  if (!db && process.env.NODE_ENV === 'production') {
-    throw new Error('MongoDB connection is required in production');
-  }
-  await ensureAdminUser();
-  initSocket(httpServer);
+  try {
+    const db = await connectDB();
+    if (!db && process.env.NODE_ENV === 'production') {
+      throw new Error('MongoDB connection is required in production');
+    }
 
-  httpServer.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+    await ensureAdminUser();
+    initSocket(httpServer);
+
+    httpServer.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+
+    httpServer.on('error', (error) => {
+      console.error('HTTP server error:', error);
+      process.exit(1);
+    });
+  } catch (error) {
+    console.error('Server startup failed:', error);
+    process.exit(1);
+  }
 };
 
 startServer();
