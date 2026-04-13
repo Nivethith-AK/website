@@ -306,7 +306,9 @@ export default function DesignerDashboardPage() {
           <TabsList>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
+            <TabsTrigger value="projects" disabled>
+              Projects (Admin Managed)
+            </TabsTrigger>
             <TabsTrigger value="inbox" className="gap-1.5">
               Inbox
               {inboxUnread > 0 ? (

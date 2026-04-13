@@ -17,7 +17,7 @@ const navItems = [
   { label: "Designers", href: "/admin/designers", icon: Users },
   { label: "Companies", href: "/admin/companies", icon: Building2 },
   { label: "Requests", href: "/admin/requests", icon: ClipboardList },
-  { label: "Projects", href: "/admin/projects", icon: Briefcase },
+  { label: "Projects (Admin)", href: "/admin/projects", icon: Briefcase },
   { label: "Vacancies", href: "/admin/vacancies", icon: ClipboardPen },
   { label: "Messages", href: "/admin/messages", icon: Mail },
 ];
