@@ -27,7 +27,7 @@ interface RequestItem {
   duration: string;
   budget?: number;
   status: string;
-  company: {
+  company?: {
     companyName: string;
     contactPerson: string;
     email: string;
@@ -55,7 +55,8 @@ export default function AdminRequestsPage() {
   const filtered = useMemo(() => {
     return requests.filter((r) => {
       const q = query.toLowerCase();
-      const matches = r.projectTitle.toLowerCase().includes(q) || r.company.companyName.toLowerCase().includes(q);
+      const companyName = r.company?.companyName || "";
+      const matches = r.projectTitle.toLowerCase().includes(q) || companyName.toLowerCase().includes(q);
       const byStatus = tab === "all" ? true : r.status.toLowerCase() === tab;
       return matches && byStatus;
     });
@@ -123,9 +124,9 @@ export default function AdminRequestsPage() {
                       <TableRow key={r._id}>
                         <TableCell>
                           <p className="font-semibold uppercase">{r.projectTitle}</p>
-                          <p className="text-xs text-white/55">{r.description.slice(0, 70)}...</p>
+                          <p className="text-xs text-white/55">{r.description ? `${r.description.slice(0, 70)}...` : "No description."}</p>
                         </TableCell>
-                        <TableCell>{r.company.companyName}</TableCell>
+                        <TableCell>{r.company?.companyName || "Unknown Company"}</TableCell>
                         <TableCell>
                           <Badge
                             variant={
