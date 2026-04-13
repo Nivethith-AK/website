@@ -81,6 +81,9 @@ export default function AdminProjectsPage() {
   return (
     <AdminShell title="Project Grid" subtitle="Monitor and update admin-managed delivery lanes.">
       <div className="mb-4 flex flex-wrap gap-2">
+        <Button size="sm" variant="secondary" onClick={() => router.push('/admin/projects/create')}>
+          Create Project
+        </Button>
         {approvedRequests.length > 0 ? (
           approvedRequests.slice(0, 8).map((request) => (
             <Button
