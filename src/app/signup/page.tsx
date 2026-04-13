@@ -245,9 +245,15 @@ export default function SignUp() {
                   )}
 
                   <Field>
-                    <FieldLabel htmlFor="email">Email</FieldLabel>
-                    <Input id="email" type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="email@agency.com" />
-                  </Field>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input id="email" type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="email@agency.com" />
+              </Field>
+
+                  {role === "company" && (
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">
+                      Company accounts require email verification and admin approval before login.
+                    </p>
+                  )}
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <Field>
