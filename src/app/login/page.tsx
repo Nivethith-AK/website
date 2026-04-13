@@ -94,6 +94,9 @@ export default function LoginPage() {
             </Link>
             <h1 className="text-3xl font-black uppercase tracking-tight sm:text-4xl">Sign In</h1>
             <p className="mt-2 text-[10px] uppercase tracking-[0.32em] text-white/55">Secure identity validation</p>
+            <p className="mt-3 text-xs text-white/60">
+              Designers and companies can sign in after email verification and admin approval.
+            </p>
           </div>
 
           <form onSubmit={handleSubmit}>
