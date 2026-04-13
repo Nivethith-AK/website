@@ -3,7 +3,7 @@ import Company from '../models/Company.js';
 
 export const createClientRequest = async (req, res) => {
   try {
-    const { projectTitle, description, requiredDesigners, duration, budget, requiredSkills, preferredExperience } = req.body;
+    const { projectTitle, description, requiredDesigners, duration, budget, requiredSkills, preferredExperience, isPublic } = req.body;
 
     const request = await ClientRequest.create({
       company: req.user.id,
@@ -14,6 +14,7 @@ export const createClientRequest = async (req, res) => {
       budget,
       requiredSkills,
       preferredExperience,
+      isPublic: Boolean(isPublic),
       status: 'New',
     });
 
