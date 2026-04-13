@@ -6,6 +6,7 @@ import { get, put } from "@/lib/api";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -33,13 +34,27 @@ interface Project {
 }
 
 export default function AdminProjectsPage() {
+  const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [approvedRequests, setApprovedRequests] = useState<Array<{ _id: string; projectTitle: string; company?: { companyName?: string } }>>([]);
   const [tab, setTab] = useState("all");
 
   useEffect(() => {
     const fetchProjects = async () => {
-      const response = await get<Project[]>("/admin/projects");
-      if (response.success && response.data) setProjects(response.data);
+      const [projectsResponse, requestsResponse] = await Promise.all([
+        get<any>("/admin/projects?limit=300"),
+        get<any>("/admin/requests?status=Approved&limit=300"),
+      ]);
+
+      if (projectsResponse.success) {
+        const list = Array.isArray(projectsResponse.data) ? projectsResponse.data : projectsResponse.data?.data || [];
+        setProjects(list);
+      }
+
+      if (requestsResponse.success) {
+        const list = Array.isArray(requestsResponse.data) ? requestsResponse.data : requestsResponse.data?.data || [];
+        setApprovedRequests(list);
+      }
     };
     fetchProjects();
   }, []);
@@ -54,7 +69,24 @@ export default function AdminProjectsPage() {
   };
 
   return (
-    <AdminShell title="Project Grid" subtitle="Monitor and update active delivery lanes.">
+    <AdminShell title="Project Grid" subtitle="Monitor and update admin-managed delivery lanes.">
+      <div className="mb-4 flex flex-wrap gap-2">
+        {approvedRequests.length > 0 ? (
+          approvedRequests.slice(0, 8).map((request) => (
+            <Button
+              key={request._id}
+              size="sm"
+              variant="outline"
+              onClick={() => router.push(`/admin/projects/assign?requestId=${request._id}`)}
+            >
+              Assign: {request.projectTitle}
+            </Button>
+          ))
+        ) : (
+          <Badge variant="default">No approved requests waiting for assignment</Badge>
+        )}
+      </div>
+
       <Tabs value={tab} onValueChange={setTab} className="mb-4">
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
