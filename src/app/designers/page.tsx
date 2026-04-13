@@ -3,9 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { get } from "@/lib/api";
-import { Search, Sparkles, CircleCheck } from "lucide-react";
+import { Search, Sparkles, CircleCheck, MessageSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/Card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { post } from "@/lib/api";
 
 interface Designer {
   _id: string;
@@ -33,10 +38,26 @@ interface Opportunity {
     industry?: string;
   };
   company?: {
+    _id?: string;
     companyName?: string;
     contactPerson?: string;
     industry?: string;
+    email?: string;
+    phone?: string;
+    website?: string;
+    description?: string;
   };
+}
+
+interface CompanyProfile {
+  _id: string;
+  companyName: string;
+  industry: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  website?: string;
+  description?: string;
 }
 
 const experienceOptions = ["Student", "Intern", "Professional"];
@@ -49,6 +70,10 @@ export default function DesignersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [selectedExperience, setSelectedExperience] = useState<string>("");
+  const [activeOpportunity, setActiveOpportunity] = useState<Opportunity | null>(null);
+  const [message, setMessage] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     const fetchDesigners = async () => {
@@ -82,6 +107,52 @@ export default function DesignersPage() {
       return (nameMatch || skillMatch) && experienceMatch;
     });
   }, [designers, query, selectedExperience]);
+
+  const selectedCompany = useMemo<CompanyProfile | null>(() => {
+    if (!activeOpportunity?.company?._id) {
+      return null;
+    }
+
+    return {
+      _id: activeOpportunity.company._id,
+      companyName: activeOpportunity.company.companyName || "Fashion Company",
+      industry: activeOpportunity.company.industry || "Fashion",
+      contactPerson: activeOpportunity.company.contactPerson || "Hiring Team",
+      email: activeOpportunity.company.email || "Not listed",
+      phone: activeOpportunity.company.phone || "Not listed",
+      website: activeOpportunity.company.website,
+      description: activeOpportunity.company.description,
+    };
+  }, [activeOpportunity]);
+
+  const openContactDialog = (job: Opportunity) => {
+    setActiveOpportunity(job);
+    setMessage(`Hi ${job.company?.contactPerson || "team"}, I am interested in ${job.projectTitle}.`);
+    setActionMessage("");
+  };
+
+  const sendMessage = async () => {
+    if (!activeOpportunity?.company?._id || !message.trim()) {
+      return;
+    }
+
+    setIsSending(true);
+    setActionMessage("");
+
+    const response = await post("/messages", {
+      receiverId: activeOpportunity.company._id,
+      message: message.trim(),
+    });
+
+    if (response.success) {
+      setActionMessage("Message sent. The company can now respond in your inbox flow.");
+      setMessage("");
+    } else {
+      setActionMessage(response.message || "Unable to send message. Please login as a designer and try again.");
+    }
+
+    setIsSending(false);
+  };
 
   return (
     <div className="min-h-screen bg-background pt-36 text-foreground">
@@ -162,6 +233,7 @@ export default function DesignersPage() {
                   {opportunities.map((job) => {
                     const summary = (job.projectDescription || job.description || "").trim();
                     const companyName = job.companyId?.companyName || job.company?.companyName || "Fashion Company";
+                    const budgetText = typeof job.budget === "number" ? `$${job.budget.toLocaleString()}` : "Budget on request";
 
                     return (
                       <Card key={job._id} className="lux-glass rounded-2xl p-5">
@@ -173,6 +245,13 @@ export default function DesignersPage() {
                             Need: {job.designersNeeded || job.requiredDesigners || 1}
                           </span>
                           <span className="rounded-full border border-white/12 px-2 py-1">{companyName}</span>
+                          <span className="rounded-full border border-white/12 px-2 py-1">{budgetText}</span>
+                        </div>
+                        <div className="mt-4 flex gap-2">
+                          <Button size="sm" variant="secondary" onClick={() => openContactDialog(job)}>
+                            <MessageSquare size={14} className="mr-1" />
+                            Apply / Contact
+                          </Button>
                         </div>
                       </Card>
                     );
@@ -245,6 +324,66 @@ export default function DesignersPage() {
             )}
           </>
         )}
+
+        <Dialog
+          open={Boolean(activeOpportunity)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setActiveOpportunity(null);
+              setActionMessage("");
+            }
+          }}
+        >
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Contact Company</DialogTitle>
+              <DialogDescription>
+                Send your pitch directly for <span className="font-semibold text-white">{activeOpportunity?.projectTitle || "this opportunity"}</span>.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              {selectedCompany ? (
+                <Card className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-sm font-black uppercase tracking-[0.14em]">{selectedCompany.companyName}</p>
+                    <Badge variant="accent">{selectedCompany.industry}</Badge>
+                  </div>
+                  <div className="space-y-1 text-sm text-white/70">
+                    <p>Contact: {selectedCompany.contactPerson}</p>
+                    <p>Email: {selectedCompany.email}</p>
+                    <p>Phone: {selectedCompany.phone}</p>
+                    {selectedCompany.website ? <p>Website: {selectedCompany.website}</p> : null}
+                    {selectedCompany.description ? <p>{selectedCompany.description}</p> : null}
+                  </div>
+                </Card>
+              ) : (
+                <p className="text-sm text-amber-200">Company details are unavailable for this opportunity.</p>
+              )}
+
+              <div>
+                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Message</p>
+                <Textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Introduce your profile, relevant experience, and availability."
+                  className="min-h-[120px]"
+                />
+              </div>
+
+              {actionMessage ? <p className="text-sm text-white/75">{actionMessage}</p> : null}
+
+              <div className="flex gap-2">
+                <Button variant="secondary" onClick={sendMessage} isLoading={isSending} disabled={!activeOpportunity?.company?._id || !message.trim()}>
+                  Send Message
+                </Button>
+                <Button variant="outline" onClick={() => setActiveOpportunity(null)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </section>
     </div>
   );
