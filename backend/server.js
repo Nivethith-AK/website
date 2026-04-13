@@ -7,6 +7,7 @@ import http from 'http';
 import connectDB from './config/database.js';
 import { ensureAdminUser } from './config/adminSeed.js';
 import { initSocket } from './socket.js';
+import { getAllowedOrigins, isAllowedOrigin } from './config/origins.js';
 
 // Routes
 import authRoutes from './routes/auth.js';
@@ -31,9 +32,13 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(
   cors({
-    origin: process.env.NODE_ENV === 'production' 
-      ? 'https://yourdomain.com' 
-      : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001'],
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin ${origin}`));
+    },
     credentials: true,
   })
 );
@@ -69,7 +74,10 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
-  await connectDB();
+  const db = await connectDB();
+  if (!db && process.env.NODE_ENV === 'production') {
+    throw new Error('MongoDB connection is required in production');
+  }
   await ensureAdminUser();
   initSocket(httpServer);
 
