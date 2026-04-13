@@ -245,7 +245,7 @@ export function InboxPanel({
                 <div className="py-10 text-center text-sm text-white/60">No messages yet. Start the conversation below.</div>
               ) : (
                 messages.map((item) => {
-                  const isMine = getUserId(item.senderId) !== selectedPartnerId;
+                  const isMine = getUserId(item.receiverId) === selectedPartnerId;
 
                   return (
                     <div key={item._id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
