@@ -165,7 +165,7 @@ export function InboxPanel({
     await fetchMessages(partnerId);
   }, [fetchMessages, selectedPartnerId]);
 
-  const onSend = useCallback(async () => {
+  const onSend = async () => {
     if (!selectedPartnerId || (!draft.trim() && attachmentFiles.length === 0)) return;
 
     setIsSending(true);
@@ -203,7 +203,7 @@ export function InboxPanel({
     }
 
     setIsSending(false);
-  }, [attachmentFiles.length, draft, fetchConversations, selectedPartnerId]);
+  };
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
