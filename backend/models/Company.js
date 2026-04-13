@@ -34,6 +34,26 @@ const companySchema = new mongoose.Schema({
       ref: 'ClientRequest',
     },
   ],
+  portfolio: [
+    {
+      image: {
+        type: String,
+        required: true,
+      },
+      title: {
+        type: String,
+        required: true,
+      },
+      description: {
+        type: String,
+        default: '',
+      },
+      uploadedAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
   assignedDesigners: [
     {
       type: mongoose.Schema.Types.ObjectId,
