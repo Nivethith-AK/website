@@ -159,61 +159,88 @@ export default function DesignersPage() {
             <p className="text-white/55">Try adjusting filters or searching with a different keyword.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredDesigners.map((designer) => (
-              <motion.div
-                key={designer._id}
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.28, ease }}
-              >
-                <Card className="lux-glass lux-glow-hover rounded-2xl p-5 h-full">
-                  <div className="mb-4 flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 overflow-hidden rounded-xl border border-white/15 bg-white/5">
-                        {designer.profileImage ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={designer.profileImage} alt={designer.firstName} className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-sm font-black uppercase text-white/55">
-                            {designer.firstName?.[0]}
-                            {designer.lastName?.[0]}
-                          </div>
-                        )}
+          <>
+            {opportunities.length > 0 && (
+              <div className="mb-10">
+                <h2 className="mb-4 text-2xl font-black uppercase tracking-tight">Fashion Opportunities</h2>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {opportunities.map((job) => (
+                    <Card key={job._id} className="lux-glass rounded-2xl p-5">
+                      <p className="text-lg font-black uppercase leading-tight">{job.projectTitle}</p>
+                      <p className="mt-2 text-sm text-white/60">
+                        {(job.projectDescription || job.description || '').slice(0, 120)}...
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.14em] text-white/70">
+                        <span className="rounded-full border border-white/12 px-2 py-1">{job.duration}</span>
+                        <span className="rounded-full border border-white/12 px-2 py-1">
+                          Need: {job.designersNeeded || job.requiredDesigners || 1}
+                        </span>
+                        <span className="rounded-full border border-white/12 px-2 py-1">
+                          {job.companyId?.companyName || job.company?.companyName || 'Fashion Company'}
+                        </span>
                       </div>
-                      <div>
-                        <p className="text-lg font-black uppercase leading-tight">
-                          {designer.firstName} {designer.lastName}
-                        </p>
-                        <p className="text-[10px] uppercase tracking-[0.24em] text-white/50">{designer.experienceLevel}</p>
-                      </div>
-                    </div>
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] ${
-                        (designer.availability || "Available") === "Available"
-                          ? "border border-emerald-300/30 bg-emerald-400/10 text-emerald-200"
-                          : "border border-amber-300/30 bg-amber-400/10 text-amber-200"
-                      }`}
-                    >
-                      <CircleCheck size={11} />
-                      {designer.availability || "Available"}
-                    </span>
-                  </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
 
-                  <div className="flex flex-wrap gap-2">
-                    {(designer.skills || []).slice(0, 5).map((skill) => (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {filteredDesigners.map((designer) => (
+                <motion.div
+                  key={designer._id}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.28, ease }}
+                >
+                  <Card className="lux-glass lux-glow-hover rounded-2xl p-5 h-full">
+                    <div className="mb-4 flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 overflow-hidden rounded-xl border border-white/15 bg-white/5">
+                          {designer.profileImage ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={designer.profileImage} alt={designer.firstName} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-sm font-black uppercase text-white/55">
+                              {designer.firstName?.[0]}
+                              {designer.lastName?.[0]}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-lg font-black uppercase leading-tight">
+                            {designer.firstName} {designer.lastName}
+                          </p>
+                          <p className="text-[10px] uppercase tracking-[0.24em] text-white/50">{designer.experienceLevel}</p>
+                        </div>
+                      </div>
                       <span
-                        key={skill}
-                        className="rounded-full border border-white/12 bg-white/[0.04] px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-white/70"
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] ${
+                          (designer.availability || "Available") === "Available"
+                            ? "border border-emerald-300/30 bg-emerald-400/10 text-emerald-200"
+                            : "border border-amber-300/30 bg-amber-400/10 text-amber-200"
+                        }`}
                       >
-                        {skill}
+                        <CircleCheck size={11} />
+                        {designer.availability || "Available"}
                       </span>
-                    ))}
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {(designer.skills || []).slice(0, 5).map((skill) => (
+                        <span
+                          key={skill}
+                          className="rounded-full border border-white/12 bg-white/[0.04] px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-white/70"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </>
         )}
       </section>
     </div>
