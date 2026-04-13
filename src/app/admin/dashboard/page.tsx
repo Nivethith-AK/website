@@ -134,7 +134,7 @@ export default function AdminDashboard() {
               {[
                 { label: "Review Designers", href: "/admin/designers" },
                 { label: "Review Companies", href: "/admin/companies" },
-                { label: "Handle Requests", href: "/admin/requests" },
+                { label: "Handle New Requests", href: "/admin/requests" },
                 { label: "Manage Projects", href: "/admin/projects" },
                 { label: "Private Messages", href: "/admin/messages" },
               ].map((action) => (

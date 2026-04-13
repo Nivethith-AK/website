@@ -34,6 +34,15 @@ interface RequestItem {
   };
 }
 
+const statusOrder: Record<string, number> = {
+  New: 0,
+  Pending: 1,
+  Approved: 2,
+  "In Progress": 3,
+  Completed: 4,
+  Rejected: 5,
+};
+
 export default function AdminRequestsPage() {
   const router = useRouter();
   const [requests, setRequests] = useState<RequestItem[]>([]);
@@ -43,10 +52,11 @@ export default function AdminRequestsPage() {
 
   useEffect(() => {
     const fetchRequests = async () => {
-      const response = await get<any>("/admin/requests?limit=200");
+      const response = await get<any>("/admin/requests?status=New&limit=200");
       if (response.success) {
         const list = Array.isArray(response.data) ? response.data : response.data?.data || [];
-        setRequests(list);
+        const sorted = [...list].sort((a, b) => (statusOrder[a.status] || 999) - (statusOrder[b.status] || 999));
+        setRequests(sorted);
       }
     };
     fetchRequests();
