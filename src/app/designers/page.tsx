@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { get } from "@/lib/api";
+import { get, post } from "@/lib/api";
 import { Search, Sparkles, CircleCheck, MessageSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/Card";
@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { post } from "@/lib/api";
 
 interface Designer {
   _id: string;
