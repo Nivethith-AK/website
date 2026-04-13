@@ -94,9 +94,7 @@ npm run dev
 
 ### Test Accounts
 ```
-Designer: designer@test.com / password123
-Company: company@test.com / password123
-Admin: admin@auramodel.com / password123
+Admin: test@gmail.com / 123456
 ```
 
 ### Popular Routes
@@ -198,17 +196,28 @@ npm run build
 vercel deploy
 ```
 
-### Backend (Heroku/Railway)
+### Backend (Render/Railway)
 ```bash
-git push heroku main
+Deploy the Express backend separately and point the frontend to it.
 ```
 
 ### Environment Variables
 ```
-MONGODB_URI=production_mongodb_url
-JWT_SECRET=production_secret
+### Frontend (Vercel)
+NEXT_PUBLIC_API_URL=https://your-backend-domain.com/api
+NEXTAUTH_URL=https://your-vercel-domain.vercel.app
+NEXTAUTH_SECRET=your_secret
+FRONTEND_URL=https://your-vercel-domain.vercel.app
+
+### Backend (Render/Railway)
+MONGODB_URI=your_mongodb_atlas_uri
+JWT_SECRET=your_secret
+FRONTEND_URL=https://your-vercel-domain.vercel.app
+SMTP_USER=your_gmail_address
+SMTP_PASS=your_gmail_app_password
+SMTP_FROM=your_gmail_address
+PORT=5000
 NODE_ENV=production
-NEXT_PUBLIC_API_URL=https://your-api.com/api
 ```
 
 ---
