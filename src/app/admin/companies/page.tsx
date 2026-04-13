@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { get, patch } from "@/lib/api";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { AdminUserOverviewDialog } from "@/components/admin/AdminUserOverviewDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,8 @@ export default function AdminCompaniesPage() {
   const [companies, setCompanies] = useState<CompanyUser[]>([]);
   const [query, setQuery] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isOverviewOpen, setIsOverviewOpen] = useState(false);
 
   const fetchCompanies = useCallback(async () => {
     const response = await get<any>("/admin/users?role=company&limit=300");
@@ -157,6 +160,16 @@ export default function AdminCompaniesPage() {
                           </Button>
                           <Button
                             size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedUserId(company._id);
+                              setIsOverviewOpen(true);
+                            }}
+                          >
+                            View 360
+                          </Button>
+                          <Button
+                            size="sm"
                             variant="secondary"
                             isLoading={processingId === company._id}
                             onClick={() => approve(company._id)}
@@ -174,6 +187,8 @@ export default function AdminCompaniesPage() {
           </Table>
         </div>
       </motion.div>
+
+      <AdminUserOverviewDialog open={isOverviewOpen} onOpenChange={setIsOverviewOpen} userId={selectedUserId} />
     </AdminShell>
   );
 }
