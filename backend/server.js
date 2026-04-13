@@ -7,7 +7,7 @@ import http from 'http';
 import connectDB from './config/database.js';
 import { ensureAdminUser } from './config/adminSeed.js';
 import { initSocket } from './socket.js';
-import { getAllowedOrigins, isAllowedOrigin } from './config/origins.js';
+import { isAllowedOrigin } from './config/origins.js';
 
 // Routes
 import authRoutes from './routes/auth.js';
