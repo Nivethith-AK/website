@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { get } from "@/lib/api";
+import { get, resolveAssetUrl } from "@/lib/api";
 import { Search, Sparkles, CircleCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/Card";
@@ -98,10 +98,7 @@ export default function DesignersPage() {
     }
   };
 
-  const formatImageUrl = (url?: string) => {
-    if (!url) return null;
-    return url.startsWith("http") ? url : `http://localhost:5000${url}`;
-  };
+  const formatImageUrl = (url?: string) => resolveAssetUrl(url);
 
   return (
     <div className="min-h-screen bg-background pt-36 text-foreground">
