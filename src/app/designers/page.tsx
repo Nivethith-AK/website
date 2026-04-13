@@ -115,19 +115,11 @@ export default function DesignersPage() {
   useEffect(() => {
     const fetchDesigners = async () => {
       setIsLoading(true);
-      const [designersResponse, requestBoardResponse] = await Promise.all([
-        get<Designer[]>("/designers?limit=24"),
-        get<any>("/designers/requests-board?limit=12"),
-      ]);
+      const designersResponse = await get<Designer[]>("/designers?limit=24");
 
       setDesigners(designersResponse.success && designersResponse.data ? designersResponse.data : []);
 
-      if (requestBoardResponse.success) {
-        const list = Array.isArray(requestBoardResponse.data)
-          ? requestBoardResponse.data
-          : requestBoardResponse.data?.data || [];
-        setRequestBoard(list);
-      }
+      setRequestBoard([]);
 
       setIsLoading(false);
     };
@@ -215,9 +207,7 @@ export default function DesignersPage() {
             Curated
             <span className="block text-accent">Global Talent</span>
           </h1>
-          <p className="mt-4 max-w-2xl text-white/65">
-            Explore approved designer profiles and curated client request boards.
-          </p>
+          <p className="mt-4 max-w-2xl text-white/65">Explore approved designer profiles, portfolios, and project history.</p>
         </motion.div>
 
         <motion.div
@@ -339,39 +329,6 @@ export default function DesignersPage() {
               </div>
             )}
 
-            {requestBoard.length > 0 ? (
-              <div className="mt-12">
-                <h2 className="mb-4 text-2xl font-black uppercase tracking-tight">Client Request Board</h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {requestBoard.map((job) => {
-                    const summary = (job.projectDescription || job.description || "").trim();
-                    const companyName = job.companyId?.companyName || job.company?.companyName || "Fashion Company";
-                    const budgetText = typeof job.budget === "number" ? `$${job.budget.toLocaleString()}` : "Budget on request";
-
-                    return (
-                      <Card key={job._id} className="lux-glass rounded-2xl p-5">
-                        <p className="text-lg font-black uppercase leading-tight">{job.projectTitle}</p>
-                        <p className="mt-2 text-sm text-white/60">{summary ? `${summary.slice(0, 120)}...` : "No description provided."}</p>
-                        <div className="mt-3 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.14em] text-white/70">
-                          <span className="rounded-full border border-white/12 px-2 py-1">{job.duration}</span>
-                          <span className="rounded-full border border-white/12 px-2 py-1">
-                            Need: {job.designersNeeded || job.requiredDesigners || 1}
-                          </span>
-                          <span className="rounded-full border border-white/12 px-2 py-1">{companyName}</span>
-                          <span className="rounded-full border border-white/12 px-2 py-1">{budgetText}</span>
-                        </div>
-                        <div className="mt-4 flex gap-2">
-                          <Button size="sm" variant="secondary" onClick={() => openContactDialog(job)}>
-                            <MessageSquare size={14} className="mr-1" />
-                            Contact Company
-                          </Button>
-                        </div>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : null}
           </>
         )}
 
