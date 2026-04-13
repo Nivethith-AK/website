@@ -1,14 +1,12 @@
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === 'production'
-    ? (() => {
-        throw new Error('NEXT_PUBLIC_API_URL is required in production');
-      })()
-    : 'http://localhost:5000/api');
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 export const getApiBaseUrl = () => API_URL;
 
-export const getApiRootUrl = () => getApiBaseUrl().replace(/\/api\/?$/, '');
+export const getApiRootUrl = () => {
+  const base = getApiBaseUrl();
+  if (base.startsWith('/')) return '';
+  return base.replace(/\/api\/?$/, '');
+};
 
 export const resolveAssetUrl = (path?: string | null) => {
   if (!path) return '';
