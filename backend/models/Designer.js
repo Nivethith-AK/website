@@ -44,6 +44,62 @@ const designerSchema = new mongoose.Schema({
       },
     },
   ],
+  cvFile: {
+    type: String,
+    default: '',
+  },
+  experiences: [
+    {
+      company: {
+        type: String,
+        default: '',
+      },
+      role: {
+        type: String,
+        default: '',
+      },
+      startDate: {
+        type: String,
+        default: '',
+      },
+      endDate: {
+        type: String,
+        default: '',
+      },
+      description: {
+        type: String,
+        default: '',
+      },
+    },
+  ],
+  fashionProjects: [
+    {
+      title: {
+        type: String,
+        default: '',
+      },
+      client: {
+        type: String,
+        default: '',
+      },
+      year: {
+        type: String,
+        default: '',
+      },
+      role: {
+        type: String,
+        default: '',
+      },
+      description: {
+        type: String,
+        default: '',
+      },
+      link: {
+        type: String,
+        default: '',
+      },
+    },
+  ],
   bio: {
     type: String,
     maxlength: 500,
