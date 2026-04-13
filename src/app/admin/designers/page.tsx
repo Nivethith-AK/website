@@ -135,7 +135,7 @@ export default function AdminDesignersPage() {
                     <TableCell className="font-semibold uppercase">{designer.firstName} {designer.lastName}</TableCell>
                     <TableCell className="text-white/70">{designer.email}</TableCell>
                     <TableCell>
-                      <Badge variant="purple">{designer.experienceLevel}</Badge>
+                      <Badge variant="purple">{designer.experienceLevel || "N/A"}</Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1.5">
@@ -146,14 +146,16 @@ export default function AdminDesignersPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => reject(designer._id)}
-                          disabled={processingId === designer._id}
-                        >
-                          Reject
-                        </Button>
+                        {tab === "pending" ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => reject(designer._id)}
+                            disabled={processingId === designer._id}
+                          >
+                            Reject
+                          </Button>
+                        ) : null}
                         <Button
                           size="sm"
                           variant="outline"
@@ -164,14 +166,18 @@ export default function AdminDesignersPage() {
                         >
                           View 360
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="primary"
-                          isLoading={processingId === designer._id}
-                          onClick={() => approve(designer._id)}
-                        >
-                          Approve
-                        </Button>
+                        {tab === "pending" ? (
+                          <Button
+                            size="sm"
+                            variant="primary"
+                            isLoading={processingId === designer._id}
+                            onClick={() => approve(designer._id)}
+                          >
+                            Approve
+                          </Button>
+                        ) : (
+                          <Badge variant={designer.isApproved ? "success" : "warning"}>{designer.isApproved ? "Approved" : "Pending"}</Badge>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
