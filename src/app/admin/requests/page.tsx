@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { get, put } from "@/lib/api";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +44,6 @@ const statusOrder: Record<string, number> = {
 };
 
 export default function AdminRequestsPage() {
-  const router = useRouter();
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [query, setQuery] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
