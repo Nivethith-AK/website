@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { get, post } from "@/lib/api";
-import { Search, Sparkles, CircleCheck, MessageSquare } from "lucide-react";
+import { get } from "@/lib/api";
+import { Search, Sparkles, CircleCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/ui/button";
@@ -59,58 +59,16 @@ interface Designer {
   }>;
 }
 
-interface Opportunity {
-  _id: string;
-  projectTitle: string;
-  projectDescription?: string;
-  description?: string;
-  designersNeeded?: number;
-  requiredDesigners?: number;
-  duration: string;
-  budget?: number;
-  companyId?: {
-    companyName?: string;
-    contactPerson?: string;
-    industry?: string;
-  };
-  company?: {
-    _id?: string;
-    companyName?: string;
-    contactPerson?: string;
-    industry?: string;
-    email?: string;
-    phone?: string;
-    website?: string;
-    description?: string;
-  };
-}
-
-interface CompanyProfile {
-  _id: string;
-  companyName: string;
-  industry: string;
-  contactPerson: string;
-  email: string;
-  phone: string;
-  website?: string;
-  description?: string;
-}
-
 const experienceOptions = ["Student", "Intern", "Professional"];
 
 const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function DesignersPage() {
   const [designers, setDesigners] = useState<Designer[]>([]);
-  const [requestBoard, setRequestBoard] = useState<Opportunity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [selectedExperience, setSelectedExperience] = useState<string>("");
-  const [activeOpportunity, setActiveOpportunity] = useState<Opportunity | null>(null);
   const [activeDesigner, setActiveDesigner] = useState<Designer | null>(null);
-  const [message, setMessage] = useState("");
-  const [actionMessage, setActionMessage] = useState("");
-  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     const fetchDesigners = async () => {
@@ -118,8 +76,6 @@ export default function DesignersPage() {
       const designersResponse = await get<Designer[]>("/designers?limit=24");
 
       setDesigners(designersResponse.success && designersResponse.data ? designersResponse.data : []);
-
-      setRequestBoard([]);
 
       setIsLoading(false);
     };
@@ -137,57 +93,11 @@ export default function DesignersPage() {
     });
   }, [designers, query, selectedExperience]);
 
-  const selectedCompany = useMemo<CompanyProfile | null>(() => {
-    if (!activeOpportunity?.company?._id) {
-      return null;
-    }
-
-    return {
-      _id: activeOpportunity.company._id,
-      companyName: activeOpportunity.company.companyName || "Fashion Company",
-      industry: activeOpportunity.company.industry || "Fashion",
-      contactPerson: activeOpportunity.company.contactPerson || "Hiring Team",
-      email: activeOpportunity.company.email || "Not listed",
-      phone: activeOpportunity.company.phone || "Not listed",
-      website: activeOpportunity.company.website,
-      description: activeOpportunity.company.description,
-    };
-  }, [activeOpportunity]);
-
-  const openContactDialog = (job: Opportunity) => {
-    setActiveOpportunity(job);
-    setMessage(`Hi ${job.company?.contactPerson || "team"}, I am interested in ${job.projectTitle}.`);
-    setActionMessage("");
-  };
-
   const openDesignerDialog = async (designerId: string) => {
     const response = await get<Designer>(`/designers/${designerId}`);
     if (response.success && response.data) {
       setActiveDesigner(response.data);
     }
-  };
-
-  const sendMessage = async () => {
-    if (!activeOpportunity?.company?._id || !message.trim()) {
-      return;
-    }
-
-    setIsSending(true);
-    setActionMessage("");
-
-    const response = await post("/messages", {
-      receiverId: activeOpportunity.company._id,
-      message: message.trim(),
-    });
-
-    if (response.success) {
-      setActionMessage("Message sent. The company can now respond in your inbox flow.");
-      setMessage("");
-    } else {
-      setActionMessage(response.message || "Unable to send message. Please login as a designer and try again.");
-    }
-
-    setIsSending(false);
   };
 
   return (
@@ -331,66 +241,6 @@ export default function DesignersPage() {
 
           </>
         )}
-
-        <Dialog
-          open={Boolean(activeOpportunity)}
-          onOpenChange={(open) => {
-            if (!open) {
-              setActiveOpportunity(null);
-              setActionMessage("");
-            }
-          }}
-        >
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Contact Company</DialogTitle>
-              <DialogDescription>
-                Send your message directly for <span className="font-semibold text-white">{activeOpportunity?.projectTitle || "this request"}</span>.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              {selectedCompany ? (
-                <Card className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                  <div className="mb-2 flex items-center justify-between">
-                    <p className="text-sm font-black uppercase tracking-[0.14em]">{selectedCompany.companyName}</p>
-                    <Badge variant="accent">{selectedCompany.industry}</Badge>
-                  </div>
-                  <div className="space-y-1 text-sm text-white/70">
-                    <p>Contact: {selectedCompany.contactPerson}</p>
-                    <p>Email: {selectedCompany.email}</p>
-                    <p>Phone: {selectedCompany.phone}</p>
-                    {selectedCompany.website ? <p>Website: {selectedCompany.website}</p> : null}
-                    {selectedCompany.description ? <p>{selectedCompany.description}</p> : null}
-                  </div>
-                </Card>
-              ) : (
-                <p className="text-sm text-amber-200">Company details are unavailable for this request.</p>
-              )}
-
-              <div>
-                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Message</p>
-                <Textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Introduce your profile, relevant experience, and availability."
-                  className="min-h-[120px]"
-                />
-              </div>
-
-              {actionMessage ? <p className="text-sm text-white/75">{actionMessage}</p> : null}
-
-              <div className="flex gap-2">
-                <Button variant="secondary" onClick={sendMessage} isLoading={isSending} disabled={!activeOpportunity?.company?._id || !message.trim()}>
-                  Send Message
-                </Button>
-                <Button variant="outline" onClick={() => setActiveOpportunity(null)}>
-                  Close
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
 
         <Dialog
           open={Boolean(activeDesigner)}
