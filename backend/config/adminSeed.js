@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import User from '../models/User.js';
-import '../models/Admin.js';
+import Admin from '../models/Admin.js';
+import Company from '../models/Company.js';
 
 const DEFAULT_ADMIN_EMAIL = 'admin@gmail.com';
 const DEFAULT_ADMIN_PASSWORD = 'admin';
@@ -17,7 +18,7 @@ export const ensureAdminUser = async () => {
     const existing = await User.findOne({ email: DEFAULT_ADMIN_EMAIL }).select('+password');
 
     if (!existing) {
-      await User.create({
+      await Admin.create({
         name: 'Admin',
         email: DEFAULT_ADMIN_EMAIL,
         password: DEFAULT_ADMIN_PASSWORD,
@@ -44,13 +45,18 @@ export const ensureAdminUser = async () => {
     const existingTest = await User.findOne({ email: DEFAULT_TEST_EMAIL }).select('+password');
 
     if (!existingTest) {
-      await User.create({
+      await Company.create({
         name: 'Test User',
         email: DEFAULT_TEST_EMAIL,
         password: DEFAULT_TEST_PASSWORD,
         role: 'company',
         isApproved: true,
         isVerified: true,
+        companyName: 'Test Fashion House',
+        industry: 'Fashion',
+        contactPerson: 'Test User',
+        phone: 'N/A',
+        address: 'N/A',
       });
       console.log('Default test user created: test@gmail.com');
       return;
