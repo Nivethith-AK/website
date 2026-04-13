@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { get, put } from "@/lib/api";
 import { Input } from "@/components/ui/input";
@@ -19,11 +19,15 @@ import { Search } from "lucide-react";
 
 interface Designer {
   _id: string;
+  name?: string;
   firstName: string;
   lastName: string;
   email: string;
   experienceLevel: string;
   skills: string[];
+  isVerified?: boolean;
+  isApproved?: boolean;
+  rejectionReason?: string;
 }
 
 export default function AdminDesignersPage() {
@@ -55,10 +59,14 @@ export default function AdminDesignersPage() {
     setProcessingId(null);
   };
 
-  const filtered = designers.filter((d) => {
+  const filtered = useMemo(() => {
     const v = query.toLowerCase();
-    return `${d.firstName} ${d.lastName}`.toLowerCase().includes(v) || d.email.toLowerCase().includes(v);
-  });
+
+    return designers.filter((d) => {
+      const fullName = d.firstName && d.lastName ? `${d.firstName} ${d.lastName}` : d.name || "";
+      return fullName.toLowerCase().includes(v) || d.email.toLowerCase().includes(v);
+    });
+  }, [designers, query]);
 
   return (
     <AdminShell
@@ -95,9 +103,7 @@ export default function AdminDesignersPage() {
               ) : (
                 filtered.map((designer) => (
                   <TableRow key={designer._id}>
-                    <TableCell className="font-semibold uppercase">
-                      {designer.firstName} {designer.lastName}
-                    </TableCell>
+                    <TableCell className="font-semibold uppercase">{designer.firstName} {designer.lastName}</TableCell>
                     <TableCell className="text-white/70">{designer.email}</TableCell>
                     <TableCell>
                       <Badge variant="purple">{designer.experienceLevel}</Badge>
