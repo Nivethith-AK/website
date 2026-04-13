@@ -52,5 +52,5 @@ while ($true) {
     }
   }
 
-  Wait-Event -Timeout $IntervalSeconds | Out-Null
+  Start-Sleep -Seconds $IntervalSeconds
 }
