@@ -99,6 +99,8 @@ export default function DesignerDashboardPage() {
   const [inboxUnread, setInboxUnread] = useState(0);
   const [isUploadingCv, setIsUploadingCv] = useState(false);
   const [cvMessage, setCvMessage] = useState("");
+  const [isUploadingProfileImage, setIsUploadingProfileImage] = useState(false);
+  const [profileImageMessage, setProfileImageMessage] = useState("");
 
   const [form, setForm] = useState({
     firstName: "",
@@ -257,6 +259,25 @@ export default function DesignerDashboardPage() {
     }
 
     setIsUploadingCv(false);
+  };
+
+  const uploadProfileImage = async (file: File | null) => {
+    if (!file) return;
+    setIsUploadingProfileImage(true);
+    setProfileImageMessage("");
+
+    const formData = new FormData();
+    formData.append("profileImage", file);
+
+    const response = await upload<DesignerProfile>("/designers/upload/profile-image", formData);
+    if (response.success && response.data) {
+      setProfile(response.data);
+      setProfileImageMessage("Profile image updated.");
+    } else {
+      setProfileImageMessage(response.message || "Unable to update profile image.");
+    }
+
+    setIsUploadingProfileImage(false);
   };
 
   const activeCount = useMemo(() => profile?.assignedProjects?.filter((p) => p.status !== "Completed").length || 0, [profile]);
@@ -518,6 +539,28 @@ export default function DesignerDashboardPage() {
                 ) : (
                   <div className="space-y-5">
                     <div>
+                      <div className="mb-3 flex items-center gap-3">
+                        <div className="h-14 w-14 overflow-hidden rounded-xl border border-white/15 bg-white/5">
+                          {profile.profileImage ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={profile.profileImage.startsWith("http") ? profile.profileImage : `http://localhost:5000${profile.profileImage}`}
+                              alt={`${profile.firstName} ${profile.lastName}`}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : null}
+                        </div>
+                        <div>
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => uploadProfileImage(e.target.files?.[0] || null)}
+                            disabled={isUploadingProfileImage}
+                          />
+                          {profileImageMessage ? <p className="mt-1 text-xs text-white/70">{profileImageMessage}</p> : null}
+                        </div>
+                      </div>
+
                       <p className="text-3xl font-black uppercase">
                         {profile.firstName} {profile.lastName}
                       </p>
