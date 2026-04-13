@@ -245,25 +245,7 @@ If you are moving to Supabase-only backend, set these first:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (server only)
 
-Required table for current login/signup flow:
-```sql
-create table if not exists public.profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
-  email text unique not null,
-  role text not null check (role in ('admin','designer','company')),
-  is_approved boolean not null default false,
-  first_name text,
-  last_name text,
-  experience_level text,
-  company_name text,
-  contact_person text,
-  phone text,
-  address text,
-  industry text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-```
+Run the full schema in `supabase/schema.sql` (includes profiles, requests, projects, messages, vacancies, and RLS policies).
 
 In this mode, app logic should use Supabase Auth + Postgres + Storage + Realtime directly, and `NEXT_PUBLIC_API_URL` is not required unless you keep legacy Express routes.
 
