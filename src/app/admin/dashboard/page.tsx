@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { BarChart3, Briefcase, CheckCircle2, Clock3, Users } from "lucide-react";
-import { get } from "@/lib/api";
+import { get, resolveAssetUrl } from "@/lib/api";
 import { Card } from "@/components/Card";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Badge } from "@/components/ui/badge";
@@ -92,7 +92,7 @@ export default function AdminDashboard() {
     setIsPurging(true);
     setPurgeMessage("");
 
-    const response = await fetch("http://localhost:5000/api/admin/users/purge-by-email", {
+    const response = await fetch(resolveAssetUrl('/api/admin/users/purge-by-email'), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
