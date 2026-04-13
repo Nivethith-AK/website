@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { post } from "@/lib/api";
+import { signUpWithProfile } from "@/lib/supabase-auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/Card";
 import {
@@ -71,38 +71,30 @@ export default function SignUp() {
     setIsLoading(true);
 
     try {
-      const endpoint = role === "designer" ? "/auth/register/designer" : "/auth/register/company";
-
-      const payload =
-        role === "designer"
-          ? {
-              email: formData.email,
-              password: formData.password,
-              firstName: formData.firstName,
-              lastName: formData.lastName,
-              experienceLevel: formData.experienceLevel,
-            }
-          : {
-              email: formData.email,
-              password: formData.password,
-              companyName: formData.companyName,
-              contactPerson: formData.contactPerson,
-              phone: formData.phone,
-              address: formData.address,
-              industry: formData.industry,
-            };
-
-      const response = await post(endpoint, payload);
-
-      if (response.success && response.token) {
-        localStorage.removeItem("token");
-        setSuccess(true);
-        setTimeout(() => {
-          router.push("/login");
-        }, 1200);
-      } else {
-        setError(response.message || "Sign up failed. Please try again.");
+      if (!role) {
+        setError("Select a role before continuing.");
+        return;
       }
+
+      await signUpWithProfile({
+        role,
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        experienceLevel: formData.experienceLevel,
+        companyName: formData.companyName,
+        contactPerson: formData.contactPerson,
+        phone: formData.phone,
+        address: formData.address,
+        industry: formData.industry,
+      });
+
+      localStorage.removeItem("token");
+      setSuccess(true);
+      setTimeout(() => {
+        router.push("/login");
+      }, 1200);
     } catch (err: any) {
       setError(err.message || "An error occurred during sign up");
     } finally {

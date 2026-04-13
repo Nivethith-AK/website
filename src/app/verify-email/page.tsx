@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { get } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
 
 function VerifyEmailContent() {
   const params = useSearchParams();
@@ -22,13 +22,17 @@ function VerifyEmailContent() {
         return;
       }
 
-      const response = await get(`/auth/verify-email?token=${encodeURIComponent(token)}`);
-      if (response.success) {
+      const { error } = await supabase.auth.verifyOtp({
+        token_hash: token,
+        type: "email",
+      });
+
+      if (!error) {
         setStatus("success");
         setMessage("Email verified successfully. Your account now waits for admin approval.");
       } else {
         setStatus("error");
-        setMessage(response.message || "Email verification failed.");
+        setMessage(error.message || "Email verification failed.");
       }
     };
 
