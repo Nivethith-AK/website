@@ -51,15 +51,16 @@ export default function AdminRequestsPage() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [tab, setTab] = useState("new");
 
+  const fetchRequests = async () => {
+    const response = await get<any>("/admin/requests?limit=200");
+    if (response.success) {
+      const list = Array.isArray(response.data) ? response.data : response.data?.data || [];
+      const sorted = [...list].sort((a, b) => (statusOrder[a.status] || 999) - (statusOrder[b.status] || 999));
+      setRequests(sorted);
+    }
+  };
+
   useEffect(() => {
-    const fetchRequests = async () => {
-      const response = await get<any>("/admin/requests?limit=200");
-      if (response.success) {
-        const list = Array.isArray(response.data) ? response.data : response.data?.data || [];
-        const sorted = [...list].sort((a, b) => (statusOrder[a.status] || 999) - (statusOrder[b.status] || 999));
-        setRequests(sorted);
-      }
-    };
     fetchRequests();
   }, []);
 
@@ -76,7 +77,9 @@ export default function AdminRequestsPage() {
   const approve = async (id: string) => {
     setProcessingId(id);
     const response = await put(`/admin/requests/${id}/approve`, {});
-    if (response.success) setRequests((prev) => prev.map((r) => (r._id === id ? { ...r, status: "Approved" } : r)));
+    if (response.success) {
+      await fetchRequests();
+    }
     setProcessingId(null);
   };
 
@@ -85,7 +88,9 @@ export default function AdminRequestsPage() {
     if (reason === null) return;
     setProcessingId(id);
     const response = await put(`/admin/requests/${id}/reject`, { rejectionReason: reason });
-    if (response.success) setRequests((prev) => prev.map((r) => (r._id === id ? { ...r, status: "Rejected" } : r)));
+    if (response.success) {
+      await fetchRequests();
+    }
     setProcessingId(null);
   };
 
@@ -177,14 +182,6 @@ export default function AdminRequestsPage() {
                                 Approve
                               </Button>
                             </div>
-                          ) : r.status === "Approved" ? (
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => router.push(`/admin/projects/assign?requestId=${r._id}`)}
-                            >
-                              Assign
-                            </Button>
                           ) : (
                             <span className="text-xs text-white/45">Closed</span>
                           )}
