@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { AdminUserOverviewDialog } from "@/components/admin/AdminUserOverviewDialog";
 import { Search } from "lucide-react";
 
 interface Designer {
@@ -34,6 +35,8 @@ export default function AdminDesignersPage() {
   const [designers, setDesigners] = useState<Designer[]>([]);
   const [query, setQuery] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isOverviewOpen, setIsOverviewOpen] = useState(false);
 
   useEffect(() => {
     const fetchDesigners = async () => {
@@ -127,6 +130,16 @@ export default function AdminDesignersPage() {
                         </Button>
                         <Button
                           size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedUserId(designer._id);
+                            setIsOverviewOpen(true);
+                          }}
+                        >
+                          View 360
+                        </Button>
+                        <Button
+                          size="sm"
                           variant="primary"
                           isLoading={processingId === designer._id}
                           onClick={() => approve(designer._id)}
@@ -142,6 +155,8 @@ export default function AdminDesignersPage() {
           </Table>
         </div>
       </motion.div>
+
+      <AdminUserOverviewDialog open={isOverviewOpen} onOpenChange={setIsOverviewOpen} userId={selectedUserId} />
     </AdminShell>
   );
 }
