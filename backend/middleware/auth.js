@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
-export const authMiddleware = (req, res, next) => {
+export const authMiddleware = async (req, res, next) => {
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -16,7 +17,36 @@ export const authMiddleware = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    const user = await User.findById(decoded.id).select('_id role isApproved isVerified');
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not found for this token',
+      });
+    }
+
+    if (user.role !== 'admin' && !user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: 'Please verify your email before accessing this route',
+      });
+    }
+
+    if (user.role !== 'admin' && !user.isApproved) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account is pending admin approval',
+      });
+    }
+
+    req.user = {
+      id: user._id.toString(),
+      role: user.role,
+      isApproved: user.isApproved,
+      isVerified: user.isVerified,
+    };
+
     next();
   } catch {
     return res.status(401).json({
