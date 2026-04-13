@@ -66,8 +66,8 @@ export default function AdminDashboard() {
 
   const metricCards = [
     { label: "Designers", value: stats?.totalDesigners || 0, icon: Users, tone: "accent" as const },
-    { label: "Pending Review", value: stats?.pendingDesigners || 0, icon: Clock3, tone: "warning" as const },
-    { label: "Pending Companies", value: stats?.pendingCompanies || 0, icon: Briefcase, tone: "warning" as const },
+    { label: "Pending Designers", value: stats?.pendingDesigners || 0, icon: Clock3, tone: "warning" as const },
+    { label: "Pending Companies", value: stats?.pendingCompanies || 0, icon: Users, tone: "warning" as const },
     { label: "Companies", value: stats?.totalCompanies || 0, icon: Briefcase, tone: "purple" as const },
     { label: "Active Projects", value: stats?.activeProjects || 0, icon: CheckCircle2, tone: "success" as const },
   ];
