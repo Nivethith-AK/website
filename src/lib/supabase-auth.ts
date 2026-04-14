@@ -94,11 +94,13 @@ export const signInWithRole = async (email: string, password: string) => {
     throw new Error("Unable to load your account");
   }
 
-  let { data: profile, error: profileError } = await supabase
+  const { data: initialProfile, error: profileError } = await supabase
     .from("profiles")
     .select("role,is_approved")
     .eq("id", userId)
     .maybeSingle();
+
+  let profile = initialProfile;
 
   if (!profile && !profileError) {
     const bootstrapResponse = await fetch("/api/auth/bootstrap-profile", {
