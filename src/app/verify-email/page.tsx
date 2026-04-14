@@ -11,7 +11,13 @@ import { assertSupabaseConfig } from "@/lib/supabase";
 
 function VerifyEmailContent() {
   const params = useSearchParams();
-  const token = params.get("token") || params.get("token_hash") || "";
+
+  const token =
+    params.get("token") ||
+    params.get("token_hash") ||
+    params.get("code") ||
+    "";
+
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("Verifying your email...");
 
@@ -19,7 +25,7 @@ function VerifyEmailContent() {
     const verify = async () => {
       if (!token) {
         setStatus("error");
-        setMessage("Verification token is missing.");
+        setMessage("Verification token is missing or invalid link.");
         return;
       }
 
@@ -31,17 +37,25 @@ function VerifyEmailContent() {
         return;
       }
 
-      const { error } = await supabase.auth.verifyOtp({
-        token_hash: token,
-        type: "email",
-      });
+      try {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: token,
+          type: "signup",
+        });
 
-      if (!error) {
+        if (error) {
+          setStatus("error");
+          setMessage(error.message || "Email verification failed.");
+          return;
+        }
+
         setStatus("success");
-        setMessage("Email verified successfully. Your account now waits for admin approval.");
-      } else {
+        setMessage(
+          "Email verified successfully. Your account is now pending admin approval."
+        );
+      } catch (err: any) {
         setStatus("error");
-        setMessage(error.message || "Email verification failed.");
+        setMessage(err.message || "Unexpected error during verification.");
       }
     };
 
@@ -55,13 +69,21 @@ function VerifyEmailContent() {
           <Badge variant={status === "success" ? "success" : status === "error" ? "warning" : "accent"}>
             {status === "loading" ? "Processing" : status === "success" ? "Verified" : "Error"}
           </Badge>
+
           <h1 className="mt-4 text-3xl font-black uppercase tracking-tight">Email Verification</h1>
+
           <p className="mt-3 text-sm text-white/70">{message}</p>
 
-          <div className="mt-6">
+          <div className="mt-6 flex justify-center gap-3">
             <Link href="/login">
               <Button variant="secondary">Go to Login</Button>
             </Link>
+
+            {status === "error" && (
+              <Button onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            )}
           </div>
         </Card>
       </div>
