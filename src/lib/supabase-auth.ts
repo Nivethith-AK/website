@@ -94,13 +94,41 @@ export const signInWithRole = async (email: string, password: string) => {
     throw new Error("Unable to load your account");
   }
 
-  const { data: profile, error: profileError } = await supabase
+  let { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role,is_approved")
     .eq("id", userId)
-    .single();
+    .maybeSingle();
 
-  if (profileError) {
+  if (!profile && !profileError) {
+    const bootstrapResponse = await fetch("/api/auth/bootstrap-profile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${data.session?.access_token || ""}`,
+      },
+      body: JSON.stringify({
+        role: (data.user?.user_metadata as any)?.role,
+        firstName: (data.user?.user_metadata as any)?.firstName,
+        lastName: (data.user?.user_metadata as any)?.lastName,
+        experienceLevel: (data.user?.user_metadata as any)?.experienceLevel,
+        companyName: (data.user?.user_metadata as any)?.companyName,
+        contactPerson: (data.user?.user_metadata as any)?.contactPerson,
+        phone: (data.user?.user_metadata as any)?.phone,
+        address: (data.user?.user_metadata as any)?.address,
+        industry: (data.user?.user_metadata as any)?.industry,
+      }),
+    });
+
+    const bootstrapData = await bootstrapResponse.json().catch(() => ({}));
+    if (!bootstrapResponse.ok || !bootstrapData?.success) {
+      throw new Error(bootstrapData?.message || "Profile setup failed. Please contact admin.");
+    }
+
+    profile = bootstrapData.data || null;
+  }
+
+  if (profileError || !profile) {
     throw new Error("Profile not found. Please contact admin.");
   }
 
