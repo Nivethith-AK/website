@@ -93,7 +93,7 @@ export default function SignUp() {
       localStorage.removeItem("token");
       setSuccess(true);
       setTimeout(() => {
-        router.push("/login");
+        router.push("/login?registered=1");
       }, 1200);
     } catch (err: any) {
       setError(err.message || "An error occurred during sign up");
