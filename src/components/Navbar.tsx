@@ -100,7 +100,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-4">
           {token ? (
             <>
-              <Link href="/designer/dashboard" className="text-[10px] font-black uppercase tracking-[0.28em] text-white/70 hover:text-white transition-colors">
+              <Link href="/login" className="text-[10px] font-black uppercase tracking-[0.28em] text-white/70 hover:text-white transition-colors">
                 Dashboard
               </Link>
               <motion.button
@@ -167,7 +167,7 @@ export default function Navbar() {
               <div className="space-y-3 border-t border-white/10 pt-4">
                 {token ? (
                   <>
-                    <Link href="/designer/dashboard" onClick={() => setIsOpen(false)} className="block text-[10px] font-black uppercase tracking-[0.3em] text-white">
+                    <Link href="/login" onClick={() => setIsOpen(false)} className="block text-[10px] font-black uppercase tracking-[0.3em] text-white">
                       Dashboard
                     </Link>
                     <button

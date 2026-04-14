@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { signInWithRole } from "@/lib/supabase-auth";
@@ -15,10 +15,13 @@ const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const registeredBanner = useMemo(() => searchParams.get("registered") === "1", [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +99,12 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit}>
             <FieldGroup>
+              {registeredBanner ? (
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-[10px] uppercase tracking-[0.2em] text-emerald-200">
+                  Registration received. Verify your email and wait for admin approval.
+                </div>
+              ) : null}
+
               <Field>
                 <FieldLabel htmlFor="login-email">Email</FieldLabel>
                 <Input
@@ -146,6 +155,12 @@ export default function LoginPage() {
                   {isLoading ? "Validating..." : "Enter Portal"}
                 </Button>
               </motion.div>
+
+              <div className="text-center">
+                <Link href="/forgot-password" className="text-[10px] uppercase tracking-[0.28em] text-white/60 hover:text-accent">
+                  Forgot Password?
+                </Link>
+              </div>
 
               <p className="pt-1 text-center text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
                 No account?{" "}
