@@ -22,6 +22,19 @@ export const signUpWithProfile = async (payload: RegisterPayload) => {
   const { data, error } = await supabase.auth.signUp({
     email: payload.email.trim().toLowerCase(),
     password: payload.password,
+    options: {
+      data: {
+        role: payload.role,
+        firstName: payload.firstName ?? null,
+        lastName: payload.lastName ?? null,
+        experienceLevel: payload.experienceLevel ?? null,
+        companyName: payload.companyName ?? null,
+        contactPerson: payload.contactPerson ?? null,
+        phone: payload.phone ?? null,
+        address: payload.address ?? null,
+        industry: payload.industry ?? null,
+      },
+    },
   });
 
   if (error) {
@@ -50,7 +63,15 @@ export const signUpWithProfile = async (payload: RegisterPayload) => {
 
   const { error: profileError } = await supabase.from("profiles").upsert(profilePayload, { onConflict: "id" });
   if (profileError) {
-    throw new Error(profileError.message);
+    const message = profileError.message.toLowerCase();
+    const policyBlocked =
+      message.includes("row-level security") ||
+      message.includes("permission denied") ||
+      message.includes("new row violates row-level security policy");
+
+    if (!policyBlocked) {
+      throw new Error(profileError.message);
+    }
   }
 
   return { needsEmailVerification: true };
