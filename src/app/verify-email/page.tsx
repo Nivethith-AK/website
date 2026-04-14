@@ -7,115 +7,67 @@ import { Card } from "@/components/Card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/lib/supabase";
-import { assertSupabaseConfig } from "@/lib/supabase";
 
 function VerifyEmailContent() {
   const params = useSearchParams();
 
-  // ✅ IMPORTANT: must match ?token= from email link
-  const token = params.get("token");
+  const token_hash = params.get("token_hash");
+  const type = params.get("type") || "signup";
 
-  const [status, setStatus] = useState<
-    "loading" | "success" | "error"
-  >("loading");
-
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("Verifying your email...");
 
   useEffect(() => {
     const verify = async () => {
-      // ❌ No token in URL
-      if (!token) {
+      if (!token_hash) {
         setStatus("error");
-        setMessage("Invalid or missing verification token.");
+        setMessage("Verification token is missing. Please use the latest email link.");
         return;
       }
 
-      try {
-        assertSupabaseConfig();
-      } catch (err: any) {
+      const { error } = await supabase.auth.verifyOtp({
+        type: type as any,
+        token_hash,
+      });
+
+      if (error) {
         setStatus("error");
-        setMessage(err.message || "Supabase not configured.");
-        return;
-      }
-
-      try {
-        // ✅ SUPABASE EMAIL CONFIRMATION
-        const { error } = await supabase.auth.verifyOtp({
-          token_hash: token,
-          type: "signup",
-        });
-
-        if (error) {
-          setStatus("error");
-          setMessage(error.message || "Email verification failed.");
-          return;
-        }
-
+        setMessage(error.message || "Email verification failed.");
+      } else {
         setStatus("success");
-        setMessage(
-          "Email verified successfully. You can now login and wait for admin approval."
-        );
-      } catch (err: any) {
-        setStatus("error");
-        setMessage(err.message || "Unexpected error occurred.");
+        setMessage("Email verified successfully. Wait for admin approval.");
       }
     };
 
     verify();
-  }, [token]);
+  }, [token_hash, type]);
 
   return (
-    <div className="min-h-screen bg-background px-4 py-28 text-foreground">
-      <div className="mx-auto max-w-xl">
-        <Card className="lux-glass rounded-3xl p-8 text-center">
-          <Badge
-            variant={
-              status === "success"
-                ? "success"
-                : status === "error"
-                ? "warning"
-                : "accent"
-            }
-          >
-            {status === "loading"
-              ? "Processing"
-              : status === "success"
-              ? "Verified"
-              : "Error"}
-          </Badge>
+    <div className="min-h-screen flex items-center justify-center bg-black text-white">
+      <Card className="p-6 text-center max-w-md">
+        <Badge>
+          {status === "loading"
+            ? "Processing"
+            : status === "success"
+            ? "Verified"
+            : "Error"}
+        </Badge>
 
-          <h1 className="mt-4 text-3xl font-black uppercase tracking-tight">
-            Email Verification
-          </h1>
+        <h1 className="text-xl font-bold mt-4">Email Verification</h1>
 
-          <p className="mt-3 text-sm text-white/70">{message}</p>
+        <p className="mt-2 text-sm opacity-70">{message}</p>
 
-          <div className="mt-6 flex justify-center gap-3">
-            <Link href="/login">
-              <Button variant="secondary">Go to Login</Button>
-            </Link>
-
-            {status === "error" && (
-              <Button onClick={() => window.location.reload()}>
-                Try Again
-              </Button>
-            )}
-          </div>
-        </Card>
-      </div>
+        <Link href="/login">
+          <Button className="mt-4">Go to Login</Button>
+        </Link>
+      </Card>
     </div>
   );
 }
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-background px-4 py-28 text-center text-white/70">
-          Loading...
-        </div>
-      }
-    >
+    <Suspense fallback={<div className="text-center p-10">Loading...</div>}>
       <VerifyEmailContent />
     </Suspense>
   );
