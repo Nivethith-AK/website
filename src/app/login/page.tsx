@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -14,6 +14,14 @@ import { Badge } from "@/components/ui/badge";
 const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background px-4 py-28 text-center text-white/70">Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
