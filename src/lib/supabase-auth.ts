@@ -102,7 +102,7 @@ export const signInWithRole = async (email: string, password: string) => {
 
   let profile = initialProfile;
 
-  if (!profile && !profileError) {
+  if ((!profile && !profileError) || (profile && !profile.is_approved && (data.user?.user_metadata as any)?.role === "admin")) {
     const bootstrapResponse = await fetch("/api/auth/bootstrap-profile", {
       method: "POST",
       headers: {
@@ -128,6 +128,20 @@ export const signInWithRole = async (email: string, password: string) => {
     }
 
     profile = bootstrapData.data || null;
+  }
+
+  if (!profile && !profileError) {
+    const bootstrapResponse = await fetch("/api/auth/bootstrap-profile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${data.session?.access_token || ""}`,
+      },
+    });
+    const bootstrapData = await bootstrapResponse.json().catch(() => ({}));
+    if (bootstrapResponse.ok && bootstrapData?.success && bootstrapData?.data) {
+      profile = bootstrapData.data;
+    }
   }
 
   if (profileError || !profile) {
