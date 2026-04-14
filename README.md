@@ -244,6 +244,8 @@ If you are moving to Supabase-only backend, set these first:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (server only)
+- `ADMIN_EMAIL` (optional single admin email auto-promote)
+- `ADMIN_EMAILS` (optional comma-separated admin emails)
 
 Run the full schema in `supabase/schema.sql` (includes profiles, requests, projects, messages, vacancies, and RLS policies).
 
