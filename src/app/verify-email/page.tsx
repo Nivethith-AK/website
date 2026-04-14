@@ -11,7 +11,7 @@ import { assertSupabaseConfig } from "@/lib/supabase";
 
 function VerifyEmailContent() {
   const params = useSearchParams();
-  const token = params.get("token") || "";
+  const token = params.get("token") || params.get("token_hash") || "";
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("Verifying your email...");
 
