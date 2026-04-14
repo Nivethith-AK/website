@@ -12,20 +12,21 @@ import { assertSupabaseConfig } from "@/lib/supabase";
 function VerifyEmailContent() {
   const params = useSearchParams();
 
-  const token =
-    params.get("token") ||
-    params.get("token_hash") ||
-    params.get("code") ||
-    "";
+  // ✅ IMPORTANT: must match ?token= from email link
+  const token = params.get("token");
 
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [status, setStatus] = useState<
+    "loading" | "success" | "error"
+  >("loading");
+
   const [message, setMessage] = useState("Verifying your email...");
 
   useEffect(() => {
     const verify = async () => {
+      // ❌ No token in URL
       if (!token) {
         setStatus("error");
-        setMessage("Verification token is missing or invalid link.");
+        setMessage("Invalid or missing verification token.");
         return;
       }
 
@@ -33,11 +34,12 @@ function VerifyEmailContent() {
         assertSupabaseConfig();
       } catch (err: any) {
         setStatus("error");
-        setMessage(err.message || "Supabase is not configured.");
+        setMessage(err.message || "Supabase not configured.");
         return;
       }
 
       try {
+        // ✅ SUPABASE EMAIL CONFIRMATION
         const { error } = await supabase.auth.verifyOtp({
           token_hash: token,
           type: "signup",
@@ -51,11 +53,11 @@ function VerifyEmailContent() {
 
         setStatus("success");
         setMessage(
-          "Email verified successfully. Your account is now pending admin approval."
+          "Email verified successfully. You can now login and wait for admin approval."
         );
       } catch (err: any) {
         setStatus("error");
-        setMessage(err.message || "Unexpected error during verification.");
+        setMessage(err.message || "Unexpected error occurred.");
       }
     };
 
@@ -66,11 +68,25 @@ function VerifyEmailContent() {
     <div className="min-h-screen bg-background px-4 py-28 text-foreground">
       <div className="mx-auto max-w-xl">
         <Card className="lux-glass rounded-3xl p-8 text-center">
-          <Badge variant={status === "success" ? "success" : status === "error" ? "warning" : "accent"}>
-            {status === "loading" ? "Processing" : status === "success" ? "Verified" : "Error"}
+          <Badge
+            variant={
+              status === "success"
+                ? "success"
+                : status === "error"
+                ? "warning"
+                : "accent"
+            }
+          >
+            {status === "loading"
+              ? "Processing"
+              : status === "success"
+              ? "Verified"
+              : "Error"}
           </Badge>
 
-          <h1 className="mt-4 text-3xl font-black uppercase tracking-tight">Email Verification</h1>
+          <h1 className="mt-4 text-3xl font-black uppercase tracking-tight">
+            Email Verification
+          </h1>
 
           <p className="mt-3 text-sm text-white/70">{message}</p>
 
@@ -93,7 +109,13 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background px-4 py-28 text-center text-white/70">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background px-4 py-28 text-center text-white/70">
+          Loading...
+        </div>
+      }
+    >
       <VerifyEmailContent />
     </Suspense>
   );
