@@ -4,6 +4,12 @@ const endpoint = process.env.APPWRITE_ENDPOINT || process.env.NEXT_PUBLIC_APPWRI
 const projectId = process.env.APPWRITE_PROJECT_ID || process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
 const apiKey = process.env.APPWRITE_API_KEY;
 
+export const getResolvedAppwriteServerEnv = () => ({
+  endpoint: endpoint || "",
+  projectId: projectId || "",
+  hasApiKey: Boolean(apiKey),
+});
+
 const assertServerConfig = () => {
   if (!endpoint || !projectId || !apiKey) {
     throw new Error("Missing APPWRITE_ENDPOINT (or NEXT_PUBLIC_APPWRITE_ENDPOINT), APPWRITE_PROJECT_ID (or NEXT_PUBLIC_APPWRITE_PROJECT_ID), or APPWRITE_API_KEY");

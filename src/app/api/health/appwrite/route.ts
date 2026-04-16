@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { Query } from "node-appwrite";
 import { appwriteDatabaseId } from "@/lib/appwrite";
-import { createAppwriteServerClient } from "@/lib/appwrite-server";
+import { createAppwriteServerClient, getResolvedAppwriteServerEnv } from "@/lib/appwrite-server";
 
 export async function GET() {
   const bucketId = process.env.APPWRITE_STORAGE_BUCKET_ID || "";
+  const resolved = getResolvedAppwriteServerEnv();
 
   try {
     const server = createAppwriteServerClient();
@@ -19,6 +20,9 @@ export async function GET() {
       success: true,
       data: {
         appwrite: {
+          endpoint: resolved.endpoint || null,
+          projectId: resolved.projectId || null,
+          hasApiKey: resolved.hasApiKey,
           databaseId: appwriteDatabaseId,
           storageBucketId: bucketId || null,
           databaseReachable: true,
@@ -34,6 +38,9 @@ export async function GET() {
         message: error?.message || "Appwrite health check failed",
         data: {
           appwrite: {
+            endpoint: resolved.endpoint || null,
+            projectId: resolved.projectId || null,
+            hasApiKey: resolved.hasApiKey,
             databaseId: appwriteDatabaseId,
             storageBucketId: bucketId || null,
             databaseReachable: false,
