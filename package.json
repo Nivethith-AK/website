@@ -10,7 +10,8 @@
     "web:build": "next build",
     "web:start": "next start",
     "lint": "eslint",
-    "auto:sync": "powershell -ExecutionPolicy Bypass -File ./scripts/auto-sync.ps1"
+    "auto:sync": "powershell -ExecutionPolicy Bypass -File ./scripts/auto-sync.ps1",
+    "deploy:appwrite": "npm run build && node scripts/deploy-appwrite.js"
   },
   "engines": {
     "node": "24.x"
