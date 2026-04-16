@@ -1,5 +1,6 @@
 import { ID, Query } from "appwrite";
 import { appwriteAccount, appwriteDatabases, appwriteDatabaseId, assertAppwriteConfig, collections } from "@/lib/appwrite";
+import { sendVerificationEmail } from "./email";
 
 export type AppRole = "admin" | "designer" | "company" | "user";
 
@@ -29,6 +30,8 @@ export const signUp = async (email: string, password: string, name: string, role
     user.$id,
     profile
   );
+
+  await sendVerificationEmail(normalizedEmail, name);
 
   return user;
 };
