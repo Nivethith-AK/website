@@ -45,6 +45,13 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      // Clear any existing browser session before logging in
+      try {
+        await appwriteAccount.deleteSession("current");
+      } catch (error) {
+        // No session to delete, proceed
+      }
+
       const session = await login(email, password);
       const jwt = await appwriteAccount.createJWT();
       localStorage.setItem("token", jwt.jwt);

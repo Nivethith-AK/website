@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signUp } from "@/lib/auth";
+import { appwriteAccount } from "@/lib/appwrite";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/Card";
 import {
@@ -74,6 +75,13 @@ export default function SignUp() {
       if (!role) {
         setError("Select a role before continuing.");
         return;
+      }
+
+      // Clear any existing browser session before signing up
+      try {
+        await appwriteAccount.deleteSession("current");
+      } catch (error) {
+        // No session to delete, proceed
       }
 
       const name =
