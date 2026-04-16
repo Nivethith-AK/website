@@ -232,7 +232,7 @@ Update only:
 The app is already wired to read these values from env, so domain changes won't require code edits.
 
 ### Copy-Paste Production Setup
-Use `.env.example` as your source of truth.
+Configure the same variables in your hosting provider's environment settings.
 
 ### Appwrite Full-Backend Mode
 Set these first:
@@ -277,7 +277,7 @@ In this mode, app logic uses Appwrite Auth + Databases + Storage directly, and R
 
 - **Setup Guide**: See SETUP_GUIDE.md
 - **Project Summary**: See PROJECT_SUMMARY.md
-- **Production Env Template**: `.env.example`
+- **Production Env Setup**: See the deployment section above
 - **Troubleshooting**: Check SETUP_GUIDE.md section
 
 ---

@@ -229,7 +229,7 @@ RESEND_API_KEY=your_resend_api_key
 ADMIN_EMAIL=your_admin_email@example.com
 ```
 
-Use `.env.example` for a complete copy-paste template.
+Set the same variables in your hosting provider's environment settings.
 
 ---
 
