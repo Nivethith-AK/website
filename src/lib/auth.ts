@@ -31,7 +31,11 @@ export const signUp = async (email: string, password: string, name: string, role
     profile
   );
 
-  await sendVerificationEmail(normalizedEmail, name);
+  try {
+    await sendVerificationEmail(normalizedEmail, name);
+  } catch (error) {
+    console.error("Verification email failed:", error);
+  }
 
   return user;
 };
