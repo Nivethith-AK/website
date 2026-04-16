@@ -6,9 +6,9 @@
 
 ### Tech Stack
 - **Frontend**: Next.js 16.2.3 + React 19 + Tailwind CSS
-- **Backend**: Express.js + Node.js
-- **Database**: MongoDB
-- **Authentication**: JWT-based auth with bcrypt
+- **Backend**: Appwrite Auth + Databases + Storage
+- **Email**: Resend SMTP
+- **Authentication**: Appwrite sessions/JWT
 
 ---
 
@@ -16,26 +16,25 @@
 
 ### Prerequisites
 - Node.js (v18+)
-- MongoDB (local or cloud instance)
+- Appwrite project with a database and storage bucket
+- Resend account for SMTP verification emails
 - npm or yarn
 
-### 1. Backend Setup
+### 1. Environment Setup
 
 ```bash
 # Install dependencies
 npm install
 
 # Create .env file with the following variables
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/fashion_talent_agency
-JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
-JWT_EXPIRE=7d
-NODE_ENV=development
-PORT=5000
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
-FRONTEND_URL=http://localhost:3000
-
-# Start backend server
-npm run backend:dev
+NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+NEXT_PUBLIC_APPWRITE_PROJECT_ID=your_appwrite_project_id
+NEXT_PUBLIC_APPWRITE_DATABASE_ID=your_appwrite_database_id
+APPWRITE_DATABASE_ID=your_appwrite_database_id
+APPWRITE_API_KEY=your_appwrite_api_key
+APPWRITE_STORAGE_BUCKET_ID=your_appwrite_bucket_id
+RESEND_API_KEY=your_resend_api_key
+ADMIN_EMAIL=your_admin_email@example.com
 ```
 
 ### 2. Frontend Setup
@@ -46,12 +45,11 @@ npm run backend:dev
 npm run dev
 
 # Frontend will be available at: http://localhost:3000
-# Backend will be available at: http://localhost:5000
 ```
 
-### Running Both Simultaneously
+### Running the App
 ```bash
-npm run dev  # Uses concurrently to run both frontend and backend
+npm run dev
 ```
 
 ---
@@ -60,30 +58,6 @@ npm run dev  # Uses concurrently to run both frontend and backend
 
 ```
 .
-├── backend/
-│   ├── config/
-│   │   └── database.js          # MongoDB connection
-│   ├── models/
-│   │   ├── User.js             # Base user model
-│   │   ├── Designer.js         # Designer profile
-│   │   ├── Company.js          # Company profile
-│   │   ├── ClientRequest.js    # Project requests
-│   │   └── Project.js          # Project assignments
-│   ├── controllers/
-│   │   ├── authController.js   # Auth logic
-│   │   ├── designerController.js
-│   │   ├── adminController.js
-│   │   └── clientController.js
-│   ├── middleware/
-│   │   └── auth.js             # JWT & RBAC
-│   ├── routes/
-│   │   ├── auth.js
-│   │   ├── designer.js
-│   │   ├── admin.js
-│   │   └── client.js
-│   ├── uploads/                # User file uploads
-│   └── server.js               # Entry point
-│
 ├── src/
 │   ├── app/
 │   │   ├── (public)/
@@ -243,31 +217,16 @@ npm run build
 vercel deploy
 ```
 
-### Backend (Heroku / Railway / Render)
-```bash
-# Push to repository
-git push heroku main
-
-# Or configure for Render/Railway
-```
-
 ### Environment Variables for Production
 ```
-MONGODB_URI=mongodb+srv://prod_user:prod_password@prod_cluster.mongodb.net/fashion_talent_agency
-JWT_SECRET=your_production_secret_key
-JWT_EXPIRE=7d
-NODE_ENV=production
-PORT=5000
-FRONTEND_URL=https://your-frontend-domain.com
-CORS_ORIGINS=https://your-frontend-domain.com
-SMTP_USER=your-gmail-address@gmail.com
-SMTP_PASS=your-gmail-app-password
-SMTP_FROM=your-gmail-address@gmail.com
-
-# Frontend (Vercel)
-NEXT_PUBLIC_API_URL=https://your-backend-domain.com/api
-NEXTAUTH_URL=https://your-frontend-domain.com
-NEXTAUTH_SECRET=your_nextauth_secret
+NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+NEXT_PUBLIC_APPWRITE_PROJECT_ID=your_appwrite_project_id
+NEXT_PUBLIC_APPWRITE_DATABASE_ID=your_appwrite_database_id
+APPWRITE_DATABASE_ID=your_appwrite_database_id
+APPWRITE_API_KEY=your_appwrite_api_key
+APPWRITE_STORAGE_BUCKET_ID=your_appwrite_bucket_id
+RESEND_API_KEY=your_resend_api_key
+ADMIN_EMAIL=your_admin_email@example.com
 ```
 
 Use `.env.example` for a complete copy-paste template.

@@ -5,7 +5,8 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16.2.3-black?style=flat-square&logo=nextdotjs)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-19.2.4-61DAFB?style=flat-square&logo=react)](https://react.dev)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=nodedotjs)](https://nodejs.org)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Latest-47A248?style=flat-square&logo=mongodb)](https://www.mongodb.com)
+[![Appwrite](https://img.shields.io/badge/Appwrite-Cloud-F02E65?style=flat-square&logo=appwrite)](https://appwrite.io)
+[![Resend](https://img.shields.io/badge/Resend-SMTP-111111?style=flat-square&logo=resend)](https://resend.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
 
 ---
@@ -58,8 +59,9 @@
 ## 🛠 Tech Stack
 
 **Frontend**: Next.js 16.2.3, React 19, TypeScript, Tailwind CSS, Framer Motion
-**Backend**: Express.js, Node.js, MongoDB, Mongoose, JWT
-**Tools**: TypeScript, ESLint, Multer
+**Backend**: Appwrite Auth, Appwrite Databases, Appwrite Storage
+**Email**: Resend SMTP
+**Tools**: TypeScript, ESLint
 
 ---
 
@@ -70,16 +72,19 @@
 npm install
 
 # 2. Set up .env file
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/fashion_talent_agency
-JWT_SECRET=your_secret_key
-PORT=5000
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
+NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+NEXT_PUBLIC_APPWRITE_PROJECT_ID=your_appwrite_project_id
+NEXT_PUBLIC_APPWRITE_DATABASE_ID=your_appwrite_database_id
+APPWRITE_DATABASE_ID=your_appwrite_database_id
+APPWRITE_API_KEY=your_appwrite_api_key
+APPWRITE_STORAGE_BUCKET_ID=your_appwrite_bucket_id
+RESEND_API_KEY=your_resend_api_key
+ADMIN_EMAIL=you@example.com
 
 # 3. Start development servers
 npm run dev
 
 # Frontend: http://localhost:3000
-# Backend: http://localhost:5000
 ```
 
 ---
@@ -92,37 +97,27 @@ npm run dev
 - Sign Up: http://localhost:3000/signup
 - Login: http://localhost:3000/login
 
-### Test Accounts
+### Deployment
+
+### Frontend on Vercel
+```bash
+npm run build
+vercel deploy
 ```
-Admin: test@gmail.com / 123456
+
+This project now uses Appwrite for auth, database, and storage, so there is no separate Express/Mongo backend to deploy.
+
+### Environment Variables
 ```
-
-### Popular Routes
-| Page | URL |
-|------|-----|
-| Home | / |
-| Designers | /designers |
-| About | /about |
-| Contact | /contact |
-| Designer Dashboard | /designer/dashboard |
-| Admin Dashboard | /admin/dashboard |
-| Company Dashboard | /client/dashboard |
-
----
-
-## 📂 Project Structure
-
+NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+NEXT_PUBLIC_APPWRITE_PROJECT_ID=your_appwrite_project_id
+NEXT_PUBLIC_APPWRITE_DATABASE_ID=your_appwrite_database_id
+APPWRITE_DATABASE_ID=your_appwrite_database_id
+APPWRITE_API_KEY=your_appwrite_api_key
+APPWRITE_STORAGE_BUCKET_ID=your_appwrite_bucket_id
+RESEND_API_KEY=your_resend_api_key
+ADMIN_EMAIL=you@example.com
 ```
-├── backend/
-│   ├── config/              # Database config
-│   ├── models/              # 5 Mongoose models
-│   ├── controllers/         # 4 controllers
-│   ├── routes/              # 4 route files
-│   ├── middleware/          # Auth middleware
-│   └── server.js
-│
-├── src/
-│   ├── app/
 │   │   ├── page.tsx         # Home
 │   │   ├── about/
 │   │   ├── contact/
@@ -246,28 +241,11 @@ Set these first:
 - `APPWRITE_DATABASE_ID`
 - `APPWRITE_STORAGE_BUCKET_ID`
 - `APPWRITE_API_KEY` (server only)
+- `RESEND_API_KEY`
 - `ADMIN_EMAIL` (optional single admin email auto-promote)
 - `ADMIN_EMAILS` (optional comma-separated admin emails)
 
-In this mode, app logic uses Appwrite Auth + Databases + Storage directly, and `NEXT_PUBLIC_API_URL` is not required unless you keep legacy Express routes.
-
-Frontend on Vercel:
-- `NEXT_PUBLIC_API_URL` -> backend URL + `/api`
-- `NEXTAUTH_URL` -> your public frontend URL
-- `NEXTAUTH_SECRET` -> strong random secret
-- `FRONTEND_URL` -> your public frontend URL
-
-Backend on Render/Railway:
-- `MONGODB_URI` -> MongoDB Atlas connection string
-- `JWT_SECRET` -> same strong secret
-- `JWT_EXPIRE` -> `7d`
-- `FRONTEND_URL` -> your public frontend URL
-- `CORS_ORIGINS` -> comma-separated allowed frontend URLs
-- `SMTP_USER` -> Gmail address
-- `SMTP_PASS` -> Gmail app password
-- `SMTP_FROM` -> Gmail address
-- `PORT` -> `5000`
-- `NODE_ENV` -> `production`
+In this mode, app logic uses Appwrite Auth + Databases + Storage directly, and Resend is used only for SMTP verification emails.
 
 ### Non-Technical Deploy Flow
 1. Deploy backend first on Render/Railway and set backend env vars from `.env.example`
@@ -308,10 +286,10 @@ Backend on Render/Railway:
 
 | Issue | Fix |
 |-------|-----|
-| MongoDB error | Check MONGODB_URI and IP whitelist |
+| Appwrite region error | Check NEXT_PUBLIC_APPWRITE_ENDPOINT and APPWRITE_ENDPOINT |
+| Missing Appwrite env | Confirm project ID, database ID, and API key are set in Vercel |
 | Auth fails | Clear localStorage and re-login |
-| CORS error | Check backend CORS config |
-| Port in use | Change PORT or kill process |
+| Email not sending | Check RESEND_API_KEY and verified sender |
 
 ---
 
