@@ -1,7 +1,7 @@
 import { Client, Account, Databases } from "appwrite";
 
-const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT;
-const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
+const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || process.env.APPWRITE_ENDPOINT;
+const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || process.env.APPWRITE_PROJECT_ID;
 const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || process.env.APPWRITE_DATABASE_ID;
 
 export const hasAppwriteCoreConfig = Boolean(endpoint && projectId);
@@ -10,14 +10,14 @@ export const hasAppwriteConfig = Boolean(hasAppwriteCoreConfig && hasAppwriteDat
 
 export const assertAppwriteCoreConfig = () => {
   if (!hasAppwriteCoreConfig) {
-    throw new Error("Missing NEXT_PUBLIC_APPWRITE_ENDPOINT or NEXT_PUBLIC_APPWRITE_PROJECT_ID");
+    throw new Error("Missing NEXT_PUBLIC_APPWRITE_ENDPOINT (or APPWRITE_ENDPOINT) or NEXT_PUBLIC_APPWRITE_PROJECT_ID (or APPWRITE_PROJECT_ID)");
   }
 };
 
 export const assertAppwriteConfig = () => {
   if (!hasAppwriteConfig) {
     throw new Error(
-      "Missing NEXT_PUBLIC_APPWRITE_ENDPOINT, NEXT_PUBLIC_APPWRITE_PROJECT_ID, or NEXT_PUBLIC_APPWRITE_DATABASE_ID"
+      "Missing NEXT_PUBLIC_APPWRITE_ENDPOINT (or APPWRITE_ENDPOINT), NEXT_PUBLIC_APPWRITE_PROJECT_ID (or APPWRITE_PROJECT_ID), or NEXT_PUBLIC_APPWRITE_DATABASE_ID (or APPWRITE_DATABASE_ID)"
     );
   }
 };
