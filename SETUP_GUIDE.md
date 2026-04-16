@@ -26,10 +26,12 @@
 # Install dependencies
 npm install
 
-# Create .env file with the following variables
+# Set the following environment variables in Vercel
 NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
 NEXT_PUBLIC_APPWRITE_PROJECT_ID=your_appwrite_project_id
 NEXT_PUBLIC_APPWRITE_DATABASE_ID=your_appwrite_database_id
+APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+APPWRITE_PROJECT_ID=your_appwrite_project_id
 APPWRITE_DATABASE_ID=your_appwrite_database_id
 APPWRITE_API_KEY=your_appwrite_api_key
 APPWRITE_STORAGE_BUCKET_ID=your_appwrite_bucket_id
@@ -222,6 +224,8 @@ vercel deploy
 NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
 NEXT_PUBLIC_APPWRITE_PROJECT_ID=your_appwrite_project_id
 NEXT_PUBLIC_APPWRITE_DATABASE_ID=your_appwrite_database_id
+APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+APPWRITE_PROJECT_ID=your_appwrite_project_id
 APPWRITE_DATABASE_ID=your_appwrite_database_id
 APPWRITE_API_KEY=your_appwrite_api_key
 APPWRITE_STORAGE_BUCKET_ID=your_appwrite_bucket_id

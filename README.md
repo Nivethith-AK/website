@@ -196,38 +196,23 @@ Current Vercel URL:
 
 When you buy your `.com` domain later, update only the environment variables below. No code changes are needed.
 
-### Backend (Render/Railway)
-```bash
-Deploy the Express backend separately and point the frontend to it.
-```
-
 ### Environment Variables
 ```
 ### Frontend (Vercel)
-NEXT_PUBLIC_API_URL=https://your-backend-domain.com/api
-NEXTAUTH_URL=https://website-sage-one-13.vercel.app
-NEXTAUTH_SECRET=your_secret
-FRONTEND_URL=https://website-sage-one-13.vercel.app
-
-### Backend (Render/Railway)
-MONGODB_URI=your_mongodb_atlas_uri
-JWT_SECRET=your_secret
-JWT_EXPIRE=7d
-FRONTEND_URL=https://website-sage-one-13.vercel.app
-CORS_ORIGINS=https://website-sage-one-13.vercel.app
-SMTP_USER=your_gmail_address
-SMTP_PASS=your_gmail_app_password
-SMTP_FROM=your_gmail_address
-PORT=5000
-NODE_ENV=production
+NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+NEXT_PUBLIC_APPWRITE_PROJECT_ID=your_appwrite_project_id
+NEXT_PUBLIC_APPWRITE_DATABASE_ID=your_appwrite_database_id
+APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+APPWRITE_PROJECT_ID=your_appwrite_project_id
+APPWRITE_DATABASE_ID=your_appwrite_database_id
+APPWRITE_API_KEY=your_appwrite_api_key
+APPWRITE_STORAGE_BUCKET_ID=your_appwrite_bucket_id
+RESEND_API_KEY=your_resend_api_key
+ADMIN_EMAIL=your_admin_email@example.com
 ```
 
 ### After buying a custom domain
-Update only:
-- `NEXTAUTH_URL`
-- `FRONTEND_URL`
-- `NEXT_PUBLIC_API_URL` if the backend URL changes
-- `CORS_ORIGINS` if you set multiple allowed frontends
+Update only your Vercel domain settings and the Appwrite/Resend env vars above if any hostnames change.
 
 The app is already wired to read these values from env, so domain changes won't require code edits.
 
@@ -238,6 +223,8 @@ Configure the same variables in your hosting provider's environment settings.
 Set these first:
 - `NEXT_PUBLIC_APPWRITE_ENDPOINT`
 - `NEXT_PUBLIC_APPWRITE_PROJECT_ID`
+- `APPWRITE_ENDPOINT`
+- `APPWRITE_PROJECT_ID`
 - `APPWRITE_DATABASE_ID`
 - `APPWRITE_STORAGE_BUCKET_ID`
 - `APPWRITE_API_KEY` (server only)
@@ -248,12 +235,10 @@ Set these first:
 In this mode, app logic uses Appwrite Auth + Databases + Storage directly, and Resend is used only for SMTP verification emails.
 
 ### Non-Technical Deploy Flow
-1. Deploy backend first on Render/Railway and set backend env vars from `.env.example`
-2. Confirm backend health endpoint works: `https://your-backend-domain.com/api/health`
-3. Open Vercel project settings and set frontend env vars from `.env.example`
-4. Set `NEXT_PUBLIC_API_URL` to your backend URL ending with `/api`
-5. Redeploy Vercel, then test signup/login/admin/designer pages on live URL
-6. After buying `.com`, update `NEXTAUTH_URL`, `FRONTEND_URL`, and `CORS_ORIGINS`
+1. Open Vercel project settings and set the Appwrite and Resend env vars listed above.
+2. Make sure `NEXT_PUBLIC_APPWRITE_ENDPOINT` and `APPWRITE_ENDPOINT` point to your Appwrite region endpoint.
+3. Redeploy Vercel, then test signup/login/admin/designer pages on the live URL.
+4. After buying `.com`, update the site domain in Vercel if needed.
 
 ---
 
@@ -286,8 +271,8 @@ In this mode, app logic uses Appwrite Auth + Databases + Storage directly, and R
 
 | Issue | Fix |
 |-------|-----|
-| Appwrite region error | Check NEXT_PUBLIC_APPWRITE_ENDPOINT and APPWRITE_ENDPOINT |
-| Missing Appwrite env | Confirm project ID, database ID, and API key are set in Vercel |
+| Appwrite region error | Check NEXT_PUBLIC_APPWRITE_ENDPOINT and APPWRITE_ENDPOINT match your Appwrite Cloud region |
+| Missing Appwrite env | Confirm project ID, database ID, storage bucket, and API key are set in Vercel |
 | Auth fails | Clear localStorage and re-login |
 | Email not sending | Check RESEND_API_KEY and verified sender |
 
