@@ -22,11 +22,12 @@ export const assertAppwriteConfig = () => {
   }
 };
 
-assertAppwriteCoreConfig();
+const fallbackEndpoint = "https://cloud.appwrite.io/v1";
+const fallbackProject = "placeholder";
 
 const client = new Client()
-  .setEndpoint(endpoint as string)
-  .setProject(projectId as string);
+  .setEndpoint(endpoint || fallbackEndpoint)
+  .setProject(projectId || fallbackProject);
 
 export const appwriteClient = client;
 export const appwriteAccount = new Account(client);
