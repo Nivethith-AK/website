@@ -2,14 +2,14 @@ import { Client, Account, Databases } from "appwrite";
 
 const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT;
 const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
-const databaseId = process.env.APPWRITE_DATABASE_ID;
+const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || process.env.APPWRITE_DATABASE_ID;
 
 export const hasAppwriteConfig = Boolean(endpoint && projectId && databaseId);
 
 export const assertAppwriteConfig = () => {
   if (!hasAppwriteConfig) {
     throw new Error(
-      "Missing NEXT_PUBLIC_APPWRITE_ENDPOINT, NEXT_PUBLIC_APPWRITE_PROJECT_ID, or APPWRITE_DATABASE_ID"
+      "Missing NEXT_PUBLIC_APPWRITE_ENDPOINT, NEXT_PUBLIC_APPWRITE_PROJECT_ID, or NEXT_PUBLIC_APPWRITE_DATABASE_ID"
     );
   }
 };
