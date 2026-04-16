@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signUpWithProfile } from "@/lib/supabase-auth";
+import { signUp } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/Card";
 import {
@@ -76,19 +76,12 @@ export default function SignUp() {
         return;
       }
 
-      await signUpWithProfile({
-        role,
-        email: formData.email,
-        password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        experienceLevel: formData.experienceLevel,
-        companyName: formData.companyName,
-        contactPerson: formData.contactPerson,
-        phone: formData.phone,
-        address: formData.address,
-        industry: formData.industry,
-      });
+      const name =
+        role === "designer"
+          ? `${formData.firstName} ${formData.lastName}`.trim()
+          : formData.companyName.trim() || formData.contactPerson.trim() || formData.email.trim();
+
+      await signUp(formData.email, formData.password, name, role);
 
       localStorage.removeItem("token");
       setSuccess(true);

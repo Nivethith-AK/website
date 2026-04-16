@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { assertSupabaseConfig, supabase } from "@/lib/supabase";
+import { appwriteAccount } from "@/lib/appwrite";
 
 const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -18,54 +18,8 @@ export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSessionReady, setIsSessionReady] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        assertSupabaseConfig();
-      } catch (err: any) {
-        setStatus("error");
-        setMessage(err.message || "Supabase is not configured.");
-        return;
-      }
-
-      const hash = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : "";
-      const params = new URLSearchParams(hash);
-      const accessToken = params.get("access_token");
-      const refreshToken = params.get("refresh_token");
-      const type = params.get("type");
-
-      if (accessToken && refreshToken && type === "recovery") {
-        const { error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-
-        if (error) {
-          setStatus("error");
-          setMessage(error.message || "Invalid or expired reset link.");
-          return;
-        }
-
-        window.history.replaceState({}, document.title, window.location.pathname);
-        setIsSessionReady(true);
-        return;
-      }
-
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        setIsSessionReady(true);
-      } else {
-        setStatus("error");
-        setMessage("Reset link is invalid or expired. Request a new one.");
-      }
-    };
-
-    init();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,38 +38,36 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    setIsLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    setIsLoading(false);
+    const query = new URLSearchParams(window.location.search);
+    const userId = query.get("userId") || "";
+    const secret = query.get("secret") || "";
 
-    if (error) {
+    if (!userId || !secret) {
       setStatus("error");
-      setMessage(error.message || "Unable to reset password.");
+      setMessage("Reset link is invalid or expired. Request a new one.");
       return;
     }
 
-    setStatus("success");
-    setMessage("Password reset successful. Redirecting to login...");
-    window.setTimeout(() => {
-      router.push("/login");
-    }, 1200);
+    setIsLoading(true);
+    try {
+      if (password !== confirmPassword) {
+        throw new Error("Passwords do not match.");
+      }
+
+      await appwriteAccount.updateRecovery(userId, secret, password);
+      setStatus("success");
+      setMessage("Password reset successful. Redirecting to login...");
+      window.setTimeout(() => router.push("/login"), 1200);
+    } catch (err: any) {
+      setStatus("error");
+      setMessage(err?.message || "Unable to reset password.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background px-4 pb-12 pt-32 text-foreground">
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <motion.div
-          animate={{ x: [0, 18, -12, 0], y: [0, -18, 10, 0] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute left-[-8%] top-[0%] h-[28rem] w-[28rem] rounded-full bg-accent-purple/22 blur-[110px]"
-        />
-        <motion.div
-          animate={{ x: [0, -18, 10, 0], y: [0, 14, -8, 0] }}
-          transition={{ duration: 17, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[-8%] right-[-10%] h-[26rem] w-[26rem] rounded-full bg-accent/10 blur-[100px]"
-        />
-      </div>
-
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -135,59 +87,53 @@ export default function ResetPasswordPage() {
             <p className="mt-2 text-xs text-white/65">Set a new secure password for your account.</p>
           </div>
 
-          {!isSessionReady ? (
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-white/70">Checking reset link...</div>
-          ) : (
-            <form onSubmit={handleSubmit}>
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="reset-password">New Password</FieldLabel>
-                  <Input
-                    id="reset-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="********"
-                    required
-                    minLength={6}
-                    disabled={isLoading}
-                  />
-                </Field>
+          <form onSubmit={handleSubmit}>
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="reset-password">New Password</FieldLabel>
+                <Input
+                  id="reset-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="********"
+                  required
+                  minLength={6}
+                  disabled={isLoading}
+                />
+              </Field>
 
-                <Field>
-                  <FieldLabel htmlFor="reset-confirm">Confirm Password</FieldLabel>
-                  <Input
-                    id="reset-confirm"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="********"
-                    required
-                    minLength={6}
-                    disabled={isLoading}
-                  />
-                </Field>
+              <Field>
+                <FieldLabel htmlFor="reset-confirm">Confirm Password</FieldLabel>
+                <Input
+                  id="reset-confirm"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="********"
+                  required
+                  minLength={6}
+                  disabled={isLoading}
+                />
+              </Field>
 
-                {message ? (
-                  <div
-                    className={`rounded-xl px-4 py-3 text-[10px] uppercase tracking-[0.2em] ${
-                      status === "success"
-                        ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
-                        : status === "error"
-                        ? "border border-red-500/30 bg-red-500/10 text-red-300"
-                        : "border border-white/12 bg-white/[0.03] text-white/70"
-                    }`}
-                  >
-                    {message}
-                  </div>
-                ) : null}
+              {message ? (
+                <div
+                  className={`rounded-xl px-4 py-3 text-[10px] uppercase tracking-[0.2em] ${
+                    status === "success"
+                      ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+                      : "border border-red-500/30 bg-red-500/10 text-red-300"
+                  }`}
+                >
+                  {message}
+                </div>
+              ) : null}
 
-                <Button type="submit" variant="secondary" size="lg" className="w-full rounded-full" isLoading={isLoading}>
-                  Update Password
-                </Button>
-              </FieldGroup>
-            </form>
-          )}
+              <Button type="submit" variant="secondary" size="lg" className="w-full rounded-full" isLoading={isLoading}>
+                Update Password
+              </Button>
+            </FieldGroup>
+          </form>
         </Card>
       </motion.div>
     </div>

@@ -4,7 +4,7 @@ import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { signInWithRole } from "@/lib/supabase-auth";
+import { getProfileByUserId, login } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/Card";
 import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
@@ -49,12 +49,15 @@ function LoginPageContent() {
     setIsLoading(true);
 
     try {
-      const result = await signInWithRole(email, password);
-      localStorage.setItem("token", result.accessToken);
+      const session = await login(email, password);
+      localStorage.setItem("token", session.$id);
 
-      if (result.role === "admin") router.push("/admin/dashboard");
-      else if (result.role === "designer") router.push("/designer/dashboard");
-      else if (result.role === "company") router.push("/client/dashboard");
+      const profile = await getProfileByUserId(session.userId);
+      const role = (profile?.role as string) || "user";
+
+      if (role === "admin") router.push("/admin/dashboard");
+      else if (role === "designer") router.push("/designer/dashboard");
+      else if (role === "company") router.push("/client/dashboard");
       else router.push("/");
     } catch (err: any) {
       setError(err.message || "Login failed");

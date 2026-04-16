@@ -15,24 +15,25 @@ const getAdminEmails = () => {
 
 export async function POST(req: NextRequest) {
   try {
-    const { user, profile } = await getAuthContext(req);
+    const { authUser, profile } = await getAuthContext(req);
+    const currentProfile: any = profile;
 
-    if (!user) {
+    if (!authUser) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const email = String(user.email || "").trim().toLowerCase();
+    const email = String(authUser.email || "").trim().toLowerCase();
     const adminEmails = getAdminEmails();
     const shouldBeAdmin = !!email && adminEmails.includes(email);
 
-    if (profile) {
-      if (shouldBeAdmin && (profile.role !== "admin" || !profile.is_approved)) {
+    if (currentProfile) {
+      if (shouldBeAdmin && (currentProfile.role !== "admin" || !currentProfile.isApproved)) {
         const supabase = getSupabaseAdmin();
         const { data: updated, error: updateError } = await supabase
           .from("profiles")
-          .update({ role: "admin", is_approved: true, rejection_reason: "", updated_at: new Date().toISOString() })
-          .eq("id", user.id)
-          .select("role,is_approved")
+          .update({ role: "admin", isApproved: true, rejectionReason: "", updatedAt: new Date().toISOString() })
+          .eq("id", authUser.$id)
+          .select("role,isApproved")
           .single();
 
         if (updateError) {
@@ -45,14 +46,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         data: {
-          role: profile.role,
-          is_approved: !!profile.is_approved,
+          role: currentProfile.role,
+          is_approved: !!currentProfile.isApproved,
         },
       });
     }
 
     const body = await req.json().catch(() => ({}));
-    const meta = (user.user_metadata || {}) as Record<string, unknown>;
+    const meta = {} as Record<string, unknown>;
     const role = shouldBeAdmin ? "admin" : normalizeRole(body.role ?? meta.role);
     const effectiveEmail = email || String(body.email || "").trim().toLowerCase();
 
@@ -61,15 +62,16 @@ export async function POST(req: NextRequest) {
     }
 
     const profilePayload = {
-      id: user.id,
+      id: authUser.$id,
+      userId: authUser.$id,
       email: effectiveEmail,
       role,
-      is_approved: shouldBeAdmin,
-      first_name: (body.firstName ?? meta.firstName ?? null) as string | null,
-      last_name: (body.lastName ?? meta.lastName ?? null) as string | null,
-      experience_level: (body.experienceLevel ?? meta.experienceLevel ?? null) as string | null,
-      company_name: (body.companyName ?? meta.companyName ?? null) as string | null,
-      contact_person: (body.contactPerson ?? meta.contactPerson ?? null) as string | null,
+      isApproved: shouldBeAdmin,
+      firstName: (body.firstName ?? meta.firstName ?? "") as string,
+      lastName: (body.lastName ?? meta.lastName ?? "") as string,
+      experienceLevel: (body.experienceLevel ?? meta.experienceLevel ?? "Student") as string,
+      companyName: (body.companyName ?? meta.companyName ?? "") as string,
+      contactPerson: (body.contactPerson ?? meta.contactPerson ?? "") as string,
       phone: (body.phone ?? meta.phone ?? null) as string | null,
       address: (body.address ?? meta.address ?? null) as string | null,
       industry: (body.industry ?? meta.industry ?? null) as string | null,
@@ -78,8 +80,8 @@ export async function POST(req: NextRequest) {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from("profiles")
-      .upsert(profilePayload, { onConflict: "id" })
-      .select("role,is_approved")
+      .upsert(profilePayload)
+      .select("role,isApproved")
       .single();
 
     if (error) {

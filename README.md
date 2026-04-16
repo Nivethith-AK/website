@@ -239,17 +239,17 @@ The app is already wired to read these values from env, so domain changes won't 
 ### Copy-Paste Production Setup
 Use `.env.example` as your source of truth.
 
-### Supabase-Only Backend Mode
-If you are moving to Supabase-only backend, set these first:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY` (server only)
+### Appwrite Full-Backend Mode
+Set these first:
+- `NEXT_PUBLIC_APPWRITE_ENDPOINT`
+- `NEXT_PUBLIC_APPWRITE_PROJECT_ID`
+- `APPWRITE_DATABASE_ID`
+- `APPWRITE_STORAGE_BUCKET_ID`
+- `APPWRITE_API_KEY` (server only)
 - `ADMIN_EMAIL` (optional single admin email auto-promote)
 - `ADMIN_EMAILS` (optional comma-separated admin emails)
 
-Run the full schema in `supabase/schema.sql` (includes profiles, requests, projects, messages, vacancies, and RLS policies).
-
-In this mode, app logic should use Supabase Auth + Postgres + Storage + Realtime directly, and `NEXT_PUBLIC_API_URL` is not required unless you keep legacy Express routes.
+In this mode, app logic uses Appwrite Auth + Databases + Storage directly, and `NEXT_PUBLIC_API_URL` is not required unless you keep legacy Express routes.
 
 Frontend on Vercel:
 - `NEXT_PUBLIC_API_URL` -> backend URL + `/api`

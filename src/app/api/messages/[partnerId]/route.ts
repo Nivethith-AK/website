@@ -21,9 +21,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ part
     }
 
     const rows = data || [];
-    const profiles = await getProfilesMap(rows.flatMap((row) => [row.sender_id, row.receiver_id]).filter(Boolean));
+    const profiles = await getProfilesMap(rows.flatMap((row: any) => [row.sender_id, row.receiver_id]).filter(Boolean));
 
-    const mapped = rows.map((row) => {
+    const mapped = rows.map((row: any) => {
       const sender = profiles.get(row.sender_id);
       const receiver = profiles.get(row.receiver_id);
       return {

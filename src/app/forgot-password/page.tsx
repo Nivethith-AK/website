@@ -6,9 +6,9 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/Card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { assertSupabaseConfig, supabase } from "@/lib/supabase";
+import { appwriteAccount } from "@/lib/appwrite";
 
 const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -24,23 +24,14 @@ export default function ForgotPasswordPage() {
     setSuccess("");
 
     const normalized = email.trim().toLowerCase();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(normalized)) {
+    if (!normalized.includes("@")) {
       setError("Enter a valid email address");
       return;
     }
 
     setIsLoading(true);
     try {
-      assertSupabaseConfig();
-
-      const redirectTo = `${window.location.origin}/reset-password`;
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalized, { redirectTo });
-
-      if (resetError) {
-        throw new Error(resetError.message);
-      }
-
+      await appwriteAccount.createRecovery(normalized, `${window.location.origin}/reset-password`);
       setSuccess("Reset link sent. Check your email inbox.");
     } catch (err: any) {
       setError(err?.message || "Unable to send reset link");
@@ -51,19 +42,6 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen bg-background px-4 pb-12 pt-32 text-foreground">
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <motion.div
-          animate={{ x: [0, 22, -14, 0], y: [0, -20, 12, 0] }}
-          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute left-[-10%] top-[0%] h-[32rem] w-[32rem] rounded-full bg-accent-purple/24 blur-[120px]"
-        />
-        <motion.div
-          animate={{ x: [0, -20, 12, 0], y: [0, 16, -10, 0] }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[-8%] right-[-10%] h-[28rem] w-[28rem] rounded-full bg-accent/10 blur-[110px]"
-        />
-      </div>
-
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -96,7 +74,6 @@ export default function ForgotPasswordPage() {
                   disabled={isLoading}
                   required
                 />
-                <FieldDescription>Use the same email used during registration.</FieldDescription>
               </Field>
 
               {error ? (

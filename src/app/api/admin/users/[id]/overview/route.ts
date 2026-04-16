@@ -29,7 +29,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         .limit(120),
     ]);
 
-    const requests = (reqRows.data || []).map((row) => ({
+    const requests = (reqRows.data || []).map((row: any) => ({
       _id: row.id,
       projectTitle: row.project_title,
       status: row.status,
@@ -39,17 +39,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const projectRows = projRows.data || [];
 
-    const projects = projectRows.map((row) => ({
+    const projects = projectRows.map((row: any) => ({
       _id: row.id,
       projectTitle: row.project_title,
       status: row.status,
       createdAt: row.created_at,
     }));
 
-    const profileIds = (msgRows.data || []).flatMap((row) => [row.sender_id, row.receiver_id]).filter(Boolean);
+    const profileIds = (msgRows.data || []).flatMap((row: any) => [row.sender_id, row.receiver_id]).filter(Boolean);
     const profileMap = await getProfilesMap(profileIds);
 
-    const messages = (msgRows.data || []).map((row) => ({
+    const messages = (msgRows.data || []).map((row: any) => ({
       _id: row.id,
       message: row.message || "",
       createdAt: row.created_at,
@@ -65,8 +65,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       },
     }));
 
-    const sentCount = (msgRows.data || []).filter((row) => row.sender_id === id).length;
-    const receivedCount = (msgRows.data || []).filter((row) => row.receiver_id === id).length;
+    const sentCount = (msgRows.data || []).filter((row: any) => row.sender_id === id).length;
+    const receivedCount = (msgRows.data || []).filter((row: any) => row.receiver_id === id).length;
 
     return NextResponse.json({
       success: true,

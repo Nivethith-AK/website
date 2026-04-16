@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: (data || []).map((row) => ({
+      data: (data || []).map((row: any) => ({
         _id: row.id,
         projectTitle: row.project_title,
         status: row.status,

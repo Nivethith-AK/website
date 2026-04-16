@@ -3,22 +3,22 @@ import { getAuthContext } from "@/lib/supabase-server";
 
 export async function GET(req: NextRequest) {
   try {
-    const { user, profile } = await getAuthContext(req);
+    const { authUser, profile } = await getAuthContext(req);
 
-    if (!user || !profile) {
+    if (!authUser || !profile) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
     return NextResponse.json({
       success: true,
       user: {
-        id: user.id,
-        name: `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || profile.company_name || "User",
-        email: profile.email || user.email,
+        id: authUser.$id,
+        name: `${profile.firstName || ""} ${profile.lastName || ""}`.trim() || profile.companyName || "User",
+        email: profile.email || authUser.email,
         role: profile.role,
-        isApproved: profile.is_approved,
-        isVerified: !!user.email_confirmed_at,
-        createdAt: user.created_at,
+        isApproved: !!profile.isApproved,
+        isVerified: !!authUser.emailVerification,
+        createdAt: authUser.registration,
       },
     });
   } catch (error: any) {

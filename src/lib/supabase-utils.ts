@@ -1,47 +1,56 @@
-import { getSupabaseAdmin } from "@/lib/supabase-server";
+import { Query } from "node-appwrite";
+import { appwriteDatabaseId, collections } from "@/lib/appwrite";
+import { createAppwriteServerClient } from "@/lib/appwrite-server";
 
 export const asArray = <T = any>(value: any): T[] => (Array.isArray(value) ? value : []);
 
-export const toPublicUrl = (bucket: string, path: string) => {
-  const supabase = getSupabaseAdmin();
-  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
-};
+export const uploadToBucket = async (_bucketOrPath: string, pathOrFile: string | File, maybeFile?: File) => {
+  const file = (maybeFile || pathOrFile) as File;
 
-export const uploadToBucket = async (bucket: string, path: string, file: File) => {
-  const supabase = getSupabaseAdmin();
+  const server = createAppwriteServerClient();
+  const stored = await server.storage.createFile(
+    process.env.APPWRITE_STORAGE_BUCKET_ID || "",
+    "unique()",
+    file
+  );
 
-  const { error } = await supabase.storage.from(bucket).upload(path, file, {
-    upsert: true,
-    contentType: file.type || "application/octet-stream",
-  });
+  const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "https://cloud.appwrite.io/v1";
+  const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "";
+  const bucketId = process.env.APPWRITE_STORAGE_BUCKET_ID || "";
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return toPublicUrl(bucket, path);
+  return `${endpoint}/storage/buckets/${bucketId}/files/${stored.$id}/view?project=${projectId}`;
 };
 
 export const getProfilesMap = async (ids: string[]) => {
   const uniqueIds = [...new Set(ids.filter(Boolean))];
-  if (!uniqueIds.length) return new Map<string, any>();
-
-  const supabase = getSupabaseAdmin();
-  const { data } = await supabase
-    .from("profiles")
-    .select("id,email,role,is_approved,first_name,last_name,company_name,contact_person,industry")
-    .in("id", uniqueIds);
-
   const map = new Map<string, any>();
-  for (const row of data || []) {
-    map.set(row.id, row);
+  if (!uniqueIds.length) return map;
+
+  const server = createAppwriteServerClient();
+  const list = await server.databases.listDocuments(
+    appwriteDatabaseId,
+    collections.profiles,
+    [Query.equal("userId", uniqueIds), Query.limit(500)]
+  );
+
+  for (const doc of list.documents) {
+    map.set(doc.userId, {
+      id: doc.$id,
+      email: doc.email,
+      role: doc.role,
+      firstName: doc.firstName || "",
+      lastName: doc.lastName || "",
+      companyName: doc.companyName || "",
+      contactPerson: doc.contactPerson || "",
+      industry: doc.industry || "",
+    });
   }
+
   return map;
 };
 
 export const profileName = (profile: any) => {
   if (!profile) return "Unknown User";
-  const person = `${profile.first_name || ""} ${profile.last_name || ""}`.trim();
-  return person || profile.company_name || profile.email || "Unknown User";
+  const person = `${profile.firstName || ""} ${profile.lastName || ""}`.trim();
+  return person || profile.companyName || profile.email || "Unknown User";
 };

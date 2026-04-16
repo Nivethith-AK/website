@@ -38,11 +38,11 @@ export async function GET(req: NextRequest) {
     }
 
     const rows = data || [];
-    const companies = await getProfilesMap(rows.map((row) => row.company_id).filter(Boolean));
+    const companies = await getProfilesMap(rows.map((row: any) => row.company_id).filter(Boolean));
 
     return NextResponse.json({
       success: true,
-      data: rows.map((row) => mapRequest(row, companies.get(row.company_id))),
+      data: rows.map((row: any) => mapRequest(row, companies.get(row.company_id))),
     });
   } catch (error: any) {
     const status = error.message === "Unauthorized" ? 401 : error.message === "Forbidden" ? 403 : 500;

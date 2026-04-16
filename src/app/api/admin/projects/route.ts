@@ -20,12 +20,12 @@ export async function GET(req: NextRequest) {
     }
 
     const rows = data || [];
-    const profileIds = rows.flatMap((row) => [row.company_id, ...(Array.isArray(row.designer_ids) ? row.designer_ids : [])]).filter(Boolean);
+    const profileIds = rows.flatMap((row: any) => [row.company_id, ...(Array.isArray(row.designer_ids) ? row.designer_ids : [])]).filter(Boolean);
     const profiles = await getProfilesMap(profileIds);
 
     return NextResponse.json({
       success: true,
-      data: rows.map((row) => ({
+      data: rows.map((row: any) => ({
         _id: row.id,
         projectTitle: row.project_title,
         budget: row.budget,

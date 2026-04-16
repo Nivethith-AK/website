@@ -43,11 +43,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     const rows = data || [];
-    const profiles = await getProfilesMap(rows.map((row) => row.sender_id).filter(Boolean));
+    const profiles = await getProfilesMap(rows.map((row: any) => row.sender_id).filter(Boolean));
 
     return NextResponse.json({
       success: true,
-      data: rows.map((row) => {
+      data: rows.map((row: any) => {
         const sender = profiles.get(row.sender_id);
         return {
           _id: row.id,

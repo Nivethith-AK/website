@@ -3,10 +3,10 @@ import { getSupabaseAdmin, requireAuth } from "@/lib/supabase-server";
 import { getProfilesMap, profileName, uploadToBucket } from "@/lib/supabase-utils";
 
 const normalizeMessage = async (rows: any[]) => {
-  const participantIds = rows.flatMap((row) => [row.sender_id, row.receiver_id]).filter(Boolean);
+  const participantIds = rows.flatMap((row: any) => [row.sender_id, row.receiver_id]).filter(Boolean);
   const profiles = await getProfilesMap(participantIds);
 
-  return rows.map((row) => {
+  return rows.map((row: any) => {
     const sender = profiles.get(row.sender_id);
     const receiver = profiles.get(row.receiver_id);
     return {
