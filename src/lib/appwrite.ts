@@ -13,18 +13,16 @@ export const assertAppwriteConfig = () => {
     );
   }
 };
-
-const fallbackEndpoint = "https://cloud.appwrite.io/v1";
-const fallbackProject = "placeholder";
+assertAppwriteConfig();
 
 const client = new Client()
-  .setEndpoint(endpoint || fallbackEndpoint)
-  .setProject(projectId || fallbackProject);
+  .setEndpoint(endpoint as string)
+  .setProject(projectId as string);
 
 export const appwriteClient = client;
 export const appwriteAccount = new Account(client);
 export const appwriteDatabases = new Databases(client);
-export const appwriteDatabaseId = databaseId || "placeholder";
+export const appwriteDatabaseId = databaseId as string;
 
 export const collections = {
   profiles: "profiles",
