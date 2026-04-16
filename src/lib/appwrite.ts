@@ -4,7 +4,15 @@ const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT;
 const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
 const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || process.env.APPWRITE_DATABASE_ID;
 
-export const hasAppwriteConfig = Boolean(endpoint && projectId && databaseId);
+export const hasAppwriteCoreConfig = Boolean(endpoint && projectId);
+export const hasAppwriteDatabaseConfig = Boolean(databaseId);
+export const hasAppwriteConfig = Boolean(hasAppwriteCoreConfig && hasAppwriteDatabaseConfig);
+
+export const assertAppwriteCoreConfig = () => {
+  if (!hasAppwriteCoreConfig) {
+    throw new Error("Missing NEXT_PUBLIC_APPWRITE_ENDPOINT or NEXT_PUBLIC_APPWRITE_PROJECT_ID");
+  }
+};
 
 export const assertAppwriteConfig = () => {
   if (!hasAppwriteConfig) {
@@ -13,7 +21,8 @@ export const assertAppwriteConfig = () => {
     );
   }
 };
-assertAppwriteConfig();
+
+assertAppwriteCoreConfig();
 
 const client = new Client()
   .setEndpoint(endpoint as string)
@@ -22,7 +31,7 @@ const client = new Client()
 export const appwriteClient = client;
 export const appwriteAccount = new Account(client);
 export const appwriteDatabases = new Databases(client);
-export const appwriteDatabaseId = databaseId as string;
+export const appwriteDatabaseId = databaseId || "";
 
 export const collections = {
   profiles: "profiles",

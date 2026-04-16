@@ -1,5 +1,12 @@
 import { ID, Query } from "appwrite";
-import { appwriteAccount, appwriteDatabases, appwriteDatabaseId, assertAppwriteConfig, collections } from "@/lib/appwrite";
+import {
+  appwriteAccount,
+  appwriteDatabases,
+  appwriteDatabaseId,
+  assertAppwriteConfig,
+  assertAppwriteCoreConfig,
+  collections,
+} from "@/lib/appwrite";
 import { sendVerificationEmail } from "./email";
 
 export type AppRole = "admin" | "designer" | "company" | "user";
@@ -41,17 +48,17 @@ export const signUp = async (email: string, password: string, name: string, role
 };
 
 export const login = async (email: string, password: string) => {
-  assertAppwriteConfig();
+  assertAppwriteCoreConfig();
   return appwriteAccount.createEmailPasswordSession(email.trim().toLowerCase(), password);
 };
 
 export const logout = async () => {
-  assertAppwriteConfig();
+  assertAppwriteCoreConfig();
   return appwriteAccount.deleteSession("current");
 };
 
 export const getUser = async () => {
-  assertAppwriteConfig();
+  assertAppwriteCoreConfig();
   return appwriteAccount.get();
 };
 
