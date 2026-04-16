@@ -49,6 +49,14 @@ export const signUp = async (email: string, password: string, name: string, role
 
 export const login = async (email: string, password: string) => {
   assertAppwriteCoreConfig();
+  
+  // Clear any existing session before creating a new one
+  try {
+    await appwriteAccount.deleteSession("current");
+  } catch (error) {
+    // No existing session, proceed
+  }
+  
   return appwriteAccount.createEmailPasswordSession(email.trim().toLowerCase(), password);
 };
 
